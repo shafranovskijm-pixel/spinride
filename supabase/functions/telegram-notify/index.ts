@@ -52,6 +52,21 @@ serve(async (req) => {
     const order: OrderNotification = await req.json();
 
     let message: string;
+    
+    // Clean phone number for links (remove spaces, dashes, etc.)
+    const cleanPhone = order.customer_phone.replace(/[^\d+]/g, '');
+    const whatsappPhone = cleanPhone.replace('+', '');
+    
+    // Build inline keyboard with quick action buttons
+    // Note: Telegram only supports http/https URLs in inline buttons
+    const inlineKeyboard = {
+      inline_keyboard: [
+        [
+          { text: '💬 WhatsApp', url: `https://wa.me/${whatsappPhone}` },
+          { text: '✈️ Telegram', url: `https://t.me/+${whatsappPhone}` },
+        ],
+      ],
+    };
 
     if (order.type === 'status_change') {
       // Status change notification
@@ -111,6 +126,7 @@ ${itemsList}
           chat_id: TELEGRAM_CHAT_ID,
           text: message,
           parse_mode: 'Markdown',
+          reply_markup: inlineKeyboard,
         }),
       }
     );
