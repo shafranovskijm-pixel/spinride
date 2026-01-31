@@ -2,12 +2,12 @@ import { Link } from "react-router-dom";
 import { ShoppingCart, Heart, Search, Menu, X, User, Phone } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useCart } from "@/hooks/use-cart";
 import { useFavorites } from "@/hooks/use-favorites";
 import { useSeason } from "@/hooks/use-season";
+import { SearchAutocomplete } from "./SearchAutocomplete";
 
 const navigation = [
   { name: "Каталог", href: "/catalog" },
@@ -20,7 +20,6 @@ const navigation = [
 
 export function Header() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
   const { itemCount } = useCart();
   const { count: favoritesCount } = useFavorites();
   const { season } = useSeason();
@@ -52,18 +51,9 @@ export function Header() {
             </span>
           </Link>
 
-          {/* Search - Desktop */}
+          {/* Search - Desktop with Autocomplete */}
           <div className="hidden md:flex flex-1 max-w-lg">
-            <div className="relative w-full">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="search"
-                placeholder="Поиск велосипедов, самокатов..."
-                className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/50 focus:bg-white focus:text-foreground focus:placeholder:text-muted-foreground transition-colors"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
+            <SearchAutocomplete variant="desktop" />
           </div>
 
           {/* Actions */}
@@ -156,20 +146,13 @@ export function Header() {
           </div>
         </div>
 
-        {/* Mobile search bar */}
+        {/* Mobile search bar with autocomplete */}
         {isSearchOpen && (
           <div className="md:hidden pb-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="search"
-                placeholder="Поиск..."
-                className="pl-10 bg-white text-foreground"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                autoFocus
-              />
-            </div>
+            <SearchAutocomplete 
+              variant="mobile" 
+              onClose={() => setIsSearchOpen(false)} 
+            />
           </div>
         )}
 
