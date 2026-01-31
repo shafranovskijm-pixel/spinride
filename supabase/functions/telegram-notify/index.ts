@@ -6,6 +6,7 @@ const corsHeaders = {
 };
 
 interface OrderNotification {
+  type?: 'new' | 'status_change';
   order_number: string;
   customer_name: string;
   customer_phone: string;
@@ -18,7 +19,17 @@ interface OrderNotification {
     quantity: number;
     price: number;
   }>;
+  new_status?: string;
+  old_status?: string;
 }
+
+const statusLabels: Record<string, string> = {
+  new: 'Новый',
+  processing: 'В обработке',
+  confirmed: 'Подтверждён',
+  completed: 'Завершён',
+  cancelled: 'Отменён',
+};
 
 serve(async (req) => {
   // Handle CORS preflight
@@ -40,13 +51,38 @@ serve(async (req) => {
 
     const order: OrderNotification = await req.json();
 
-    // Format items list
-    const itemsList = order.items
-      .map((item, i) => `  ${i + 1}. ${item.name} × ${item.quantity} — ${item.price.toLocaleString('ru-RU')} ₽`)
-      .join('\n');
+    let message: string;
 
-    // Build message
-    const message = `
+    if (order.type === 'status_change') {
+      // Status change notification
+      const oldStatusLabel = statusLabels[order.old_status || ''] || order.old_status;
+      const newStatusLabel = statusLabels[order.new_status || ''] || order.new_status;
+      
+      const statusEmoji = {
+        processing: '⏳',
+        confirmed: '✅',
+        completed: '🎉',
+        cancelled: '❌',
+      }[order.new_status || ''] || '📋';
+
+      message = `
+${statusEmoji} *Статус заказа изменён*
+
+📦 *Заказ:* \`${order.order_number}\`
+👤 *Клиент:* ${escapeMarkdown(order.customer_name)}
+📞 *Телефон:* ${escapeMarkdown(order.customer_phone)}
+
+📊 *Статус:* ${oldStatusLabel} → *${newStatusLabel}*
+
+💰 *Сумма:* ${order.total_amount.toLocaleString('ru-RU')} ₽
+      `.trim();
+    } else {
+      // New order notification
+      const itemsList = order.items
+        .map((item, i) => `  ${i + 1}. ${item.name} × ${item.quantity} — ${item.price.toLocaleString('ru-RU')} ₽`)
+        .join('\n');
+
+      message = `
 🛒 *Новый заказ!*
 
 📦 *Заказ:* \`${order.order_number}\`
@@ -62,7 +98,8 @@ ${order.delivery_address ? `📍 *Адрес:* ${escapeMarkdown(order.delivery_a
 ${itemsList}
 
 💰 *Итого:* *${order.total_amount.toLocaleString('ru-RU')} ₽*
-    `.trim();
+      `.trim();
+    }
 
     // Send to Telegram
     const telegramResponse = await fetch(
