@@ -1,10 +1,27 @@
 import { useState, useRef } from "react";
-import { Upload, X, Loader2, ImageIcon, Link as LinkIcon, Camera } from "lucide-react";
+import { Upload, Loader2, ImageIcon, Link as LinkIcon, Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  rectSortingStrategy,
+} from "@dnd-kit/sortable";
+import { SortableImageItem } from "./SortableImageItem";
 
 interface ImageUploadProps {
   images: string[];
@@ -163,12 +180,32 @@ export function ImageUpload({ images, onImagesChange, maxImages = 10 }: ImageUpl
     onImagesChange(images.filter((_, i) => i !== index));
   };
 
-  const moveImage = (from: number, to: number) => {
-    if (to < 0 || to >= images.length) return;
-    const newImages = [...images];
-    const [removed] = newImages.splice(from, 1);
-    newImages.splice(to, 0, removed);
-    onImagesChange(newImages);
+  // Sensors for dnd-kit - touch support is crucial for mobile
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 200,
+        tolerance: 5,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    
+    if (over && active.id !== over.id) {
+      const oldIndex = images.findIndex((img) => img === active.id);
+      const newIndex = images.findIndex((img) => img === over.id);
+      onImagesChange(arrayMove(images, oldIndex, newIndex));
+    }
   };
 
   return (
@@ -286,69 +323,27 @@ export function ImageUpload({ images, onImagesChange, maxImages = 10 }: ImageUpl
         </TabsContent>
       </Tabs>
 
-      {/* Image previews - responsive grid */}
+      {/* Image previews with drag-and-drop */}
       {images.length > 0 && (
-        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2 sm:gap-3">
-          {images.map((img, index) => (
-            <div 
-              key={`${img}-${index}`} 
-              className="relative group aspect-square"
-            >
-              <div className="w-full h-full rounded-lg overflow-hidden bg-muted border">
-                <img 
-                  src={img} 
-                  alt={`Image ${index + 1}`} 
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = "/placeholder.svg";
-                  }}
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext items={images} strategy={rectSortingStrategy}>
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2 sm:gap-3">
+              {images.map((img, index) => (
+                <SortableImageItem
+                  key={img}
+                  id={img}
+                  image={img}
+                  index={index}
+                  onRemove={removeImage}
                 />
-              </div>
-              
-              {/* First image badge */}
-              {index === 0 && (
-                <span className="absolute top-1 left-1 text-[9px] sm:text-[10px] bg-primary text-primary-foreground px-1 rounded">
-                  Главное
-                </span>
-              )}
-
-              {/* Controls overlay - always visible on touch devices */}
-              <div className="absolute inset-0 bg-black/50 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center gap-1">
-                {index > 0 && (
-                  <Button
-                    type="button"
-                    size="icon"
-                    variant="secondary"
-                    className="h-7 w-7 sm:h-6 sm:w-6"
-                    onClick={() => moveImage(index, index - 1)}
-                  >
-                    ←
-                  </Button>
-                )}
-                <Button
-                  type="button"
-                  size="icon"
-                  variant="destructive"
-                  className="h-7 w-7 sm:h-6 sm:w-6"
-                  onClick={() => removeImage(index)}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-                {index < images.length - 1 && (
-                  <Button
-                    type="button"
-                    size="icon"
-                    variant="secondary"
-                    className="h-7 w-7 sm:h-6 sm:w-6"
-                    onClick={() => moveImage(index, index + 1)}
-                  >
-                    →
-                  </Button>
-                )}
-              </div>
+              ))}
             </div>
-          ))}
-        </div>
+          </SortableContext>
+        </DndContext>
       )}
 
       {images.length === 0 && (
