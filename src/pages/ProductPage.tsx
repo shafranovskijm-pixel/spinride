@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { 
@@ -12,7 +12,8 @@ import {
   Shield, 
   Check,
   Minus,
-  Plus
+  Plus,
+  Loader2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -25,8 +26,8 @@ import { ReviewList } from "@/components/shop/ReviewList";
 import { useCart } from "@/hooks/use-cart";
 import { useFavorites } from "@/hooks/use-favorites";
 import { useCompare } from "@/hooks/use-compare";
+import { useProduct, useRelatedProducts } from "@/hooks/use-products";
 import { supabase } from "@/integrations/supabase/client";
-import { mockProducts } from "@/data/mock-products";
 import { cn } from "@/lib/utils";
 
 export default function ProductPage() {
@@ -38,8 +39,14 @@ export default function ProductPage() {
   const { toggleFavorite, isFavorite } = useFavorites();
   const { addToCompare, isInCompare, canAdd } = useCompare();
 
-  // Find product by slug
-  const product = mockProducts.find(p => p.slug === slug);
+  // Fetch product from database
+  const { data: product, isLoading: productLoading, error } = useProduct(slug || "");
+
+  // Fetch related products
+  const { data: relatedProducts = [] } = useRelatedProducts(
+    product?.id || "",
+    product?.category_id || null
+  );
 
   // Fetch reviews from Supabase
   const { data: reviews = [], isLoading: reviewsLoading, refetch: refetchReviews } = useQuery({
@@ -59,8 +66,20 @@ export default function ProductPage() {
     },
     enabled: !!product?.id,
   });
+
+  // Loading state
+  if (productLoading) {
+    return (
+      <ShopLayout>
+        <div className="container-shop py-20 flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </ShopLayout>
+    );
+  }
   
-  if (!product) {
+  // Not found state
+  if (!product || error) {
     return (
       <ShopLayout>
         <div className="container-shop py-20 text-center">
@@ -80,9 +99,6 @@ export default function ProductPage() {
     : 0;
   
   const images = product.images?.length ? product.images : ["/placeholder.svg"];
-  const relatedProducts = mockProducts
-    .filter(p => p.category_id === product.category_id && p.id !== product.id)
-    .slice(0, 4);
 
   const handleAddToCart = () => {
     addItem(product, quantity);
@@ -305,7 +321,7 @@ export default function ProductPage() {
           
           <TabsContent value="specs" className="mt-6">
             <div className="max-w-2xl">
-              {Object.entries(product.specifications).map(([key, value]) => (
+              {Object.entries(product.specifications || {}).map(([key, value]) => (
                 <div key={key} className="flex py-3 border-b last:border-0">
                   <span className="w-1/2 text-muted-foreground">{key}</span>
                   <span className="w-1/2 font-medium">{value}</span>

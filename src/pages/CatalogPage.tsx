@@ -6,7 +6,8 @@ import {
   ChevronDown,
   SlidersHorizontal,
   Grid3X3,
-  List
+  List,
+  Loader2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,20 +36,8 @@ import {
 } from "@/components/ui/collapsible";
 import { ShopLayout } from "@/components/shop/ShopLayout";
 import { ProductCard } from "@/components/shop/ProductCard";
-import { mockProducts } from "@/data/mock-products";
+import { useProducts, useCategories } from "@/hooks/use-products";
 import { cn } from "@/lib/utils";
-
-const categories = [
-  { slug: "bicycles", name: "Велосипеды", count: 45 },
-  { slug: "e-bikes", name: "Электровелосипеды", count: 12 },
-  { slug: "scooters", name: "Самокаты", count: 28 },
-  { slug: "e-scooters", name: "Электросамокаты", count: 15 },
-  { slug: "bmx", name: "BMX", count: 8 },
-  { slug: "kids", name: "Детям", count: 35 },
-  { slug: "accessories", name: "Аксессуары", count: 120 },
-  { slug: "parts", name: "Запчасти", count: 200 },
-  { slug: "atv", name: "Квадроциклы", count: 5 },
-];
 
 const seasons = [
   { value: "all", label: "Все сезоны" },
@@ -69,16 +58,32 @@ export default function CatalogPage() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
 
+  // Fetch categories from DB
+  const { data: categories = [], isLoading: categoriesLoading } = useCategories();
+
   // Get filter values from URL
   const selectedCategories = searchParams.get("categories")?.split(",").filter(Boolean) || [];
   const selectedSeason = searchParams.get("season") || "all";
   const minPrice = Number(searchParams.get("minPrice")) || 0;
   const maxPrice = Number(searchParams.get("maxPrice")) || 100000;
-  const sortBy = searchParams.get("sort") || "popular";
+  const sortBy = (searchParams.get("sort") || "popular") as "popular" | "price-asc" | "price-desc" | "new" | "rating";
   const searchQuery = searchParams.get("q") || "";
   const showInStock = searchParams.get("inStock") === "true";
   const showSale = searchParams.get("sale") === "true";
   const showNew = searchParams.get("new") === "true";
+
+  // Fetch products from DB with filters
+  const { data: products = [], isLoading: productsLoading } = useProducts({
+    categoryIds: selectedCategories.length > 0 ? selectedCategories : undefined,
+    season: selectedSeason as "summer" | "winter" | "all",
+    minPrice: minPrice > 0 ? minPrice : undefined,
+    maxPrice: maxPrice < 100000 ? maxPrice : undefined,
+    inStock: showInStock || undefined,
+    onSale: showSale || undefined,
+    isNew: showNew || undefined,
+    search: searchQuery || undefined,
+    sortBy,
+  });
 
   // Price range for slider
   const priceRange = [minPrice, maxPrice];
@@ -111,86 +116,6 @@ export default function CatalogPage() {
     setSearchParams(new URLSearchParams());
   };
 
-  // Filter and sort products
-  const filteredProducts = useMemo(() => {
-    let products = [...mockProducts];
-
-    // Search
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      products = products.filter(
-        (p) =>
-          p.name.toLowerCase().includes(query) ||
-          p.description?.toLowerCase().includes(query)
-      );
-    }
-
-    // Categories
-    if (selectedCategories.length > 0) {
-      products = products.filter((p) =>
-        selectedCategories.includes(p.category_id || "")
-      );
-    }
-
-    // Season
-    if (selectedSeason !== "all") {
-      products = products.filter(
-        (p) => p.season === selectedSeason || p.season === "all"
-      );
-    }
-
-    // Price range
-    products = products.filter((p) => {
-      const price = p.sale_price ?? p.price;
-      return price >= minPrice && price <= maxPrice;
-    });
-
-    // In stock
-    if (showInStock) {
-      products = products.filter((p) => p.in_stock);
-    }
-
-    // Sale
-    if (showSale) {
-      products = products.filter((p) => p.sale_price && p.sale_price < p.price);
-    }
-
-    // New
-    if (showNew) {
-      products = products.filter((p) => p.is_new);
-    }
-
-    // Sort
-    switch (sortBy) {
-      case "price-asc":
-        products.sort((a, b) => (a.sale_price ?? a.price) - (b.sale_price ?? b.price));
-        break;
-      case "price-desc":
-        products.sort((a, b) => (b.sale_price ?? b.price) - (a.sale_price ?? a.price));
-        break;
-      case "new":
-        products.sort((a, b) => (b.is_new ? 1 : 0) - (a.is_new ? 1 : 0));
-        break;
-      case "rating":
-        products.sort((a, b) => b.rating_average - a.rating_average);
-        break;
-      default:
-        products.sort((a, b) => b.rating_count - a.rating_count);
-    }
-
-    return products;
-  }, [
-    searchQuery,
-    selectedCategories,
-    selectedSeason,
-    minPrice,
-    maxPrice,
-    showInStock,
-    showSale,
-    showNew,
-    sortBy,
-  ]);
-
   // Active filters count
   const activeFiltersCount = [
     selectedCategories.length > 0,
@@ -211,19 +136,26 @@ export default function CatalogPage() {
           <ChevronDown className="h-4 w-4" />
         </CollapsibleTrigger>
         <CollapsibleContent className="pt-2 space-y-2">
-          {categories.map((category) => (
-            <label
-              key={category.slug}
-              className="flex items-center gap-3 py-1 cursor-pointer hover:text-primary"
-            >
-              <Checkbox
-                checked={selectedCategories.includes(category.slug)}
-                onCheckedChange={() => toggleCategory(category.slug)}
-              />
-              <span className="flex-1 text-sm">{category.name}</span>
-              <span className="text-xs text-muted-foreground">{category.count}</span>
-            </label>
-          ))}
+          {categoriesLoading ? (
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Загрузка...
+            </div>
+          ) : (
+            categories.map((category) => (
+              <label
+                key={category.slug}
+                className="flex items-center gap-3 py-1 cursor-pointer hover:text-primary"
+              >
+                <Checkbox
+                  checked={selectedCategories.includes(category.slug)}
+                  onCheckedChange={() => toggleCategory(category.slug)}
+                />
+                <span className="flex-1 text-sm">{category.name}</span>
+                <span className="text-xs text-muted-foreground">{category.count}</span>
+              </label>
+            ))
+          )}
         </CollapsibleContent>
       </Collapsible>
 
@@ -348,7 +280,7 @@ export default function CatalogPage() {
           <div>
             <h1 className="text-2xl md:text-3xl font-bold">Каталог</h1>
             <p className="text-muted-foreground mt-1">
-              {filteredProducts.length} товар(ов)
+              {productsLoading ? "Загрузка..." : `${products.length} товар(ов)`}
             </p>
           </div>
 
@@ -419,7 +351,7 @@ export default function CatalogPage() {
               const cat = categories.find((c) => c.slug === slug);
               return (
                 <Badge key={slug} variant="secondary" className="gap-1">
-                  {cat?.name}
+                  {cat?.name || slug}
                   <button onClick={() => toggleCategory(slug)}>
                     <X className="h-3 w-3" />
                   </button>
@@ -484,7 +416,11 @@ export default function CatalogPage() {
 
           {/* Products grid */}
           <div className="flex-1">
-            {filteredProducts.length === 0 ? (
+            {productsLoading ? (
+              <div className="flex items-center justify-center py-16">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            ) : products.length === 0 ? (
               <div className="text-center py-16">
                 <Filter className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                 <h2 className="text-xl font-semibold mb-2">Товары не найдены</h2>
@@ -498,13 +434,13 @@ export default function CatalogPage() {
             ) : (
               <div
                 className={cn(
-                  "grid gap-4 md:gap-6",
+                  "gap-4 md:gap-6",
                   viewMode === "grid"
-                    ? "grid-cols-2 md:grid-cols-3 xl:grid-cols-4"
-                    : "grid-cols-1"
+                    ? "grid grid-cols-2 md:grid-cols-3"
+                    : "flex flex-col"
                 )}
               >
-                {filteredProducts.map((product) => (
+                {products.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
               </div>
