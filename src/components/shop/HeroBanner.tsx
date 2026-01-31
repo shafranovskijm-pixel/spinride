@@ -17,41 +17,50 @@ export function HeroBanner() {
         <div className="circle-decoration w-[300px] h-[300px] bottom-20 left-1/4 opacity-10" />
       </div>
       
+      {/* Floating particles */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="particle" style={{ top: '20%', left: '10%' }} />
+        <div className="particle" style={{ top: '60%', left: '5%' }} />
+        <div className="particle" style={{ top: '30%', right: '15%' }} />
+        <div className="particle" style={{ top: '70%', right: '10%' }} />
+        <div className="particle" style={{ top: '50%', left: '50%' }} />
+      </div>
+      
       {/* Content */}
       <div className="container-shop relative z-10 py-12 md:py-16 lg:py-20">
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
           {/* Text */}
           <div className="space-y-6 text-center lg:text-left">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black leading-[1.1] text-foreground">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black leading-[1.1] text-foreground animate-fade-in-up">
               Велосипеды и{" "}
-              <span className="block">самокаты</span>
-              <span className="block text-foreground/90">для всей семьи</span>
+              <span className="block animate-fade-in-up" style={{ animationDelay: '0.1s' }}>самокаты</span>
+              <span className="block text-foreground/90 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>для всей семьи</span>
             </h1>
             
-            <p className="text-lg md:text-xl text-foreground/70 max-w-lg mx-auto lg:mx-0">
+            <p className="text-lg md:text-xl text-foreground/70 max-w-lg mx-auto lg:mx-0 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
               доставка по всей России.
             </p>
             
-            <p className="text-base md:text-lg font-medium text-foreground/80 max-w-lg mx-auto lg:mx-0">
+            <p className="text-base md:text-lg font-medium text-foreground/80 max-w-lg mx-auto lg:mx-0 animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
               От городских прогулок до экстремальных поездок – найдите свой идеальный велосипед в Уссурийске!
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-4">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-4 animate-fade-in-up" style={{ animationDelay: '0.5s' }}>
               <Button 
                 size="lg" 
                 asChild 
-                className="bg-secondary hover:bg-secondary/90 text-secondary-foreground font-bold text-base px-8 py-6 rounded-xl shadow-lg hover:shadow-xl transition-all"
+                className="bg-secondary hover:bg-secondary/90 text-secondary-foreground font-bold text-base px-8 py-6 rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 btn-ripple animate-glow-pulse"
               >
                 <Link to="/catalog">
                   Перейти в каталог
-                  <ArrowRight className="ml-2 h-5 w-5" />
+                  <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                 </Link>
               </Button>
               <Button 
                 size="lg" 
                 variant="outline" 
                 asChild 
-                className="bg-background/90 hover:bg-background font-bold text-base px-8 py-6 rounded-xl border-2"
+                className="bg-background/90 hover:bg-background font-bold text-base px-8 py-6 rounded-xl border-2 hover:-translate-y-1 transition-all duration-300"
               >
                 <Link to="/quiz">
                   🎯 Подобрать велосипед

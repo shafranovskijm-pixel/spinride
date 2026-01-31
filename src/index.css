@@ -63,6 +63,11 @@
     --sidebar-foreground: 220 20% 25%;
     --sidebar-primary: 42 100% 50%;
     --sidebar-primary-foreground: 220 25% 10%;
+    
+    /* Animation timings */
+    --transition-fast: 150ms;
+    --transition-normal: 300ms;
+    --transition-slow: 500ms;
     --sidebar-accent: 42 30% 95%;
     --sidebar-accent-foreground: 220 20% 10%;
     --sidebar-border: 220 14% 90%;
@@ -246,11 +251,130 @@
     animation: pulse-soft 4s ease-in-out infinite;
   }
   
+  /* Fade in up animation */
+  @keyframes fade-in-up {
+    0% { opacity: 0; transform: translateY(20px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  
+  .animate-fade-in-up {
+    animation: fade-in-up 0.6s ease-out forwards;
+  }
+  
+  /* Stagger children animations */
+  .stagger-children > * {
+    opacity: 0;
+    animation: fade-in-up 0.5s ease-out forwards;
+  }
+  
+  .stagger-children > *:nth-child(1) { animation-delay: 0.1s; }
+  .stagger-children > *:nth-child(2) { animation-delay: 0.2s; }
+  .stagger-children > *:nth-child(3) { animation-delay: 0.3s; }
+  .stagger-children > *:nth-child(4) { animation-delay: 0.4s; }
+  .stagger-children > *:nth-child(5) { animation-delay: 0.5s; }
+  .stagger-children > *:nth-child(6) { animation-delay: 0.6s; }
+  .stagger-children > *:nth-child(7) { animation-delay: 0.7s; }
+  .stagger-children > *:nth-child(8) { animation-delay: 0.8s; }
+  
+  /* Scale in animation */
+  @keyframes scale-in {
+    0% { opacity: 0; transform: scale(0.9); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+  
+  .animate-scale-in {
+    animation: scale-in 0.4s ease-out forwards;
+  }
+  
+  /* Slide in from left */
+  @keyframes slide-in-left {
+    0% { opacity: 0; transform: translateX(-30px); }
+    100% { opacity: 1; transform: translateX(0); }
+  }
+  
+  .animate-slide-in-left {
+    animation: slide-in-left 0.5s ease-out forwards;
+  }
+  
+  /* Slide in from right */
+  @keyframes slide-in-right {
+    0% { opacity: 0; transform: translateX(30px); }
+    100% { opacity: 1; transform: translateX(0); }
+  }
+  
+  .animate-slide-in-right {
+    animation: slide-in-right 0.5s ease-out forwards;
+  }
+  
+  /* Bounce subtle */
+  @keyframes bounce-subtle {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+  }
+  
+  .animate-bounce-subtle {
+    animation: bounce-subtle 2s ease-in-out infinite;
+  }
+  
+  /* Spin slow */
+  @keyframes spin-slow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  
+  .animate-spin-slow {
+    animation: spin-slow 20s linear infinite;
+  }
+  
+  /* Shimmer effect for loading */
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  
+  .animate-shimmer {
+    background: linear-gradient(90deg, hsl(var(--muted)) 0%, hsl(var(--background)) 50%, hsl(var(--muted)) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+  }
+  
+  /* Glow pulse */
+  @keyframes glow-pulse {
+    0%, 100% { box-shadow: 0 0 20px hsl(var(--primary) / 0.3); }
+    50% { box-shadow: 0 0 40px hsl(var(--primary) / 0.5); }
+  }
+  
+  .animate-glow-pulse {
+    animation: glow-pulse 2s ease-in-out infinite;
+  }
+  
   /* Decorative circle */
   .circle-decoration {
     position: absolute;
     border-radius: 50%;
     border: 2px solid hsl(var(--muted-foreground) / 0.15);
+  }
+  
+  /* Animated gradient border */
+  .gradient-border {
+    position: relative;
+    background: hsl(var(--background));
+    border-radius: var(--radius);
+  }
+  
+  .gradient-border::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    background: var(--gradient-cta);
+    border-radius: calc(var(--radius) + 2px);
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  
+  .gradient-border:hover::before {
+    opacity: 1;
   }
   
   /* Hero wave decoration */
@@ -263,6 +387,21 @@
     background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 100'%3E%3Cpath fill='%23fafafa' d='M0,50 C360,100 720,0 1080,50 C1260,75 1380,50 1440,50 L1440,100 L0,100 Z'/%3E%3C/svg%3E") no-repeat bottom;
     background-size: cover;
   }
+  
+  /* Floating particles */
+  .particle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: hsl(var(--primary) / 0.3);
+    border-radius: 50%;
+    animation: float 4s ease-in-out infinite;
+  }
+  
+  .particle:nth-child(2) { animation-delay: 0.5s; width: 6px; height: 6px; }
+  .particle:nth-child(3) { animation-delay: 1s; width: 10px; height: 10px; }
+  .particle:nth-child(4) { animation-delay: 1.5s; width: 5px; height: 5px; }
+  .particle:nth-child(5) { animation-delay: 2s; width: 7px; height: 7px; }
   
   /* Card shine effect */
   .card-shine {
@@ -277,12 +416,98 @@
     left: -100%;
     width: 50%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, hsl(0 0% 100% / 0.1), transparent);
-    transition: left 0.5s ease;
+    background: linear-gradient(90deg, transparent, hsl(0 0% 100% / 0.15), transparent);
+    transition: left 0.6s ease;
   }
   
   .card-shine:hover::after {
     left: 100%;
+  }
+  
+  /* Interactive button with ripple */
+  .btn-ripple {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .btn-ripple::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center, hsl(0 0% 100% / 0.3) 0%, transparent 60%);
+    transform: scale(0);
+    opacity: 0;
+    transition: transform 0.5s ease, opacity 0.3s ease;
+  }
+  
+  .btn-ripple:active::after {
+    transform: scale(2);
+    opacity: 1;
+    transition: transform 0s, opacity 0s;
+  }
+  
+  /* Hover lift effect */
+  .hover-lift {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-xl);
+  }
+  
+  /* Text reveal animation */
+  @keyframes text-reveal {
+    0% { clip-path: inset(0 100% 0 0); }
+    100% { clip-path: inset(0 0 0 0); }
+  }
+  
+  .animate-text-reveal {
+    animation: text-reveal 0.8s ease-out forwards;
+  }
+  
+  /* Rotate on hover */
+  .hover-rotate {
+    transition: transform 0.3s ease;
+  }
+  
+  .hover-rotate:hover {
+    transform: rotate(5deg);
+  }
+  
+  /* Icon bounce on hover */
+  .icon-bounce:hover svg {
+    animation: bounce-subtle 0.5s ease-in-out;
+  }
+  
+  /* Underline animation */
+  .underline-animate {
+    position: relative;
+  }
+  
+  .underline-animate::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: hsl(var(--primary));
+    transition: width 0.3s ease;
+  }
+  
+  .underline-animate:hover::after {
+    width: 100%;
+  }
+  
+  /* Parallax container */
+  .parallax-container {
+    perspective: 1000px;
+  }
+  
+  .parallax-item {
+    transform-style: preserve-3d;
+    transition: transform 0.1s ease-out;
   }
 }
 

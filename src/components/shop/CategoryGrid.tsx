@@ -59,12 +59,13 @@ interface CategoryGridProps {
 
 export function CategoryGrid({ className }: CategoryGridProps) {
   return (
-    <div className={cn("grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4", className)}>
-      {categories.map((category) => (
+    <div className={cn("grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 stagger-children", className)}>
+      {categories.map((category, index) => (
         <Link
           key={category.id}
           to={`/catalog/${category.id}`}
-          className="group relative overflow-hidden rounded-2xl aspect-[3/4] bg-card shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
+          className="group relative overflow-hidden rounded-2xl aspect-[3/4] bg-card shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 card-shine"
+          style={{ animationDelay: `${index * 0.1}s` }}
         >
           {/* Background image */}
           <div className="absolute inset-0">
@@ -74,18 +75,18 @@ export function CategoryGrid({ className }: CategoryGridProps) {
               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
             />
             <div className={cn(
-              "absolute inset-0 bg-gradient-to-t opacity-80 group-hover:opacity-70 transition-opacity",
+              "absolute inset-0 bg-gradient-to-t opacity-80 group-hover:opacity-70 transition-opacity duration-300",
               category.color
             )} />
           </div>
           
           {/* Content */}
           <div className="absolute inset-0 p-4 flex flex-col justify-end text-white">
-            <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+            <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center mb-3 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
               <category.icon className="h-5 w-5" />
             </div>
-            <h3 className="font-bold text-lg leading-tight">{category.name}</h3>
-            <p className="text-sm text-white/80 line-clamp-2 mt-1">{category.description}</p>
+            <h3 className="font-bold text-lg leading-tight group-hover:translate-x-1 transition-transform duration-300">{category.name}</h3>
+            <p className="text-sm text-white/80 line-clamp-2 mt-1 group-hover:translate-x-1 transition-transform duration-300 delay-75">{category.description}</p>
           </div>
         </Link>
       ))}

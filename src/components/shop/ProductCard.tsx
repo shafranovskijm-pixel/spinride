@@ -47,7 +47,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
   };
 
   return (
-    <Card className={cn("product-card overflow-hidden group", className)}>
+    <Card className={cn("product-card card-shine overflow-hidden group", className)}>
       <Link to={`/product/${product.slug}`}>
         {/* Image container */}
         <div className="relative aspect-square overflow-hidden bg-muted">

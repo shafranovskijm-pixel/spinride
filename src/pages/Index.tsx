@@ -23,8 +23,8 @@ export default function Index() {
       {/* Categories */}
       <section className="container-shop py-12">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold">Категории</h2>
-          <Link to="/catalog" className="text-sm text-primary hover:underline flex items-center gap-1">
+          <h2 className="text-2xl font-bold animate-fade-in-up">Категории</h2>
+          <Link to="/catalog" className="text-sm text-primary hover:underline flex items-center gap-1 underline-animate">
             Все категории <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
@@ -36,19 +36,19 @@ export default function Index() {
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             {season === "summer" ? (
-              <Sun className="h-6 w-6 text-primary" />
+              <Sun className="h-6 w-6 text-primary animate-spin-slow" />
             ) : (
-              <Snowflake className="h-6 w-6 text-primary" />
+              <Snowflake className="h-6 w-6 text-primary animate-bounce-subtle" />
             )}
             <h2 className="text-2xl font-bold">
               {season === "summer" ? "Летняя коллекция" : "Зимняя коллекция"}
             </h2>
           </div>
-          <Link to={`/catalog?season=${season}`} className="text-sm text-primary hover:underline flex items-center gap-1">
+          <Link to={`/catalog?season=${season}`} className="text-sm text-primary hover:underline flex items-center gap-1 underline-animate">
             Все товары <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 stagger-children">
           {seasonalProducts.slice(0, 4).map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
@@ -62,11 +62,11 @@ export default function Index() {
             <TrendingUp className="h-6 w-6 text-primary" />
             <h2 className="text-2xl font-bold">Популярное</h2>
           </div>
-          <Link to="/catalog?featured=true" className="text-sm text-primary hover:underline flex items-center gap-1">
+          <Link to="/catalog?featured=true" className="text-sm text-primary hover:underline flex items-center gap-1 underline-animate">
             Все популярные <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 stagger-children">
           {featuredProducts.slice(0, 4).map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
@@ -78,14 +78,14 @@ export default function Index() {
         <section className="container-shop py-12">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
-              <Sparkles className="h-6 w-6 text-primary" />
+              <Sparkles className="h-6 w-6 text-primary animate-pulse" />
               <h2 className="text-2xl font-bold">Новинки</h2>
             </div>
-            <Link to="/catalog?new=true" className="text-sm text-primary hover:underline flex items-center gap-1">
+            <Link to="/catalog?new=true" className="text-sm text-primary hover:underline flex items-center gap-1 underline-animate">
               Все новинки <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 stagger-children">
             {newProducts.slice(0, 4).map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
@@ -95,14 +95,18 @@ export default function Index() {
 
       {/* Bike Finder CTA */}
       <section className="container-shop py-12">
-        <div className="gradient-hero rounded-2xl p-8 md:p-12 text-center text-white">
-          <h2 className="text-2xl md:text-3xl font-bold mb-4">
+        <div className="gradient-hero rounded-2xl p-8 md:p-12 text-center text-white relative overflow-hidden hover-lift">
+          {/* Decorative elements */}
+          <div className="absolute top-4 left-4 w-20 h-20 rounded-full bg-white/10 animate-pulse-soft" />
+          <div className="absolute bottom-4 right-4 w-32 h-32 rounded-full bg-white/5 animate-float" />
+          
+          <h2 className="text-2xl md:text-3xl font-bold mb-4 relative z-10">
             Не знаете, что выбрать?
           </h2>
-          <p className="text-lg mb-6 opacity-90 max-w-lg mx-auto">
+          <p className="text-lg mb-6 opacity-90 max-w-lg mx-auto relative z-10">
             Пройдите короткий тест и мы подберём идеальный велосипед или самокат под ваши задачи
           </p>
-          <Button size="lg" variant="secondary" asChild>
+          <Button size="lg" variant="secondary" asChild className="btn-ripple hover:scale-105 transition-transform relative z-10">
             <Link to="/quiz">
               🎯 Подобрать за 2 минуты
             </Link>
@@ -112,30 +116,30 @@ export default function Index() {
 
       {/* Trust signals */}
       <section className="container-shop py-12">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          <div className="text-center p-4">
-            <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-primary/10 flex items-center justify-center">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 stagger-children">
+          <div className="text-center p-4 hover-lift rounded-xl">
+            <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-primary/10 flex items-center justify-center icon-bounce">
               <span className="text-2xl">🚚</span>
             </div>
             <h3 className="font-semibold mb-1">Доставка</h3>
             <p className="text-sm text-muted-foreground">Быстрая доставка по городу и краю</p>
           </div>
-          <div className="text-center p-4">
-            <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-primary/10 flex items-center justify-center">
+          <div className="text-center p-4 hover-lift rounded-xl">
+            <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-primary/10 flex items-center justify-center icon-bounce">
               <span className="text-2xl">🛡️</span>
             </div>
             <h3 className="font-semibold mb-1">Гарантия</h3>
             <p className="text-sm text-muted-foreground">Официальная гарантия на все товары</p>
           </div>
-          <div className="text-center p-4">
-            <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-primary/10 flex items-center justify-center">
+          <div className="text-center p-4 hover-lift rounded-xl">
+            <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-primary/10 flex items-center justify-center icon-bounce">
               <span className="text-2xl">💳</span>
             </div>
             <h3 className="font-semibold mb-1">Оплата</h3>
             <p className="text-sm text-muted-foreground">Наличные, карты, рассрочка</p>
           </div>
-          <div className="text-center p-4">
-            <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-primary/10 flex items-center justify-center">
+          <div className="text-center p-4 hover-lift rounded-xl">
+            <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-primary/10 flex items-center justify-center icon-bounce">
               <span className="text-2xl">🔧</span>
             </div>
             <h3 className="font-semibold mb-1">Сервис</h3>
