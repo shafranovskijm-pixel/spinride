@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { Link, useLocation, Navigate } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { 
   LayoutDashboard, 
   Package, 
@@ -9,7 +9,8 @@ import {
   Menu,
   Sun,
   Snowflake,
-  ChevronLeft
+  ChevronLeft,
+  User
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,7 +26,17 @@ import {
   SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useSeason } from "@/hooks/use-season";
+import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -111,6 +122,17 @@ interface AdminLayoutProps {
 }
 
 export function AdminLayout({ children, title, subtitle, actions }: AdminLayoutProps) {
+  const { user, profile, signOut } = useAuth();
+
+  const handleSignOut = async () => {
+    await signOut();
+    window.location.href = "/";
+  };
+
+  const userInitials = profile?.display_name
+    ? profile.display_name.slice(0, 2).toUpperCase()
+    : user?.email?.slice(0, 2).toUpperCase() || "AD";
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-muted/30">
@@ -138,6 +160,42 @@ export function AdminLayout({ children, title, subtitle, actions }: AdminLayoutP
                   На сайт
                 </Link>
               </Button>
+
+              {/* User menu */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="rounded-full">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={profile?.avatar_url || undefined} />
+                      <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                        {userInitials}
+                      </AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel>
+                    <div className="flex flex-col">
+                      <span>{profile?.display_name || "Администратор"}</span>
+                      <span className="text-xs font-normal text-muted-foreground">
+                        {user?.email}
+                      </span>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link to="/admin/settings">
+                      <Settings className="h-4 w-4 mr-2" />
+                      Настройки
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Выйти
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </header>
 
