@@ -140,34 +140,36 @@ export function AdminLayout({ children, title, subtitle, actions }: AdminLayoutP
       <div className="min-h-screen flex w-full bg-muted/30">
         <AdminSidebar />
         
-        <div className="flex-1 flex flex-col">
-          {/* Header */}
-          <header className="h-16 border-b bg-background flex items-center justify-between px-6">
-            <div className="flex items-center gap-4">
+        <div className="flex-1 flex flex-col min-w-0">
+          {/* Header - mobile optimized */}
+          <header className="h-14 sm:h-16 border-b bg-background flex items-center justify-between px-3 sm:px-6 sticky top-0 z-10">
+            <div className="flex items-center gap-2 sm:gap-4 min-w-0">
               <SidebarTrigger>
                 <Menu className="h-5 w-5" />
               </SidebarTrigger>
-              <div>
-                <h1 className="font-semibold text-lg">{title}</h1>
+              <div className="min-w-0">
+                <h1 className="font-semibold text-base sm:text-lg truncate">{title}</h1>
                 {subtitle && (
-                  <p className="text-sm text-muted-foreground">{subtitle}</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground truncate">{subtitle}</p>
                 )}
               </div>
             </div>
-            <div className="flex items-center gap-3">
-              {actions}
-              <Button variant="ghost" size="sm" asChild>
+            <div className="flex items-center gap-1 sm:gap-3 shrink-0">
+              {/* Actions - hidden on very small screens, shown in menu */}
+              <div className="hidden sm:flex items-center gap-2">
+                {actions}
+              </div>
+              <Button variant="ghost" size="icon" className="hidden md:flex" asChild>
                 <Link to="/">
-                  <ChevronLeft className="h-4 w-4 mr-1" />
-                  На сайт
+                  <ChevronLeft className="h-4 w-4" />
                 </Link>
               </Button>
 
               {/* User menu */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="rounded-full">
-                    <Avatar className="h-8 w-8">
+                  <Button variant="ghost" size="icon" className="rounded-full h-8 w-8 sm:h-9 sm:w-9">
+                    <Avatar className="h-7 w-7 sm:h-8 sm:w-8">
                       <AvatarImage src={profile?.avatar_url || undefined} />
                       <AvatarFallback className="bg-primary text-primary-foreground text-xs">
                         {userInitials}
@@ -179,12 +181,18 @@ export function AdminLayout({ children, title, subtitle, actions }: AdminLayoutP
                   <DropdownMenuLabel>
                     <div className="flex flex-col">
                       <span>{profile?.display_name || "Администратор"}</span>
-                      <span className="text-xs font-normal text-muted-foreground">
+                      <span className="text-xs font-normal text-muted-foreground truncate">
                         {user?.email}
                       </span>
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild className="md:hidden">
+                    <Link to="/">
+                      <ChevronLeft className="h-4 w-4 mr-2" />
+                      На сайт
+                    </Link>
+                  </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link to="/admin/settings">
                       <Settings className="h-4 w-4 mr-2" />
@@ -201,8 +209,15 @@ export function AdminLayout({ children, title, subtitle, actions }: AdminLayoutP
             </div>
           </header>
 
-          {/* Content */}
-          <main className="flex-1 p-6">
+          {/* Mobile actions bar */}
+          {actions && (
+            <div className="sm:hidden flex items-center gap-2 px-3 py-2 border-b bg-background">
+              {actions}
+            </div>
+          )}
+
+          {/* Content - mobile optimized padding */}
+          <main className="flex-1 p-3 sm:p-6 overflow-x-hidden">
             {children}
           </main>
         </div>
