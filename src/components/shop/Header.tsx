@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ShoppingCart, Heart, Search, Menu, X, User } from "lucide-react";
+import { ShoppingCart, Heart, Search, Menu, X, User, Phone } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,10 +12,10 @@ import { useSeason } from "@/hooks/use-season";
 const navigation = [
   { name: "Каталог", href: "/catalog" },
   { name: "Велосипеды", href: "/catalog/bicycles" },
+  { name: "Электро", href: "/catalog/e-bikes" },
   { name: "Самокаты", href: "/catalog/scooters" },
-  { name: "Электро", href: "/catalog/electric" },
+  { name: "BMX", href: "/catalog/bmx" },
   { name: "Детям", href: "/catalog/kids" },
-  { name: "Акции", href: "/sale" },
 ];
 
 export function Header() {
@@ -26,28 +26,40 @@ export function Header() {
   const { season } = useSeason();
 
   return (
-    <header className="sticky top-0 z-50 w-full glass border-b">
+    <header className="sticky top-0 z-50 w-full bg-foreground">
+      {/* Top bar with phone */}
+      <div className="hidden lg:block border-b border-white/10">
+        <div className="container-shop flex h-10 items-center justify-between text-sm text-white/80">
+          <div className="flex items-center gap-6">
+            <span>О магазине</span>
+            <span>Отзывы</span>
+            <span>Контакты</span>
+          </div>
+          <a href="tel:+79247881111" className="flex items-center gap-2 hover:text-primary transition-colors font-semibold text-primary">
+            <Phone className="h-4 w-4" />
+            +7 924-788-11-11
+          </a>
+        </div>
+      </div>
+
       <div className="container-shop">
-        {/* Top bar with search and actions */}
+        {/* Main header */}
         <div className="flex h-16 items-center justify-between gap-4">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 shrink-0">
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center gradient-hero`}>
-              <span className="text-2xl">🚴</span>
-            </div>
-            <span className="font-bold text-xl hidden sm:block">
+            <span className="font-black text-2xl tracking-tight text-secondary">
               SPIN<span className="text-primary">RIDE</span>
             </span>
           </Link>
 
           {/* Search - Desktop */}
-          <div className="hidden md:flex flex-1 max-w-md">
+          <div className="hidden md:flex flex-1 max-w-lg">
             <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 type="search"
                 placeholder="Поиск велосипедов, самокатов..."
-                className="pl-10 bg-muted/50"
+                className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/50 focus:bg-white focus:text-foreground focus:placeholder:text-muted-foreground transition-colors"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -55,12 +67,12 @@ export function Header() {
           </div>
 
           {/* Actions */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2">
             {/* Mobile search toggle */}
             <Button
               variant="ghost"
               size="icon"
-              className="md:hidden"
+              className="md:hidden text-white hover:text-primary hover:bg-white/10"
               onClick={() => setIsSearchOpen(!isSearchOpen)}
             >
               {isSearchOpen ? <X className="h-5 w-5" /> : <Search className="h-5 w-5" />}
@@ -68,7 +80,7 @@ export function Header() {
 
             {/* Favorites */}
             <Link to="/favorites">
-              <Button variant="ghost" size="icon" className="relative">
+              <Button variant="ghost" size="icon" className="relative text-white hover:text-primary hover:bg-white/10">
                 <Heart className="h-5 w-5" />
                 {favoritesCount > 0 && (
                   <Badge 
@@ -83,11 +95,11 @@ export function Header() {
 
             {/* Cart */}
             <Link to="/cart">
-              <Button variant="ghost" size="icon" className="relative">
+              <Button variant="ghost" size="icon" className="relative text-white hover:text-primary hover:bg-white/10">
                 <ShoppingCart className="h-5 w-5" />
                 {itemCount > 0 && (
                   <Badge 
-                    className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs bg-primary"
+                    className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs bg-primary text-primary-foreground"
                   >
                     {itemCount}
                   </Badge>
@@ -97,7 +109,7 @@ export function Header() {
 
             {/* User/Admin */}
             <Link to="/admin">
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="icon" className="text-white hover:text-primary hover:bg-white/10">
                 <User className="h-5 w-5" />
               </Button>
             </Link>
@@ -105,22 +117,40 @@ export function Header() {
             {/* Mobile menu */}
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="lg:hidden">
+                <Button variant="ghost" size="icon" className="lg:hidden text-white hover:text-primary hover:bg-white/10">
                   <Menu className="h-5 w-5" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-72">
-                <nav className="flex flex-col gap-4 mt-8">
+              <SheetContent side="right" className="w-80 bg-foreground border-white/10">
+                <div className="flex flex-col gap-1 mt-8">
+                  {/* Phone */}
+                  <a 
+                    href="tel:+79247881111" 
+                    className="flex items-center gap-3 p-4 rounded-xl bg-primary/10 text-primary font-bold mb-4"
+                  >
+                    <Phone className="h-5 w-5" />
+                    +7 924-788-11-11
+                  </a>
+                  
                   {navigation.map((item) => (
                     <Link
                       key={item.name}
                       to={item.href}
-                      className="text-lg font-medium hover:text-primary transition-colors"
+                      className="text-lg font-medium text-white hover:text-primary transition-colors p-3 rounded-lg hover:bg-white/5"
                     >
                       {item.name}
                     </Link>
                   ))}
-                </nav>
+                  
+                  <div className="border-t border-white/10 mt-4 pt-4">
+                    <Link
+                      to="/quiz"
+                      className="flex items-center gap-2 text-lg font-medium text-primary p-3"
+                    >
+                      🎯 Подобрать велосипед
+                    </Link>
+                  </div>
+                </div>
               </SheetContent>
             </Sheet>
           </div>
@@ -134,7 +164,7 @@ export function Header() {
               <Input
                 type="search"
                 placeholder="Поиск..."
-                className="pl-10"
+                className="pl-10 bg-white text-foreground"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 autoFocus
@@ -144,19 +174,19 @@ export function Header() {
         )}
 
         {/* Desktop navigation */}
-        <nav className="hidden lg:flex h-12 items-center gap-6 border-t">
+        <nav className="hidden lg:flex h-12 items-center gap-8">
           {navigation.map((item) => (
             <Link
               key={item.name}
               to={item.href}
-              className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+              className="text-sm font-medium text-white/70 hover:text-primary transition-colors"
             >
               {item.name}
             </Link>
           ))}
           <Link
             to="/quiz"
-            className="ml-auto text-sm font-medium text-primary hover:underline"
+            className="ml-auto text-sm font-bold text-primary hover:underline"
           >
             🎯 Подобрать велосипед
           </Link>
