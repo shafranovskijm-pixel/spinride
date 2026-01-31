@@ -10,7 +10,8 @@ import {
   Sun,
   Snowflake,
   ChevronLeft,
-  User
+  User,
+  MessageSquare
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -43,6 +44,7 @@ const navItems = [
   { title: "Обзор", url: "/admin", icon: LayoutDashboard },
   { title: "Товары", url: "/admin/products", icon: Package },
   { title: "Заказы", url: "/admin/orders", icon: ShoppingCart },
+  { title: "Отзывы", url: "/admin/reviews", icon: MessageSquare },
   { title: "Настройки", url: "/admin/settings", icon: Settings },
 ];
 

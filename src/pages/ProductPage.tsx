@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { 
   ChevronLeft, 
   ChevronRight, 
@@ -19,9 +20,12 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ShopLayout } from "@/components/shop/ShopLayout";
 import { ProductCard } from "@/components/shop/ProductCard";
+import { ReviewForm } from "@/components/shop/ReviewForm";
+import { ReviewList } from "@/components/shop/ReviewList";
 import { useCart } from "@/hooks/use-cart";
 import { useFavorites } from "@/hooks/use-favorites";
 import { useCompare } from "@/hooks/use-compare";
+import { supabase } from "@/integrations/supabase/client";
 import { mockProducts } from "@/data/mock-products";
 import { cn } from "@/lib/utils";
 
@@ -36,6 +40,25 @@ export default function ProductPage() {
 
   // Find product by slug
   const product = mockProducts.find(p => p.slug === slug);
+
+  // Fetch reviews from Supabase
+  const { data: reviews = [], isLoading: reviewsLoading, refetch: refetchReviews } = useQuery({
+    queryKey: ["reviews", product?.id],
+    queryFn: async () => {
+      if (!product?.id) return [];
+      
+      const { data, error } = await supabase
+        .from("reviews")
+        .select("id, author_name, rating, content, created_at")
+        .eq("product_id", product.id)
+        .eq("is_approved", true)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!product?.id,
+  });
   
   if (!product) {
     return (
@@ -64,6 +87,13 @@ export default function ProductPage() {
   const handleAddToCart = () => {
     addItem(product, quantity);
   };
+
+  // Calculate average rating from reviews
+  const averageRating = reviews.length > 0
+    ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+    : product.rating_average;
+  
+  const reviewCount = reviews.length || product.rating_count;
 
   return (
     <ShopLayout>
@@ -146,7 +176,7 @@ export default function ProductPage() {
             {/* Name and rating */}
             <div>
               <h1 className="text-2xl md:text-3xl font-bold mb-2">{product.name}</h1>
-              {product.rating_count > 0 && (
+              {reviewCount > 0 && (
                 <div className="flex items-center gap-2">
                   <div className="flex items-center gap-1">
                     {[...Array(5)].map((_, i) => (
@@ -154,16 +184,16 @@ export default function ProductPage() {
                         key={i}
                         className={cn(
                           "h-4 w-4",
-                          i < Math.round(product.rating_average)
+                          i < Math.round(averageRating)
                             ? "fill-accent text-accent"
                             : "text-muted"
                         )}
                       />
                     ))}
                   </div>
-                  <span className="text-sm font-medium">{product.rating_average.toFixed(1)}</span>
+                  <span className="text-sm font-medium">{averageRating.toFixed(1)}</span>
                   <span className="text-sm text-muted-foreground">
-                    ({product.rating_count} отзывов)
+                    ({reviewCount} отзывов)
                   </span>
                 </div>
               )}
@@ -270,7 +300,7 @@ export default function ProductPage() {
           <TabsList className="w-full justify-start">
             <TabsTrigger value="specs">Характеристики</TabsTrigger>
             <TabsTrigger value="description">Описание</TabsTrigger>
-            <TabsTrigger value="reviews">Отзывы ({product.rating_count})</TabsTrigger>
+            <TabsTrigger value="reviews">Отзывы ({reviewCount})</TabsTrigger>
           </TabsList>
           
           <TabsContent value="specs" className="mt-6">
@@ -291,9 +321,17 @@ export default function ProductPage() {
           </TabsContent>
           
           <TabsContent value="reviews" className="mt-6">
-            <p className="text-muted-foreground">
-              Отзывы покупателей появятся здесь после модерации.
-            </p>
+            <div className="grid lg:grid-cols-3 gap-8">
+              {/* Reviews list */}
+              <div className="lg:col-span-2">
+                <ReviewList reviews={reviews} isLoading={reviewsLoading} />
+              </div>
+
+              {/* Review form */}
+              <div>
+                <ReviewForm productId={product.id} onSuccess={refetchReviews} />
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
 
