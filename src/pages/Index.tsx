@@ -1,19 +1,70 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, TrendingUp, Sparkles, Sun, Snowflake } from "lucide-react";
+import { ArrowRight, TrendingUp, Sparkles, Sun, Snowflake, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ShopLayout } from "@/components/shop/ShopLayout";
 import { HeroBanner } from "@/components/shop/HeroBanner";
 import { CategoryGrid } from "@/components/shop/CategoryGrid";
 import { ProductCard } from "@/components/shop/ProductCard";
 import { useSeason } from "@/hooks/use-season";
-import { mockProducts, getFeaturedProducts, getNewProducts, getSeasonalProducts } from "@/data/mock-products";
+import { useProducts } from "@/hooks/use-products";
 
 export default function Index() {
   const { season } = useSeason();
   
-  const featuredProducts = getFeaturedProducts();
-  const newProducts = getNewProducts();
-  const seasonalProducts = getSeasonalProducts(season);
+  // Fetch products from database
+  const { data: featuredProducts = [], isLoading: featuredLoading } = useProducts({
+    isFeatured: true,
+    limit: 4,
+  });
+  
+  const { data: newProducts = [], isLoading: newLoading } = useProducts({
+    isNew: true,
+    limit: 4,
+  });
+  
+  const { data: seasonalProducts = [], isLoading: seasonalLoading } = useProducts({
+    season: season,
+    limit: 4,
+  });
+
+  const ProductSection = ({ 
+    products, 
+    isLoading, 
+    title, 
+    icon, 
+    link, 
+    linkText 
+  }: { 
+    products: typeof featuredProducts;
+    isLoading: boolean;
+    title: string;
+    icon: React.ReactNode;
+    link: string;
+    linkText: string;
+  }) => (
+    <section className="container-shop py-12">
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          {icon}
+          <h2 className="text-2xl font-bold">{title}</h2>
+        </div>
+        <Link to={link} className="text-sm text-primary hover:underline flex items-center gap-1 underline-animate">
+          {linkText} <ArrowRight className="h-4 w-4" />
+        </Link>
+      </div>
+      {isLoading ? (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 stagger-children">
+          {products.map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
+      )}
+    </section>
+  );
 
   return (
     <ShopLayout>
@@ -32,65 +83,39 @@ export default function Index() {
       </section>
 
       {/* Seasonal Products */}
-      <section className="container-shop py-12">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            {season === "summer" ? (
-              <Sun className="h-6 w-6 text-primary animate-spin-slow" />
-            ) : (
-              <Snowflake className="h-6 w-6 text-primary animate-bounce-subtle" />
-            )}
-            <h2 className="text-2xl font-bold">
-              {season === "summer" ? "Летняя коллекция" : "Зимняя коллекция"}
-            </h2>
-          </div>
-          <Link to={`/catalog?season=${season}`} className="text-sm text-primary hover:underline flex items-center gap-1 underline-animate">
-            Все товары <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 stagger-children">
-          {seasonalProducts.slice(0, 4).map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
-      </section>
+      <ProductSection
+        products={seasonalProducts}
+        isLoading={seasonalLoading}
+        title={season === "summer" ? "Летняя коллекция" : "Зимняя коллекция"}
+        icon={season === "summer" ? (
+          <Sun className="h-6 w-6 text-primary animate-spin-slow" />
+        ) : (
+          <Snowflake className="h-6 w-6 text-primary animate-bounce-subtle" />
+        )}
+        link={`/catalog?season=${season}`}
+        linkText="Все товары"
+      />
 
       {/* Featured Products */}
-      <section className="container-shop py-12">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <TrendingUp className="h-6 w-6 text-primary" />
-            <h2 className="text-2xl font-bold">Популярное</h2>
-          </div>
-          <Link to="/catalog?featured=true" className="text-sm text-primary hover:underline flex items-center gap-1 underline-animate">
-            Все популярные <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 stagger-children">
-          {featuredProducts.slice(0, 4).map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
-      </section>
+      <ProductSection
+        products={featuredProducts}
+        isLoading={featuredLoading}
+        title="Популярное"
+        icon={<TrendingUp className="h-6 w-6 text-primary" />}
+        link="/catalog?featured=true"
+        linkText="Все популярные"
+      />
 
       {/* New Arrivals */}
-      {newProducts.length > 0 && (
-        <section className="container-shop py-12">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <Sparkles className="h-6 w-6 text-primary animate-pulse" />
-              <h2 className="text-2xl font-bold">Новинки</h2>
-            </div>
-            <Link to="/catalog?new=true" className="text-sm text-primary hover:underline flex items-center gap-1 underline-animate">
-              Все новинки <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 stagger-children">
-            {newProducts.slice(0, 4).map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-        </section>
+      {(newLoading || newProducts.length > 0) && (
+        <ProductSection
+          products={newProducts}
+          isLoading={newLoading}
+          title="Новинки"
+          icon={<Sparkles className="h-6 w-6 text-primary animate-pulse" />}
+          link="/catalog?new=true"
+          linkText="Все новинки"
+        />
       )}
 
       {/* Bike Finder CTA */}
