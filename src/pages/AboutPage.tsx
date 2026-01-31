@@ -229,14 +229,47 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Map placeholder */}
+      {/* Map */}
       <section className="container-shop pb-16">
-        <div className="rounded-2xl overflow-hidden shadow-lg h-[400px] bg-muted flex items-center justify-center">
-          <div className="text-center text-muted-foreground">
-            <MapPin className="h-12 w-12 mx-auto mb-4 opacity-30" />
-            <p className="font-medium">Карта с расположением магазина</p>
-            <p className="text-sm">г. Уссурийск, ул. Пушкина, 13</p>
-          </div>
+        <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 animate-fade-in-up">
+          Как нас найти
+        </h2>
+        <p className="text-center text-muted-foreground mb-8 max-w-2xl mx-auto">
+          г. Уссурийск, ул. Пушкина, 13 — ждём вас ежедневно с 10:00 до 19:00
+        </p>
+        <div className="rounded-2xl overflow-hidden shadow-lg h-[400px] md:h-[500px]">
+          <iframe
+            src="https://yandex.ru/map-widget/v1/?um=constructor%3A8c9c5e9e7b0f9c8e9c9e9c9e9c9e9c9e&amp;source=constructor&amp;ll=131.9513%2C43.8047&amp;z=16&amp;pt=131.9513%2C43.8047%2Cpm2rdm"
+            width="100%"
+            height="100%"
+            frameBorder="0"
+            allowFullScreen
+            title="Расположение магазина SPINRIDE"
+            className="w-full h-full"
+            loading="lazy"
+          />
+        </div>
+        <div className="mt-4 flex flex-col sm:flex-row gap-4 justify-center">
+          <Button variant="outline" asChild>
+            <a 
+              href="https://yandex.ru/maps/?text=Уссурийск%2C%20ул.%20Пушкина%2C%2013" 
+              target="_blank" 
+              rel="noopener noreferrer"
+            >
+              <MapPin className="mr-2 h-4 w-4" />
+              Открыть в Яндекс.Картах
+            </a>
+          </Button>
+          <Button variant="outline" asChild>
+            <a 
+              href="https://www.google.com/maps/search/?api=1&query=Уссурийск+ул+Пушкина+13" 
+              target="_blank" 
+              rel="noopener noreferrer"
+            >
+              <MapPin className="mr-2 h-4 w-4" />
+              Открыть в Google Maps
+            </a>
+          </Button>
         </div>
       </section>
     </ShopLayout>
