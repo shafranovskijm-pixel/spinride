@@ -119,8 +119,29 @@ export function HeroBanner() {
           {/* Hero Image */}
           <div className="hidden lg:flex justify-center items-center relative">
             <div className="relative w-full max-w-xl">
+              {/* Decorative rings */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-[400px] h-[400px] rounded-full border-2 border-primary/20 animate-pulse-soft" />
+                <div className="absolute w-[320px] h-[320px] rounded-full border border-secondary/30 animate-spin-slow" style={{ animationDuration: '20s' }} />
+                <div className="absolute w-[240px] h-[240px] rounded-full border border-primary/15 animate-spin-slow" style={{ animationDuration: '15s', animationDirection: 'reverse' }} />
+              </div>
+              
+              {/* Floating icons decoration */}
+              <div className="absolute -top-4 -left-4 w-16 h-16 bg-secondary/20 rounded-2xl flex items-center justify-center animate-float shadow-lg" style={{ animationDelay: '0.2s' }}>
+                <span className="text-2xl">{isWinter ? "⛷️" : "🚴"}</span>
+              </div>
+              <div className="absolute -top-8 right-12 w-12 h-12 bg-primary/20 rounded-xl flex items-center justify-center animate-float shadow-lg" style={{ animationDelay: '0.5s' }}>
+                <span className="text-xl">{isWinter ? "🎿" : "🛴"}</span>
+              </div>
+              <div className="absolute top-1/4 -right-6 w-14 h-14 bg-secondary/15 rounded-2xl flex items-center justify-center animate-float shadow-lg" style={{ animationDelay: '0.8s' }}>
+                <span className="text-xl">{isWinter ? "❄️" : "⚡"}</span>
+              </div>
+              <div className="absolute bottom-1/4 -left-8 w-12 h-12 bg-primary/15 rounded-xl flex items-center justify-center animate-float shadow-lg" style={{ animationDelay: '1.1s' }}>
+                <span className="text-lg">{isWinter ? "🧤" : "🎯"}</span>
+              </div>
+              
               {/* Decorative background blob */}
-              <div className="absolute inset-0 bg-background/50 rounded-[3rem] blob animate-pulse-soft" />
+              <div className="absolute inset-0 bg-gradient-to-br from-background/60 via-primary/5 to-secondary/10 rounded-[3rem] blob animate-pulse-soft" />
               
               {/* Product image */}
               <div className="relative z-10 p-8">
@@ -134,15 +155,11 @@ export function HeroBanner() {
                 />
               </div>
               
-              {/* Price badge */}
-              <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-card shadow-2xl rounded-2xl p-4 flex items-center gap-4 border animate-scale-in" style={{ animationDelay: '0.6s' }}>
-                <div className="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center">
-                  <span className="text-3xl">{isWinter ? "🎄" : "🚴"}</span>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">от</p>
-                  <p className="text-2xl font-bold text-primary">{isWinter ? "390 ₽" : "7 700 ₽"}</p>
-                </div>
+              {/* Bottom decorative dots */}
+              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 flex gap-2">
+                <div className="w-3 h-3 rounded-full bg-primary/40 animate-pulse" style={{ animationDelay: '0s' }} />
+                <div className="w-3 h-3 rounded-full bg-secondary/50 animate-pulse" style={{ animationDelay: '0.2s' }} />
+                <div className="w-3 h-3 rounded-full bg-primary/40 animate-pulse" style={{ animationDelay: '0.4s' }} />
               </div>
             </div>
           </div>
