@@ -1,4 +1,4 @@
-import { useState, useEffect, createContext, useContext, ReactNode } from "react";
+import { useState, useEffect, createContext, useContext, ReactNode, useCallback } from "react";
 import { 
   Season, 
   SeasonMode, 
@@ -20,12 +20,14 @@ interface SeasonContextType {
   mode: SeasonMode;
   isLoading: boolean;
   config: SeasonConfig;
+  toggleSeason: () => void;
 }
 
 const SeasonContext = createContext<SeasonContextType | undefined>(undefined);
 
 export function SeasonProvider({ children }: { children: ReactNode }) {
   const [mode, setMode] = useState<SeasonMode>("auto");
+  const [manualOverride, setManualOverride] = useState<Season | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -40,11 +42,25 @@ export function SeasonProvider({ children }: { children: ReactNode }) {
     loadSeason();
   }, []);
 
-  const season = getEffectiveSeason(mode);
+  const baseSeason = getEffectiveSeason(mode);
+  const season = manualOverride ?? baseSeason;
   const config = seasonConfig[season];
 
+  // Apply season class when manual override changes
+  useEffect(() => {
+    if (manualOverride) {
+      applySeason(manualOverride);
+    }
+  }, [manualOverride]);
+
+  const toggleSeason = useCallback(() => {
+    const newSeason: Season = season === "winter" ? "summer" : "winter";
+    setManualOverride(newSeason);
+    applySeason(newSeason);
+  }, [season]);
+
   return (
-    <SeasonContext.Provider value={{ season, mode, isLoading, config }}>
+    <SeasonContext.Provider value={{ season, mode, isLoading, config, toggleSeason }}>
       <div className="season-transition">
         {children}
       </div>

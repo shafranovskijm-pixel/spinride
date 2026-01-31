@@ -1,10 +1,10 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, Phone, MapPin, Snowflake } from "lucide-react";
+import { ArrowRight, Phone, MapPin, Snowflake, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSeason } from "@/hooks/use-season";
 
 export function HeroBanner() {
-  const { season } = useSeason();
+  const { season, toggleSeason } = useSeason();
   const isWinter = season === "winter";
 
   return (
@@ -99,8 +99,30 @@ export function HeroBanner() {
               </Button>
             </div>
 
+            {/* Season Toggle Button */}
+            <div className="flex justify-center lg:justify-start pt-2 animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={toggleSeason}
+                className="gap-2 text-foreground/70 hover:text-foreground hover:bg-foreground/10 rounded-full px-4"
+              >
+                {isWinter ? (
+                  <>
+                    <Sun className="h-4 w-4 text-secondary" />
+                    <span>Перейти к летним товарам</span>
+                  </>
+                ) : (
+                  <>
+                    <Snowflake className="h-4 w-4 text-primary" />
+                    <span>Перейти к зимним товарам</span>
+                  </>
+                )}
+              </Button>
+            </div>
+
             {/* Contact info */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-6 text-foreground/80">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-4 text-foreground/80">
               <a 
                 href="tel:+79247881111" 
                 className="flex items-center gap-2 hover:text-secondary transition-colors font-semibold"
