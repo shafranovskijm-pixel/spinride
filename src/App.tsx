@@ -14,6 +14,7 @@ import CartPage from "./pages/CartPage";
 import CheckoutPage from "./pages/CheckoutPage";
 import OrderSuccessPage from "./pages/OrderSuccessPage";
 import QuizPage from "./pages/QuizPage";
+import DeliveryPage from "./pages/DeliveryPage";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminProducts from "./pages/admin/AdminProducts";
 import AdminOrders from "./pages/admin/AdminOrders";
@@ -43,6 +44,7 @@ const App = () => (
                   <Route path="/checkout" element={<CheckoutPage />} />
                   <Route path="/order-success" element={<OrderSuccessPage />} />
                   <Route path="/quiz" element={<QuizPage />} />
+                  <Route path="/delivery" element={<DeliveryPage />} />
                   <Route path="/compare" element={<ComparePage />} />
                   <Route path="/favorites" element={<FavoritesPage />} />
                   {/* Admin routes */}
