@@ -64,7 +64,7 @@ export default function CheckoutPage() {
         image: product.images?.[0],
       }));
 
-      const { error } = await supabase.from("orders").insert([{
+      const { data: insertedOrder, error } = await supabase.from("orders").insert([{
         order_number: `SR-${Date.now()}`, // Will be overwritten by trigger
         customer_name: formData.name.trim(),
         customer_phone: formData.phone.trim(),
@@ -74,9 +74,30 @@ export default function CheckoutPage() {
         items: JSON.parse(JSON.stringify(orderItems)),
         total_amount: total,
         notes: formData.notes.trim() || null,
-      }]);
+      }]).select('order_number').single();
 
       if (error) throw error;
+
+      // Send Telegram notification (non-blocking)
+      supabase.functions.invoke('telegram-notify', {
+        body: {
+          order_number: insertedOrder?.order_number || 'N/A',
+          customer_name: formData.name.trim(),
+          customer_phone: formData.phone.trim(),
+          customer_email: formData.email.trim() || undefined,
+          delivery_method: formData.delivery,
+          delivery_address: formData.delivery === "delivery" ? formData.address.trim() : undefined,
+          total_amount: total,
+          items: orderItems.map(item => ({
+            name: item.name,
+            quantity: item.quantity,
+            price: item.price,
+          })),
+        },
+      }).catch(err => {
+        // Don't block order on notification failure
+        console.error('Telegram notification failed:', err);
+      });
 
       clearCart();
       toast({
