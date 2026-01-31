@@ -10,8 +10,8 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
           {/* Brand */}
           <div className="space-y-4">
-            <Link to="/" className="inline-block">
-              <span className="font-black text-2xl tracking-tight text-secondary">
+            <Link to="/" className="inline-block group">
+              <span className="font-black text-2xl tracking-tight text-secondary group-hover:scale-105 transition-transform inline-block">
                 SPIN<span className="text-primary">RIDE</span>
               </span>
             </Link>
@@ -23,7 +23,7 @@ export function Footer() {
                 href="https://t.me/spinride" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="w-10 h-10 rounded-xl bg-white/10 hover:bg-primary hover:text-primary-foreground flex items-center justify-center transition-colors"
+                className="w-10 h-10 rounded-xl bg-white/10 hover:bg-primary hover:text-primary-foreground flex items-center justify-center transition-all hover:scale-110 hover:-translate-y-1"
               >
                 <Send className="h-5 w-5" />
               </a>
@@ -31,7 +31,7 @@ export function Footer() {
                 href="https://instagram.com/spinride" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="w-10 h-10 rounded-xl bg-white/10 hover:bg-primary hover:text-primary-foreground flex items-center justify-center transition-colors"
+                className="w-10 h-10 rounded-xl bg-white/10 hover:bg-primary hover:text-primary-foreground flex items-center justify-center transition-all hover:scale-110 hover:-translate-y-1"
               >
                 <Instagram className="h-5 w-5" />
               </a>
@@ -43,32 +43,32 @@ export function Footer() {
             <h4 className="font-bold text-lg mb-4">Каталог</h4>
             <ul className="space-y-2">
               <li>
-                <Link to="/catalog/bicycles" className="text-white/70 hover:text-primary transition-colors">
+                <Link to="/catalog/bicycles" className="text-white/70 hover:text-primary transition-colors inline-block hover:translate-x-1">
                   Велосипеды
                 </Link>
               </li>
               <li>
-                <Link to="/catalog/e-bikes" className="text-white/70 hover:text-primary transition-colors">
+                <Link to="/catalog/e-bikes" className="text-white/70 hover:text-primary transition-colors inline-block hover:translate-x-1">
                   Электровелосипеды
                 </Link>
               </li>
               <li>
-                <Link to="/catalog/e-scooters" className="text-white/70 hover:text-primary transition-colors">
+                <Link to="/catalog/e-scooters" className="text-white/70 hover:text-primary transition-colors inline-block hover:translate-x-1">
                   Электросамокаты
                 </Link>
               </li>
               <li>
-                <Link to="/catalog/bmx" className="text-white/70 hover:text-primary transition-colors">
+                <Link to="/catalog/bmx" className="text-white/70 hover:text-primary transition-colors inline-block hover:translate-x-1">
                   BMX
                 </Link>
               </li>
               <li>
-                <Link to="/catalog/kids" className="text-white/70 hover:text-primary transition-colors">
+                <Link to="/catalog/kids" className="text-white/70 hover:text-primary transition-colors inline-block hover:translate-x-1">
                   Детям
                 </Link>
               </li>
               <li>
-                <Link to="/catalog/accessories" className="text-white/70 hover:text-primary transition-colors">
+                <Link to="/catalog/accessories" className="text-white/70 hover:text-primary transition-colors inline-block hover:translate-x-1">
                   Аксессуары
                 </Link>
               </li>

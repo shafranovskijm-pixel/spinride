@@ -45,8 +45,8 @@ export function Header() {
         {/* Main header */}
         <div className="flex h-16 items-center justify-between gap-4">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 shrink-0">
-            <span className="font-black text-2xl tracking-tight text-secondary">
+          <Link to="/" className="flex items-center gap-2 shrink-0 group">
+            <span className="font-black text-2xl tracking-tight text-secondary group-hover:scale-105 transition-transform">
               SPIN<span className="text-primary">RIDE</span>
             </span>
           </Link>
@@ -70,12 +70,12 @@ export function Header() {
 
             {/* Favorites */}
             <Link to="/favorites">
-              <Button variant="ghost" size="icon" className="relative text-white hover:text-primary hover:bg-white/10">
+              <Button variant="ghost" size="icon" className="relative text-white hover:text-primary hover:bg-white/10 hover:scale-110 transition-all">
                 <Heart className="h-5 w-5" />
                 {favoritesCount > 0 && (
                   <Badge 
                     variant="destructive" 
-                    className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs"
+                    className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs animate-scale-in"
                   >
                     {favoritesCount}
                   </Badge>
@@ -85,11 +85,11 @@ export function Header() {
 
             {/* Cart */}
             <Link to="/cart">
-              <Button variant="ghost" size="icon" className="relative text-white hover:text-primary hover:bg-white/10">
+              <Button variant="ghost" size="icon" className="relative text-white hover:text-primary hover:bg-white/10 hover:scale-110 transition-all">
                 <ShoppingCart className="h-5 w-5" />
                 {itemCount > 0 && (
                   <Badge 
-                    className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs bg-primary text-primary-foreground"
+                    className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs bg-primary text-primary-foreground animate-scale-in"
                   >
                     {itemCount}
                   </Badge>
@@ -162,14 +162,14 @@ export function Header() {
             <Link
               key={item.name}
               to={item.href}
-              className="text-sm font-medium text-white/70 hover:text-primary transition-colors"
+              className="text-sm font-medium text-white/70 hover:text-primary transition-colors underline-animate"
             >
               {item.name}
             </Link>
           ))}
           <Link
             to="/quiz"
-            className="ml-auto text-sm font-bold text-primary hover:underline"
+            className="ml-auto text-sm font-bold text-primary hover:scale-105 transition-transform"
           >
             🎯 Подобрать велосипед
           </Link>
