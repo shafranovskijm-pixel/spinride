@@ -3,13 +3,21 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Eye, EyeOff, Loader2, LogIn, Mail } from "lucide-react";
+import { Eye, EyeOff, Loader2, LogIn, Mail, KeyRound } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Separator } from "@/components/ui/separator";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { lovable } from "@/integrations/lovable";
@@ -31,8 +39,46 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [unconfirmedEmail, setUnconfirmedEmail] = useState<string | null>(null);
   const [isResending, setIsResending] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
+  const [isResetting, setIsResetting] = useState(false);
+  const [resetDialogOpen, setResetDialogOpen] = useState(false);
 
   const from = (location.state as any)?.from?.pathname || "/admin";
+
+  const handlePasswordReset = async () => {
+    if (!resetEmail.trim()) {
+      toast({
+        title: "Введите email",
+        description: "Укажите email для восстановления пароля",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsResetting(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+        redirectTo: `${window.location.origin}/auth/reset-password`,
+      });
+
+      if (error) {
+        toast({
+          title: "Ошибка",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Письмо отправлено",
+          description: "Проверьте почту и перейдите по ссылке для сброса пароля",
+        });
+        setResetDialogOpen(false);
+        setResetEmail("");
+      }
+    } finally {
+      setIsResetting(false);
+    }
+  };
 
   const handleGoogleSignIn = async () => {
     setIsGoogleLoading(true);
@@ -174,7 +220,57 @@ export default function LoginPage() {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Пароль</FormLabel>
+                    <div className="flex items-center justify-between">
+                      <FormLabel>Пароль</FormLabel>
+                      <Dialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
+                        <DialogTrigger asChild>
+                          <Button 
+                            type="button" 
+                            variant="link" 
+                            className="h-auto p-0 text-xs text-muted-foreground hover:text-primary"
+                          >
+                            Забыли пароль?
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-md">
+                          <DialogHeader>
+                            <DialogTitle className="flex items-center gap-2">
+                              <KeyRound className="h-5 w-5" />
+                              Восстановление пароля
+                            </DialogTitle>
+                            <DialogDescription>
+                              Введите email, на который зарегистрирован аккаунт. Мы отправим ссылку для сброса пароля.
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div className="space-y-4 pt-4">
+                            <Input
+                              type="email"
+                              placeholder="Ваш email"
+                              value={resetEmail}
+                              onChange={(e) => setResetEmail(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                  e.preventDefault();
+                                  handlePasswordReset();
+                                }
+                              }}
+                            />
+                            <Button 
+                              onClick={handlePasswordReset} 
+                              className="w-full"
+                              disabled={isResetting}
+                            >
+                              {isResetting ? (
+                                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                              ) : (
+                                <Mail className="h-4 w-4 mr-2" />
+                              )}
+                              Отправить ссылку
+                            </Button>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                    </div>
                     <FormControl>
                       <div className="relative">
                         <Input
