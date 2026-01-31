@@ -258,15 +258,15 @@ export function ProductFormDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-3xl w-[95vw] max-h-[95vh] sm:max-h-[90vh] overflow-y-auto p-4 sm:p-6">
         <DialogHeader>
-          <DialogTitle>
+          <DialogTitle className="text-lg sm:text-xl">
             {isEditing ? "Редактировать товар" : "Добавить товар"}
           </DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
             {/* Basic Info */}
             <div className="grid gap-4 sm:grid-cols-2">
               <FormField
@@ -514,12 +514,12 @@ export function ProductFormDialog({
               </div>
             </div>
 
-            {/* Actions */}
-            <div className="flex justify-end gap-3 pt-4 border-t">
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            {/* Actions - sticky on mobile */}
+            <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 pt-4 border-t sticky bottom-0 bg-background pb-1">
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="w-full sm:w-auto">
                 Отмена
               </Button>
-              <Button type="submit" disabled={isSubmitting}>
+              <Button type="submit" disabled={isSubmitting} className="w-full sm:w-auto">
                 {isSubmitting ? "Сохранение..." : isEditing ? "Сохранить" : "Добавить товар"}
               </Button>
             </div>

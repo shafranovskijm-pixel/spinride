@@ -47,6 +47,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { ProductFormDialog } from "@/components/admin/ProductFormDialog";
+import { ProductListMobile } from "@/components/admin/ProductListMobile";
 import { Product } from "@/types/shop";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -159,30 +160,30 @@ export default function AdminProducts() {
       title="Товары" 
       subtitle={`${products.length} товаров в каталоге`}
       actions={
-        <div className="flex gap-2">
-          <Button variant="outline" size="icon" onClick={() => refetch()}>
+        <div className="flex gap-2 w-full sm:w-auto">
+          <Button variant="outline" size="icon" onClick={() => refetch()} className="shrink-0">
             <RefreshCw className="h-4 w-4" />
           </Button>
-          <Button onClick={handleAdd}>
+          <Button onClick={handleAdd} className="flex-1 sm:flex-initial">
             <Plus className="h-4 w-4 mr-2" />
-            Добавить товар
+            <span className="sm:inline">Добавить товар</span>
           </Button>
         </div>
       }
     >
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-4 mb-6">
-        <div className="relative flex-1 max-w-md">
+      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-4 sm:mb-6">
+        <div className="relative flex-1 sm:max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Поиск товаров..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-10"
+            className="pl-10 text-base"
           />
         </div>
         <Select value={category} onValueChange={setCategory}>
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-full sm:w-[180px]">
             <SelectValue placeholder="Категория" />
           </SelectTrigger>
           <SelectContent>
@@ -213,18 +214,30 @@ export default function AdminProducts() {
         </div>
       )}
 
-      {/* Table */}
-      {!isLoading && !error && (
-        <div className="border rounded-lg bg-background">
+      {/* Mobile List */}
+      {!isLoading && !error && filteredProducts.length > 0 && (
+        <div className="sm:hidden">
+          <ProductListMobile
+            products={filteredProducts}
+            categories={categories}
+            onEdit={handleEdit}
+            onDelete={setDeleteProduct}
+          />
+        </div>
+      )}
+
+      {/* Desktop Table */}
+      {!isLoading && !error && filteredProducts.length > 0 && (
+        <div className="hidden sm:block border rounded-lg bg-background overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead className="w-[80px]">Фото</TableHead>
                 <TableHead>Название</TableHead>
-                <TableHead>Категория</TableHead>
+                <TableHead className="hidden md:table-cell">Категория</TableHead>
                 <TableHead className="text-right">Цена</TableHead>
-                <TableHead className="text-center">Наличие</TableHead>
-                <TableHead className="text-center">Сезон</TableHead>
+                <TableHead className="text-center hidden lg:table-cell">Наличие</TableHead>
+                <TableHead className="text-center hidden lg:table-cell">Сезон</TableHead>
                 <TableHead className="w-[60px]"></TableHead>
               </TableRow>
             </TableHeader>
@@ -243,10 +256,10 @@ export default function AdminProducts() {
                   <TableCell>
                     <div>
                       <p className="font-medium line-clamp-1">{product.name}</p>
-                      <p className="text-sm text-muted-foreground">{product.slug}</p>
+                      <p className="text-sm text-muted-foreground line-clamp-1">{product.slug}</p>
                     </div>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="hidden md:table-cell">
                     <Badge variant="outline">
                       {categories.find(c => c.value === product.category_id)?.label || product.category_id}
                     </Badge>
@@ -263,7 +276,7 @@ export default function AdminProducts() {
                       )}
                     </div>
                   </TableCell>
-                  <TableCell className="text-center">
+                  <TableCell className="text-center hidden lg:table-cell">
                     {product.in_stock ? (
                       <Badge variant="outline" className="bg-secondary/20 text-secondary-foreground">
                         {product.stock_quantity} шт
@@ -272,7 +285,7 @@ export default function AdminProducts() {
                       <Badge variant="destructive">Нет</Badge>
                     )}
                   </TableCell>
-                  <TableCell className="text-center">
+                  <TableCell className="text-center hidden lg:table-cell">
                     {product.season === "summer" && "☀️"}
                     {product.season === "winter" && "❄️"}
                     {product.season === "all" && "🔄"}
