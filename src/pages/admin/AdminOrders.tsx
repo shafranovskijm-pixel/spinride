@@ -113,6 +113,10 @@ export default function AdminOrders() {
     if (!validStatuses.includes(newStatus as typeof validStatuses[number])) return;
     
     const typedStatus = newStatus as Order["status"];
+    const order = orders.find(o => o.id === orderId);
+    if (!order) return;
+    
+    const oldStatus = order.status;
     
     try {
       const { error } = await supabase
@@ -121,6 +125,27 @@ export default function AdminOrders() {
         .eq("id", orderId);
 
       if (error) throw error;
+
+      // Send Telegram notification about status change
+      try {
+        await supabase.functions.invoke('telegram-notify', {
+          body: {
+            type: 'status_change',
+            order_number: order.order_number,
+            customer_name: order.customer_name,
+            customer_phone: order.customer_phone,
+            customer_email: order.customer_email,
+            delivery_method: order.delivery_method,
+            total_amount: order.total_amount,
+            old_status: oldStatus,
+            new_status: newStatus,
+            items: order.items,
+          }
+        });
+      } catch (telegramError) {
+        console.error("Failed to send Telegram notification:", telegramError);
+        // Don't fail the status update if notification fails
+      }
 
       setOrders(orders.map(o => 
         o.id === orderId ? { ...o, status: typedStatus } : o
