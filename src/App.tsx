@@ -8,6 +8,7 @@ import { CartProvider } from "@/hooks/use-cart";
 import { FavoritesProvider } from "@/hooks/use-favorites";
 import { CompareProvider } from "@/hooks/use-compare";
 import Index from "./pages/Index";
+import CatalogPage from "./pages/CatalogPage";
 import ProductPage from "./pages/ProductPage";
 import CartPage from "./pages/CartPage";
 import CheckoutPage from "./pages/CheckoutPage";
@@ -28,6 +29,8 @@ const App = () => (
               <BrowserRouter>
                 <Routes>
                   <Route path="/" element={<Index />} />
+                  <Route path="/catalog" element={<CatalogPage />} />
+                  <Route path="/catalog/:category" element={<CatalogPage />} />
                   <Route path="/product/:slug" element={<ProductPage />} />
                   <Route path="/cart" element={<CartPage />} />
                   <Route path="/checkout" element={<CheckoutPage />} />
