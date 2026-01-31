@@ -3,7 +3,8 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Eye, EyeOff, Loader2, LogIn } from "lucide-react";
+import { Eye, EyeOff, Loader2, LogIn, Mail } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -28,6 +29,8 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [unconfirmedEmail, setUnconfirmedEmail] = useState<string | null>(null);
+  const [isResending, setIsResending] = useState(false);
 
   const from = (location.state as any)?.from?.pathname || "/admin";
 
@@ -64,19 +67,60 @@ export default function LoginPage() {
     },
   });
 
+  const resendConfirmationEmail = async () => {
+    if (!unconfirmedEmail) return;
+    
+    setIsResending(true);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: unconfirmedEmail,
+      });
+      
+      if (error) {
+        toast({
+          title: "Ошибка",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Письмо отправлено",
+          description: "Проверьте почту и перейдите по ссылке для подтверждения",
+        });
+      }
+    } finally {
+      setIsResending(false);
+    }
+  };
+
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
+    setUnconfirmedEmail(null);
     try {
       const { error } = await signIn(data.email, data.password);
       
       if (error) {
-        toast({
-          title: "Ошибка входа",
-          description: error.message === "Invalid login credentials" 
-            ? "Неверный email или пароль" 
-            : error.message,
-          variant: "destructive",
-        });
+        const isEmailNotConfirmed = 
+          error.message?.toLowerCase().includes("email not confirmed") ||
+          (error as any)?.code === "email_not_confirmed";
+        
+        if (isEmailNotConfirmed) {
+          setUnconfirmedEmail(data.email);
+          toast({
+            title: "Email не подтверждён",
+            description: "Проверьте почту и перейдите по ссылке подтверждения",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Ошибка входа",
+            description: error.message === "Invalid login credentials" 
+              ? "Неверный email или пароль" 
+              : error.message,
+            variant: "destructive",
+          });
+        }
       } else {
         toast({
           title: "Добро пожаловать!",
@@ -167,6 +211,23 @@ export default function LoginPage() {
                 )}
                 Войти
               </Button>
+
+              {unconfirmedEmail && (
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  className="w-full" 
+                  onClick={resendConfirmationEmail}
+                  disabled={isResending}
+                >
+                  {isResending ? (
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  ) : (
+                    <Mail className="h-4 w-4 mr-2" />
+                  )}
+                  Отправить письмо повторно
+                </Button>
+              )}
             </form>
           </Form>
 
