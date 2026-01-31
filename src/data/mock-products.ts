@@ -4,7 +4,7 @@ import { Product } from "@/types/shop";
 export const mockProducts: Product[] = [
   // Велосипеды
   {
-    id: "1",
+    id: "a1b2c3d4-e5f6-4789-abcd-100000000001",
     category_id: "bicycles",
     name: "Велосипед OCIMA #300",
     slug: "ocima-300",
@@ -29,7 +29,7 @@ export const mockProducts: Product[] = [
     updated_at: new Date().toISOString()
   },
   {
-    id: "2",
+    id: "a1b2c3d4-e5f6-4789-abcd-100000000002",
     category_id: "bicycles",
     name: "Велосипед GT MTB Racemax",
     slug: "gt-mtb-racemax",
@@ -53,7 +53,7 @@ export const mockProducts: Product[] = [
     updated_at: new Date().toISOString()
   },
   {
-    id: "3",
+    id: "a1b2c3d4-e5f6-4789-abcd-100000000003",
     category_id: "bicycles",
     name: "Велосипед Action AN100",
     slug: "action-an100",
@@ -78,7 +78,7 @@ export const mockProducts: Product[] = [
     updated_at: new Date().toISOString()
   },
   {
-    id: "4",
+    id: "a1b2c3d4-e5f6-4789-abcd-100000000004",
     category_id: "bicycles",
     name: "Велосипед Action AN200",
     slug: "action-an200",
@@ -103,7 +103,7 @@ export const mockProducts: Product[] = [
     updated_at: new Date().toISOString()
   },
   {
-    id: "5",
+    id: "a1b2c3d4-e5f6-4789-abcd-100000000005",
     category_id: "bicycles",
     name: "Фэтбайк Action AN670",
     slug: "fatbike-an670",
@@ -128,7 +128,7 @@ export const mockProducts: Product[] = [
     updated_at: new Date().toISOString()
   },
   {
-    id: "6",
+    id: "a1b2c3d4-e5f6-4789-abcd-100000000006",
     category_id: "bicycles",
     name: "Велосипед Wolf #840",
     slug: "wolf-840",
@@ -154,7 +154,7 @@ export const mockProducts: Product[] = [
   },
   // Детские велосипеды
   {
-    id: "7",
+    id: "a1b2c3d4-e5f6-4789-abcd-100000000007",
     category_id: "kids",
     name: "Детский велосипед SPACE BABY 18\"",
     slug: "space-baby-18",
@@ -179,7 +179,7 @@ export const mockProducts: Product[] = [
     updated_at: new Date().toISOString()
   },
   {
-    id: "8",
+    id: "a1b2c3d4-e5f6-4789-abcd-100000000008",
     category_id: "kids",
     name: "Детский велосипед BLUE CAT 22\"",
     slug: "blue-cat-22",
@@ -204,7 +204,7 @@ export const mockProducts: Product[] = [
     updated_at: new Date().toISOString()
   },
   {
-    id: "9",
+    id: "a1b2c3d4-e5f6-4789-abcd-100000000009",
     category_id: "kids",
     name: "Детский велосипед ASTER 20\"",
     slug: "aster-20",
@@ -230,7 +230,7 @@ export const mockProducts: Product[] = [
   },
   // BMX
   {
-    id: "10",
+    id: "a1b2c3d4-e5f6-4789-abcd-100000000010",
     category_id: "bmx",
     name: "BMX OCIMA XZQ-20",
     slug: "bmx-ocima-xzq20",
@@ -255,7 +255,7 @@ export const mockProducts: Product[] = [
     updated_at: new Date().toISOString()
   },
   {
-    id: "11",
+    id: "a1b2c3d4-e5f6-4789-abcd-100000000011",
     category_id: "bmx",
     name: "BMX Action LMG-20 Хамелеон",
     slug: "bmx-action-lmg20",
@@ -280,7 +280,7 @@ export const mockProducts: Product[] = [
     updated_at: new Date().toISOString()
   },
   {
-    id: "12",
+    id: "a1b2c3d4-e5f6-4789-abcd-100000000012",
     category_id: "bmx",
     name: "BMX Tech Team Millennium",
     slug: "bmx-techteam-millennium",
@@ -307,7 +307,7 @@ export const mockProducts: Product[] = [
   },
   // Электровелосипеды
   {
-    id: "13",
+    id: "a1b2c3d4-e5f6-4789-abcd-100000000013",
     category_id: "e-bikes",
     name: "Электровелосипед Kugoo Kirin V3",
     slug: "kugoo-kirin-v3",
@@ -333,7 +333,7 @@ export const mockProducts: Product[] = [
     updated_at: new Date().toISOString()
   },
   {
-    id: "14",
+    id: "a1b2c3d4-e5f6-4789-abcd-100000000014",
     category_id: "e-bikes",
     name: "Электровелосипед Kugoo Kirin V3 Max",
     slug: "kugoo-kirin-v3-max",
@@ -358,7 +358,7 @@ export const mockProducts: Product[] = [
     updated_at: new Date().toISOString()
   },
   {
-    id: "15",
+    id: "a1b2c3d4-e5f6-4789-abcd-100000000015",
     category_id: "e-bikes",
     name: "Электровелосипед Kugoo Kirin V5",
     slug: "kugoo-kirin-v5",
@@ -383,7 +383,7 @@ export const mockProducts: Product[] = [
     updated_at: new Date().toISOString()
   },
   {
-    id: "16",
+    id: "a1b2c3d4-e5f6-4789-abcd-100000000016",
     category_id: "e-bikes",
     name: "Электровелосипед Kugoo Kirin V3 Pro Plus",
     slug: "kugoo-kirin-v3-pro-plus",
@@ -409,7 +409,7 @@ export const mockProducts: Product[] = [
   },
   // Электросамокаты
   {
-    id: "17",
+    id: "a1b2c3d4-e5f6-4789-abcd-100000000017",
     category_id: "e-scooters",
     name: "Электросамокат Kugoo A2",
     slug: "kugoo-a2",
@@ -434,7 +434,7 @@ export const mockProducts: Product[] = [
     updated_at: new Date().toISOString()
   },
   {
-    id: "18",
+    id: "a1b2c3d4-e5f6-4789-abcd-100000000018",
     category_id: "e-scooters",
     name: "Электросамокат Kugoo Kirin First",
     slug: "kugoo-kirin-first",
@@ -460,7 +460,7 @@ export const mockProducts: Product[] = [
   },
   // Детские самокаты
   {
-    id: "19",
+    id: "a1b2c3d4-e5f6-4789-abcd-100000000019",
     category_id: "scooters",
     name: "Детский трёхколёсный самокат",
     slug: "kids-scooter-3wheel",
@@ -486,7 +486,7 @@ export const mockProducts: Product[] = [
   },
   // Аксессуары
   {
-    id: "20",
+    id: "a1b2c3d4-e5f6-4789-abcd-100000000020",
     category_id: "accessories",
     name: "Велофонарь LED 4 в 1",
     slug: "bike-light-4in1",
@@ -510,7 +510,7 @@ export const mockProducts: Product[] = [
     updated_at: new Date().toISOString()
   },
   {
-    id: "21",
+    id: "a1b2c3d4-e5f6-4789-abcd-100000000021",
     category_id: "accessories",
     name: "Набор фонарей задний + передний",
     slug: "bike-lights-set",
@@ -534,7 +534,7 @@ export const mockProducts: Product[] = [
     updated_at: new Date().toISOString()
   },
   {
-    id: "22",
+    id: "a1b2c3d4-e5f6-4789-abcd-100000000022",
     category_id: "accessories",
     name: "Кодовый замок для велосипеда",
     slug: "bike-lock-code",
@@ -559,7 +559,7 @@ export const mockProducts: Product[] = [
   },
   // Электропитбайк
   {
-    id: "23",
+    id: "a1b2c3d4-e5f6-4789-abcd-100000000023",
     category_id: "e-bikes",
     name: "Электропитбайк WISH 01 (2024)",
     slug: "e-pitbike-wish01",
@@ -585,7 +585,7 @@ export const mockProducts: Product[] = [
   },
   // Спортинвентарь
   {
-    id: "24",
+    id: "a1b2c3d4-e5f6-4789-abcd-100000000024",
     category_id: "accessories",
     name: "Мяч футбольный",
     slug: "football",
@@ -610,7 +610,7 @@ export const mockProducts: Product[] = [
   // === ЗИМНЯЯ КОЛЛЕКЦИЯ ===
   // Тюбинги
   {
-    id: "25",
+    id: "a1b2c3d4-e5f6-4789-abcd-100000000025",
     category_id: "winter",
     name: "Тюбинг Snow Galaxy 100 см",
     slug: "tubing-snow-galaxy-100",
@@ -636,7 +636,7 @@ export const mockProducts: Product[] = [
     updated_at: new Date().toISOString()
   },
   {
-    id: "26",
+    id: "a1b2c3d4-e5f6-4789-abcd-100000000026",
     category_id: "winter",
     name: "Тюбинг Mega Snow 120 см",
     slug: "tubing-mega-snow-120",
@@ -662,7 +662,7 @@ export const mockProducts: Product[] = [
     updated_at: new Date().toISOString()
   },
   {
-    id: "27",
+    id: "a1b2c3d4-e5f6-4789-abcd-100000000027",
     category_id: "winter",
     name: "Тюбинг детский Снежинка 80 см",
     slug: "tubing-kids-snowflake-80",
@@ -689,7 +689,7 @@ export const mockProducts: Product[] = [
   },
   // Санки
   {
-    id: "28",
+    id: "a1b2c3d4-e5f6-4789-abcd-100000000028",
     category_id: "winter",
     name: "Санки-ледянки Комета",
     slug: "sled-comet",
@@ -714,7 +714,7 @@ export const mockProducts: Product[] = [
     updated_at: new Date().toISOString()
   },
   {
-    id: "29",
+    id: "a1b2c3d4-e5f6-4789-abcd-100000000029",
     category_id: "winter",
     name: "Санки детские Мишка со спинкой",
     slug: "sled-bear-with-back",
@@ -739,7 +739,7 @@ export const mockProducts: Product[] = [
     updated_at: new Date().toISOString()
   },
   {
-    id: "30",
+    id: "a1b2c3d4-e5f6-4789-abcd-100000000030",
     category_id: "winter",
     name: "Снегокат Thunder",
     slug: "snowcat-thunder",
@@ -766,7 +766,7 @@ export const mockProducts: Product[] = [
   },
   // Ёлки
   {
-    id: "31",
+    id: "a1b2c3d4-e5f6-4789-abcd-100000000031",
     category_id: "decor",
     name: "Ёлка искусственная Сибирская 150 см",
     slug: "christmas-tree-siberian-150",
@@ -792,7 +792,7 @@ export const mockProducts: Product[] = [
     updated_at: new Date().toISOString()
   },
   {
-    id: "32",
+    id: "a1b2c3d4-e5f6-4789-abcd-100000000032",
     category_id: "decor",
     name: "Ёлка искусственная Премиум 180 см",
     slug: "christmas-tree-premium-180",
@@ -818,7 +818,7 @@ export const mockProducts: Product[] = [
     updated_at: new Date().toISOString()
   },
   {
-    id: "33",
+    id: "a1b2c3d4-e5f6-4789-abcd-100000000033",
     category_id: "decor",
     name: "Ёлка настольная 60 см",
     slug: "christmas-tree-table-60",
@@ -844,7 +844,7 @@ export const mockProducts: Product[] = [
   },
   // Декор для дома
   {
-    id: "34",
+    id: "a1b2c3d4-e5f6-4789-abcd-100000000034",
     category_id: "decor",
     name: "Гирлянда светодиодная 10 м",
     slug: "led-garland-10m",
@@ -870,7 +870,7 @@ export const mockProducts: Product[] = [
     updated_at: new Date().toISOString()
   },
   {
-    id: "35",
+    id: "a1b2c3d4-e5f6-4789-abcd-100000000035",
     category_id: "decor",
     name: "Набор ёлочных шаров 24 шт",
     slug: "christmas-balls-set-24",
@@ -895,7 +895,7 @@ export const mockProducts: Product[] = [
     updated_at: new Date().toISOString()
   },
   {
-    id: "36",
+    id: "a1b2c3d4-e5f6-4789-abcd-100000000036",
     category_id: "decor",
     name: "Венок рождественский 40 см",
     slug: "christmas-wreath-40",
@@ -920,7 +920,7 @@ export const mockProducts: Product[] = [
     updated_at: new Date().toISOString()
   },
   {
-    id: "37",
+    id: "a1b2c3d4-e5f6-4789-abcd-100000000037",
     category_id: "decor",
     name: "Фигура светящаяся Олень 60 см",
     slug: "light-deer-60",
@@ -946,7 +946,7 @@ export const mockProducts: Product[] = [
     updated_at: new Date().toISOString()
   },
   {
-    id: "38",
+    id: "a1b2c3d4-e5f6-4789-abcd-100000000038",
     category_id: "decor",
     name: "Снежинки декоративные 12 шт",
     slug: "decorative-snowflakes-12",
