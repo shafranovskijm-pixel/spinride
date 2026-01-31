@@ -17,6 +17,7 @@ import CheckoutPage from "./pages/CheckoutPage";
 import OrderSuccessPage from "./pages/OrderSuccessPage";
 import QuizPage from "./pages/QuizPage";
 import DeliveryPage from "./pages/DeliveryPage";
+import AboutPage from "./pages/AboutPage";
 import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -51,6 +52,7 @@ const App = () => (
                     <Route path="/order-success" element={<OrderSuccessPage />} />
                     <Route path="/quiz" element={<QuizPage />} />
                     <Route path="/delivery" element={<DeliveryPage />} />
+                    <Route path="/about" element={<AboutPage />} />
                     <Route path="/compare" element={<ComparePage />} />
                     <Route path="/favorites" element={<FavoritesPage />} />
                     {/* Auth routes */}
