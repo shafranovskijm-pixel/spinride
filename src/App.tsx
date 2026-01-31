@@ -9,6 +9,7 @@ import { FavoritesProvider } from "@/hooks/use-favorites";
 import { CompareProvider } from "@/hooks/use-compare";
 import { AuthProvider } from "@/hooks/use-auth";
 import { ProtectedAdminRoute } from "@/components/admin/ProtectedAdminRoute";
+import { OfflineCacheProvider } from "@/components/OfflineCacheProvider";
 import Index from "./pages/Index";
 import CatalogPage from "./pages/CatalogPage";
 import ProductPage from "./pages/ProductPage";
@@ -40,8 +41,9 @@ const App = () => (
           <CartProvider>
             <FavoritesProvider>
               <CompareProvider>
-                <Toaster />
-                <Sonner />
+                <OfflineCacheProvider>
+                  <Toaster />
+                  <Sonner />
                 <BrowserRouter>
                   <Routes>
                     <Route path="/" element={<Index />} />
@@ -70,6 +72,7 @@ const App = () => (
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </BrowserRouter>
+                </OfflineCacheProvider>
               </CompareProvider>
             </FavoritesProvider>
           </CartProvider>

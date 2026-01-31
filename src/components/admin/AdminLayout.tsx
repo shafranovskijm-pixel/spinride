@@ -12,9 +12,11 @@ import {
   ChevronLeft,
   Download,
   Share,
-  MessageSquare
+  MessageSquare,
+  WifiOff
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { OfflineIndicator } from "@/components/shop/OfflineIndicator";
 import {
   Sidebar,
   SidebarContent,
@@ -290,6 +292,9 @@ export function AdminLayout({ children, title, subtitle, actions }: AdminLayoutP
           <main className="flex-1 p-3 sm:p-6 overflow-x-hidden">
             {children}
           </main>
+          
+          {/* Offline indicator */}
+          <OfflineIndicator />
         </div>
       </div>
     </SidebarProvider>

@@ -2,6 +2,7 @@ import { ReactNode } from "react";
 import { Header } from "@/components/shop/Header";
 import { Footer } from "@/components/shop/Footer";
 import { CompareFloatingBar } from "@/components/shop/CompareFloatingBar";
+import { OfflineIndicator } from "@/components/shop/OfflineIndicator";
 
 interface ShopLayoutProps {
   children: ReactNode;
@@ -15,6 +16,7 @@ export function ShopLayout({ children }: ShopLayoutProps) {
         {children}
       </main>
       <CompareFloatingBar />
+      <OfflineIndicator />
       <Footer />
     </div>
   );
