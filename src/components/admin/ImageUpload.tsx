@@ -22,6 +22,7 @@ import {
   rectSortingStrategy,
 } from "@dnd-kit/sortable";
 import { SortableImageItem } from "./SortableImageItem";
+import { compressImage, formatFileSize, getCompressionRatio } from "@/lib/image-compression";
 
 interface ImageUploadProps {
   images: string[];
@@ -35,6 +36,7 @@ export function ImageUpload({ images, onImagesChange, maxImages = 10 }: ImageUpl
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
+  const [compressionInfo, setCompressionInfo] = useState<string>("");
   const [imageUrl, setImageUrl] = useState("");
 
   const uploadFiles = async (files: FileList) => {
@@ -53,9 +55,12 @@ export function ImageUpload({ images, onImagesChange, maxImages = 10 }: ImageUpl
     const newImages: string[] = [];
     const totalFiles = files.length;
 
+    let totalOriginalSize = 0;
+    let totalCompressedSize = 0;
+
     try {
       for (let i = 0; i < files.length; i++) {
-        const file = files[i];
+        let file = files[i];
 
         // Validate file type
         if (!file.type.startsWith("image/")) {
@@ -67,27 +72,46 @@ export function ImageUpload({ images, onImagesChange, maxImages = 10 }: ImageUpl
           continue;
         }
 
-        // Validate file size (max 10MB for camera photos)
-        if (file.size > 10 * 1024 * 1024) {
+        // Validate file size (max 20MB for original files before compression)
+        if (file.size > 20 * 1024 * 1024) {
           toast({
             title: "Файл слишком большой",
-            description: `${file.name} больше 10 МБ`,
+            description: `${file.name} больше 20 МБ`,
             variant: "destructive",
           });
           continue;
         }
 
-        // Generate unique filename
-        const ext = file.name.split(".").pop() || "jpg";
-        const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+        const originalSize = file.size;
+        totalOriginalSize += originalSize;
+
+        // Compress the image
+        setCompressionInfo(`Сжатие ${file.name}...`);
+        try {
+          file = await compressImage(file, {
+            maxWidth: 1920,
+            maxHeight: 1920,
+            quality: 0.85,
+            mimeType: "image/webp",
+          });
+          totalCompressedSize += file.size;
+        } catch (compressError) {
+          console.warn("Compression failed, using original:", compressError);
+          totalCompressedSize += file.size;
+        }
+
+        // Generate unique filename with webp extension
+        const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.webp`;
         const filePath = `products/${fileName}`;
 
         // Upload to Supabase Storage
+        setCompressionInfo(`Загрузка ${i + 1}/${totalFiles}...`);
         const { data, error } = await supabase.storage
           .from("product-images")
           .upload(filePath, file, {
-            cacheControl: "3600",
+            cacheControl: "31536000", // 1 year cache for optimized images
             upsert: false,
+            contentType: "image/webp",
           });
 
         if (error) {
@@ -110,10 +134,13 @@ export function ImageUpload({ images, onImagesChange, maxImages = 10 }: ImageUpl
       }
 
       if (newImages.length > 0) {
+        const savedBytes = totalOriginalSize - totalCompressedSize;
+        const compressionPercent = getCompressionRatio(totalOriginalSize, totalCompressedSize);
+        
         onImagesChange([...images, ...newImages]);
         toast({
           title: "Изображения загружены",
-          description: `Загружено ${newImages.length} файл(ов)`,
+          description: `${newImages.length} файл(ов) • Сжато на ${compressionPercent}% (${formatFileSize(savedBytes)} сэкономлено)`,
         });
       }
     } catch (error: any) {
@@ -125,6 +152,7 @@ export function ImageUpload({ images, onImagesChange, maxImages = 10 }: ImageUpl
     } finally {
       setIsUploading(false);
       setUploadProgress(0);
+      setCompressionInfo("");
       if (fileInputRef.current) fileInputRef.current.value = "";
       if (cameraInputRef.current) cameraInputRef.current.value = "";
     }
@@ -247,7 +275,7 @@ export function ImageUpload({ images, onImagesChange, maxImages = 10 }: ImageUpl
             {isUploading ? (
               <div className="flex flex-col items-center gap-2">
                 <Loader2 className="h-8 w-8 animate-spin" />
-                <span className="text-sm">Загрузка... {uploadProgress}%</span>
+                <span className="text-sm">{compressionInfo || `Загрузка... ${uploadProgress}%`}</span>
               </div>
             ) : (
               <div className="flex flex-col items-center gap-2">
@@ -282,14 +310,14 @@ export function ImageUpload({ images, onImagesChange, maxImages = 10 }: ImageUpl
             {isUploading ? (
               <div className="flex flex-col items-center gap-2">
                 <Loader2 className="h-6 w-6 animate-spin" />
-                <span className="text-sm">Загрузка... {uploadProgress}%</span>
+                <span className="text-sm">{compressionInfo || `Загрузка... ${uploadProgress}%`}</span>
               </div>
             ) : (
               <div className="flex flex-col items-center gap-2">
                 <Upload className="h-6 w-6" />
                 <span className="text-sm">Выбрать файлы</span>
                 <span className="text-xs text-muted-foreground">
-                  PNG, JPG, WEBP до 10 МБ
+                  PNG, JPG, WEBP до 20 МБ • Автосжатие в WebP
                 </span>
               </div>
             )}
