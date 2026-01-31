@@ -30,9 +30,9 @@ export function Header() {
       <div className="hidden lg:block border-b border-white/10">
         <div className="container-shop flex h-10 items-center justify-between text-sm text-white/80">
           <div className="flex items-center gap-6">
-            <span>О магазине</span>
-            <span>Отзывы</span>
-            <span>Контакты</span>
+            <Link to="/about" className="hover:text-primary transition-colors">О магазине</Link>
+            <Link to="/delivery" className="hover:text-primary transition-colors">Доставка и оплата</Link>
+            <Link to="/contacts" className="hover:text-primary transition-colors">Контакты</Link>
           </div>
           <a href="tel:+79247881111" className="flex items-center gap-2 hover:text-primary transition-colors font-semibold text-primary">
             <Phone className="h-4 w-4" />
