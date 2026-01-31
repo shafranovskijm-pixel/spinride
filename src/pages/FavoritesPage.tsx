@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
-import { ArrowLeft, Heart, Trash2, ShoppingCart, Scale } from "lucide-react";
+import { ArrowLeft, Heart, Trash2, ShoppingCart, Scale, Loader2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -7,18 +8,51 @@ import { ShopLayout } from "@/components/shop/ShopLayout";
 import { useFavorites } from "@/hooks/use-favorites";
 import { useCart } from "@/hooks/use-cart";
 import { useCompare } from "@/hooks/use-compare";
-import { mockProducts } from "@/data/mock-products";
+import { supabase } from "@/integrations/supabase/client";
+import { Product } from "@/types/shop";
 import { cn } from "@/lib/utils";
 
 export default function FavoritesPage() {
-  const { favorites, removeFavorite, count } = useFavorites();
+  const { favorites, removeFavorite, count, isLoading: favoritesLoading } = useFavorites();
   const { addItem } = useCart();
   const { addToCompare, isInCompare, canAdd } = useCompare();
 
-  // Get full product data for favorites
-  const favoriteProducts = mockProducts.filter((product) =>
-    favorites.includes(product.id)
-  );
+  // Fetch full product data for favorites from database
+  const { data: favoriteProducts = [], isLoading: productsLoading } = useQuery({
+    queryKey: ["favoriteProducts", favorites],
+    queryFn: async () => {
+      if (favorites.length === 0) return [];
+
+      const { data, error } = await supabase
+        .from("products")
+        .select("*")
+        .in("id", favorites);
+
+      if (error) throw error;
+
+      return (data || []).map((row): Product => ({
+        id: row.id,
+        name: row.name,
+        slug: row.slug,
+        description: row.description,
+        specifications: (row.specifications as Record<string, string>) || {},
+        price: row.price,
+        sale_price: row.sale_price,
+        images: row.images || [],
+        in_stock: row.in_stock ?? true,
+        stock_quantity: row.stock_quantity ?? 0,
+        season: row.season || "all",
+        is_featured: row.is_featured ?? false,
+        is_new: row.is_new ?? false,
+        rating_average: row.rating_average ?? 0,
+        rating_count: row.rating_count ?? 0,
+        category_id: row.category_id || "",
+        created_at: row.created_at,
+        updated_at: row.updated_at,
+      }));
+    },
+    enabled: favorites.length > 0,
+  });
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("ru-RU").format(price) + " ₽";
@@ -27,6 +61,20 @@ export default function FavoritesPage() {
   const clearAllFavorites = () => {
     favorites.forEach((id) => removeFavorite(id));
   };
+
+  const isLoading = favoritesLoading || productsLoading;
+
+  if (isLoading) {
+    return (
+      <ShopLayout>
+        <div className="container-shop py-12">
+          <div className="flex items-center justify-center py-16">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        </div>
+      </ShopLayout>
+    );
+  }
 
   if (count === 0) {
     return (
