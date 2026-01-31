@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Phone, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSeason } from "@/hooks/use-season";
 
@@ -7,75 +7,107 @@ export function HeroBanner() {
   const { season, config } = useSeason();
 
   return (
-    <section className="relative overflow-hidden">
-      {/* Background with gradient */}
-      <div className="absolute inset-0 gradient-hero opacity-10" />
+    <section className="relative overflow-hidden min-h-[600px] lg:min-h-[700px]">
+      {/* Background with diagonal shape like spinride.ru */}
+      <div className="absolute inset-0">
+        <div className="absolute inset-0 gradient-hero clip-hero" />
+        {/* Decorative circles */}
+        <div className="circle-decoration w-[400px] h-[400px] -top-20 -left-20 opacity-20" />
+        <div className="circle-decoration w-[600px] h-[600px] -top-40 -right-40 opacity-15" />
+        <div className="circle-decoration w-[300px] h-[300px] bottom-20 left-1/4 opacity-10" />
+      </div>
       
       {/* Content */}
-      <div className="container-shop relative py-12 md:py-20 lg:py-28">
-        <div className="grid lg:grid-cols-2 gap-8 items-center">
+      <div className="container-shop relative z-10 py-12 md:py-16 lg:py-20">
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
           {/* Text */}
           <div className="space-y-6 text-center lg:text-left">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium">
-              <span>{season === "summer" ? "☀️" : "❄️"}</span>
-              <span>{config.accent}</span>
-            </div>
-            
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
-              {config.heroTitle}
+            <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black leading-[1.1] text-foreground">
+              Велосипеды и{" "}
+              <span className="block">самокаты</span>
+              <span className="block text-foreground/90">для всей семьи</span>
             </h1>
             
-            <p className="text-lg md:text-xl text-muted-foreground max-w-lg mx-auto lg:mx-0">
-              {config.heroSubtitle}
+            <p className="text-lg md:text-xl text-foreground/70 max-w-lg mx-auto lg:mx-0">
+              доставка по всей России.
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-              <Button size="lg" asChild className="gradient-cta text-primary-foreground border-0">
+            <p className="text-base md:text-lg font-medium text-foreground/80 max-w-lg mx-auto lg:mx-0">
+              От городских прогулок до экстремальных поездок – найдите свой идеальный велосипед в Уссурийске!
+            </p>
+            
+            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-4">
+              <Button 
+                size="lg" 
+                asChild 
+                className="bg-secondary hover:bg-secondary/90 text-secondary-foreground font-bold text-base px-8 py-6 rounded-xl shadow-lg hover:shadow-xl transition-all"
+              >
                 <Link to="/catalog">
                   Перейти в каталог
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" asChild>
+              <Button 
+                size="lg" 
+                variant="outline" 
+                asChild 
+                className="bg-background/90 hover:bg-background font-bold text-base px-8 py-6 rounded-xl border-2"
+              >
                 <Link to="/quiz">
                   🎯 Подобрать велосипед
                 </Link>
               </Button>
             </div>
 
-            {/* Stats */}
-            <div className="flex justify-center lg:justify-start gap-8 pt-4">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-primary">200+</div>
-                <div className="text-sm text-muted-foreground">Моделей</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-primary">5★</div>
-                <div className="text-sm text-muted-foreground">Рейтинг</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-primary">1000+</div>
-                <div className="text-sm text-muted-foreground">Клиентов</div>
+            {/* Contact info */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-6 text-foreground/80">
+              <a 
+                href="tel:+79247881111" 
+                className="flex items-center gap-2 hover:text-secondary transition-colors font-semibold"
+              >
+                <Phone className="h-5 w-5" />
+                <span>+7 924-788-11-11</span>
+              </a>
+              <span className="hidden sm:block text-foreground/40">•</span>
+              <div className="flex items-center gap-2">
+                <MapPin className="h-5 w-5" />
+                <span>г. Уссурийск</span>
               </div>
             </div>
           </div>
 
-          {/* Image/Illustration placeholder */}
-          <div className="hidden lg:flex justify-center items-center">
-            <div className="relative w-full max-w-md aspect-square">
-              <div className="absolute inset-0 gradient-hero rounded-full opacity-20 animate-pulse-soft" />
-              <div className="absolute inset-4 bg-card rounded-3xl shadow-xl flex items-center justify-center">
-                <span className="text-9xl animate-float">
-                  {season === "summer" ? "🚴" : "🛷"}
-                </span>
+          {/* Hero Image */}
+          <div className="hidden lg:flex justify-center items-center relative">
+            <div className="relative w-full max-w-xl">
+              {/* Decorative background blob */}
+              <div className="absolute inset-0 bg-background/50 rounded-[3rem] blob animate-pulse-soft" />
+              
+              {/* Bike image */}
+              <div className="relative z-10 p-8">
+                <img 
+                  src="https://274418.selcdn.ru/cv08300-33250f0d-0664-43fc-9dbf-9d89738d114e/uploads/521356/653fe1a0-538e-4f32-802a-654787767f95.jpg"
+                  alt="Велосипед CRONUS"
+                  className="w-full h-auto object-contain drop-shadow-2xl animate-float"
+                />
+              </div>
+              
+              {/* Price badge */}
+              <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-card shadow-2xl rounded-2xl p-4 flex items-center gap-4 border">
+                <div className="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center">
+                  <span className="text-3xl">🚴</span>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">от</p>
+                  <p className="text-2xl font-bold text-primary">7 700 ₽</p>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Decorative elements */}
-      <div className="absolute -bottom-1 left-0 right-0 h-24 bg-gradient-to-t from-background to-transparent" />
+      {/* Bottom wave */}
+      <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-background to-transparent" />
     </section>
   );
 }

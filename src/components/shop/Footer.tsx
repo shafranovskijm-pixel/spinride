@@ -1,134 +1,150 @@
 import { Link } from "react-router-dom";
-import { Phone, MapPin, Clock, Mail, MessageCircle } from "lucide-react";
-import { useSeason } from "@/hooks/use-season";
-
-const footerLinks = {
-  catalog: [
-    { name: "Велосипеды", href: "/catalog/bicycles" },
-    { name: "Электровелосипеды", href: "/catalog/e-bikes" },
-    { name: "Самокаты", href: "/catalog/scooters" },
-    { name: "Электросамокаты", href: "/catalog/e-scooters" },
-    { name: "BMX", href: "/catalog/bmx" },
-    { name: "Детям", href: "/catalog/kids" },
-  ],
-  info: [
-    { name: "О магазине", href: "/about" },
-    { name: "Доставка", href: "/delivery" },
-    { name: "Гарантия", href: "/warranty" },
-    { name: "Контакты", href: "/contacts" },
-  ],
-};
+import { Phone, MapPin, Mail, Clock, Instagram, Send } from "lucide-react";
 
 export function Footer() {
-  const { season } = useSeason();
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-muted/50 border-t mt-auto">
+    <footer className="bg-foreground text-white mt-16">
       <div className="container-shop py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {/* Brand and contact */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
+          {/* Brand */}
           <div className="space-y-4">
-            <Link to="/" className="flex items-center gap-2">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center gradient-hero">
-                <span className="text-2xl">🚴</span>
-              </div>
-              <span className="font-bold text-xl">
+            <Link to="/" className="inline-block">
+              <span className="font-black text-2xl tracking-tight text-secondary">
                 SPIN<span className="text-primary">RIDE</span>
               </span>
             </Link>
-            <p className="text-sm text-muted-foreground">
-              Магазин велосипедов и самокатов в Уссурийске. Большой выбор, доступные цены, гарантия качества.
+            <p className="text-white/70 text-sm leading-relaxed">
+              Велосипеды и самокаты для всей семьи. От городских прогулок до экстремальных поездок.
             </p>
             <div className="flex gap-3">
-              <a
-                href="https://wa.me/79991234567"
-                target="_blank"
+              <a 
+                href="https://t.me/spinride" 
+                target="_blank" 
                 rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors"
+                className="w-10 h-10 rounded-xl bg-white/10 hover:bg-primary hover:text-primary-foreground flex items-center justify-center transition-colors"
               >
-                <MessageCircle className="h-5 w-5 text-primary" />
+                <Send className="h-5 w-5" />
+              </a>
+              <a 
+                href="https://instagram.com/spinride" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="w-10 h-10 rounded-xl bg-white/10 hover:bg-primary hover:text-primary-foreground flex items-center justify-center transition-colors"
+              >
+                <Instagram className="h-5 w-5" />
               </a>
             </div>
           </div>
 
-          {/* Catalog links */}
+          {/* Catalog */}
           <div>
-            <h3 className="font-semibold mb-4">Каталог</h3>
+            <h4 className="font-bold text-lg mb-4">Каталог</h4>
             <ul className="space-y-2">
-              {footerLinks.catalog.map((link) => (
-                <li key={link.name}>
-                  <Link
-                    to={link.href}
-                    className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                  >
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
+              <li>
+                <Link to="/catalog/bicycles" className="text-white/70 hover:text-primary transition-colors">
+                  Велосипеды
+                </Link>
+              </li>
+              <li>
+                <Link to="/catalog/e-bikes" className="text-white/70 hover:text-primary transition-colors">
+                  Электровелосипеды
+                </Link>
+              </li>
+              <li>
+                <Link to="/catalog/e-scooters" className="text-white/70 hover:text-primary transition-colors">
+                  Электросамокаты
+                </Link>
+              </li>
+              <li>
+                <Link to="/catalog/bmx" className="text-white/70 hover:text-primary transition-colors">
+                  BMX
+                </Link>
+              </li>
+              <li>
+                <Link to="/catalog/kids" className="text-white/70 hover:text-primary transition-colors">
+                  Детям
+                </Link>
+              </li>
+              <li>
+                <Link to="/catalog/accessories" className="text-white/70 hover:text-primary transition-colors">
+                  Аксессуары
+                </Link>
+              </li>
             </ul>
           </div>
 
-          {/* Info links */}
+          {/* Info */}
           <div>
-            <h3 className="font-semibold mb-4">Информация</h3>
+            <h4 className="font-bold text-lg mb-4">Информация</h4>
             <ul className="space-y-2">
-              {footerLinks.info.map((link) => (
-                <li key={link.name}>
-                  <Link
-                    to={link.href}
-                    className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                  >
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
+              <li>
+                <Link to="/about" className="text-white/70 hover:text-primary transition-colors">
+                  О магазине
+                </Link>
+              </li>
+              <li>
+                <Link to="/delivery" className="text-white/70 hover:text-primary transition-colors">
+                  Доставка и оплата
+                </Link>
+              </li>
+              <li>
+                <Link to="/warranty" className="text-white/70 hover:text-primary transition-colors">
+                  Гарантия
+                </Link>
+              </li>
+              <li>
+                <Link to="/contacts" className="text-white/70 hover:text-primary transition-colors">
+                  Контакты
+                </Link>
+              </li>
+              <li>
+                <Link to="/quiz" className="text-primary hover:underline font-medium">
+                  🎯 Подобрать велосипед
+                </Link>
+              </li>
             </ul>
           </div>
 
-          {/* Contact info */}
+          {/* Contacts */}
           <div>
-            <h3 className="font-semibold mb-4">Контакты</h3>
+            <h4 className="font-bold text-lg mb-4">Контакты</h4>
             <ul className="space-y-3">
-              <li className="flex items-start gap-3">
-                <Phone className="h-4 w-4 mt-0.5 text-primary shrink-0" />
-                <div>
-                  <a href="tel:+79991234567" className="text-sm hover:text-primary">
-                    +7 (999) 123-45-67
-                  </a>
-                </div>
-              </li>
-              <li className="flex items-start gap-3">
-                <MapPin className="h-4 w-4 mt-0.5 text-primary shrink-0" />
-                <span className="text-sm text-muted-foreground">
-                  г. Уссурийск, ул. Комсомольская, 29
-                </span>
-              </li>
-              <li className="flex items-start gap-3">
-                <Clock className="h-4 w-4 mt-0.5 text-primary shrink-0" />
-                <span className="text-sm text-muted-foreground">
-                  Пн-Сб: 10:00 - 19:00<br />
-                  Вс: выходной
-                </span>
-              </li>
-              <li className="flex items-start gap-3">
-                <Mail className="h-4 w-4 mt-0.5 text-primary shrink-0" />
-                <a href="mailto:info@spinride.ru" className="text-sm hover:text-primary">
-                  info@spinride.ru
+              <li>
+                <a 
+                  href="tel:+79247881111" 
+                  className="flex items-center gap-3 text-primary font-bold hover:underline"
+                >
+                  <Phone className="h-5 w-5" />
+                  +7 924-788-11-11
                 </a>
+              </li>
+              <li className="flex items-start gap-3 text-white/70">
+                <MapPin className="h-5 w-5 shrink-0 mt-0.5" />
+                <span>г. Уссурийск, ул. Пушкина, 13</span>
+              </li>
+              <li className="flex items-center gap-3 text-white/70">
+                <Mail className="h-5 w-5" />
+                <span>info@spinride.ru</span>
+              </li>
+              <li className="flex items-start gap-3 text-white/70">
+                <Clock className="h-5 w-5 shrink-0 mt-0.5" />
+                <span>Пн-Вс: 10:00 - 19:00</span>
               </li>
             </ul>
           </div>
         </div>
 
-        {/* Bottom bar */}
-        <div className="mt-12 pt-6 border-t flex flex-col sm:flex-row justify-between items-center gap-4">
-          <p className="text-sm text-muted-foreground">
-            © {currentYear} SPINRIDE. Все права защищены.
-          </p>
-          <div className="flex gap-4 text-sm text-muted-foreground">
-            <Link to="/privacy" className="hover:text-primary">
+        {/* Bottom */}
+        <div className="border-t border-white/10 mt-8 pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-white/50">
+          <p>© {currentYear} SPINRIDE. Все права защищены.</p>
+          <div className="flex gap-6">
+            <Link to="/privacy" className="hover:text-white transition-colors">
               Политика конфиденциальности
+            </Link>
+            <Link to="/terms" className="hover:text-white transition-colors">
+              Условия использования
             </Link>
           </div>
         </div>
