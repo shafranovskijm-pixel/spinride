@@ -2,8 +2,9 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { X, Plus, Trash2, ImageIcon } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ImageUpload } from "./ImageUpload";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
@@ -61,7 +62,7 @@ const productSchema = z.object({
   season: z.enum(["all", "summer", "winter"]),
   is_featured: z.boolean(),
   is_new: z.boolean(),
-  images: z.array(z.string().url("Некорректный URL")).optional(),
+  images: z.array(z.string()).optional(),
 });
 
 type ProductFormData = z.infer<typeof productSchema>;
@@ -81,7 +82,6 @@ export function ProductFormDialog({
 }: ProductFormDialogProps) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [imageUrl, setImageUrl] = useState("");
   const [specs, setSpecs] = useState<Array<{ key: string; value: string }>>([]);
 
   const isEditing = !!product;
@@ -172,17 +172,8 @@ export function ProductFormDialog({
     }
   };
 
-  const addImage = () => {
-    if (imageUrl && imageUrl.startsWith("http")) {
-      const currentImages = form.getValues("images") || [];
-      form.setValue("images", [...currentImages, imageUrl]);
-      setImageUrl("");
-    }
-  };
-
-  const removeImage = (index: number) => {
-    const currentImages = form.getValues("images") || [];
-    form.setValue("images", currentImages.filter((_, i) => i !== index));
+  const handleImagesChange = (newImages: string[]) => {
+    form.setValue("images", newImages);
   };
 
   const addSpec = () => {
@@ -477,40 +468,12 @@ export function ProductFormDialog({
 
             {/* Images */}
             <div className="space-y-3">
-              <FormLabel>Изображения (URL)</FormLabel>
-              <div className="flex gap-2">
-                <Input
-                  value={imageUrl}
-                  onChange={(e) => setImageUrl(e.target.value)}
-                  placeholder="https://example.com/image.jpg"
-                />
-                <Button type="button" variant="outline" onClick={addImage}>
-                  <Plus className="h-4 w-4" />
-                </Button>
-              </div>
-              <div className="flex flex-wrap gap-3">
-                {(form.watch("images") || []).map((img, index) => (
-                  <div key={index} className="relative group">
-                    <div className="w-20 h-20 rounded-lg overflow-hidden bg-muted">
-                      <img src={img} alt="" className="w-full h-full object-cover" />
-                    </div>
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      size="icon"
-                      className="absolute -top-2 -right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
-                      onClick={() => removeImage(index)}
-                    >
-                      <X className="h-3 w-3" />
-                    </Button>
-                  </div>
-                ))}
-                {(form.watch("images") || []).length === 0 && (
-                  <div className="w-20 h-20 rounded-lg border-2 border-dashed border-muted-foreground/30 flex items-center justify-center">
-                    <ImageIcon className="h-6 w-6 text-muted-foreground/50" />
-                  </div>
-                )}
-              </div>
+              <FormLabel>Изображения</FormLabel>
+              <ImageUpload
+                images={form.watch("images") || []}
+                onImagesChange={handleImagesChange}
+                maxImages={10}
+              />
             </div>
 
             {/* Specifications */}
