@@ -1,8 +1,9 @@
 import { Link } from "react-router-dom";
-import { Bike, Zap, CircleDot, Users, Wrench } from "lucide-react";
+import { Bike, Zap, CircleDot, Users, Wrench, Snowflake, TreePine, Gift } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useSeason } from "@/hooks/use-season";
 
-const categories = [
+const summerCategories = [
   {
     id: "bicycles",
     name: "Велосипеды",
@@ -53,11 +54,65 @@ const categories = [
   },
 ];
 
+const winterCategories = [
+  {
+    id: "winter",
+    name: "Тюбинги и санки",
+    description: "Для весёлого катания с горок",
+    icon: Snowflake,
+    image: "https://images.unsplash.com/photo-1610973482955-e73f28a84c18?w=600",
+    color: "from-blue-400 to-cyan-400",
+  },
+  {
+    id: "decor",
+    name: "Ёлки",
+    description: "Искусственные ёлки всех размеров",
+    icon: TreePine,
+    image: "https://images.unsplash.com/photo-1545048702-79362596cdc9?w=600",
+    color: "from-green-600 to-emerald-500",
+  },
+  {
+    id: "decor",
+    name: "Декор для дома",
+    description: "Гирлянды, шары, украшения",
+    icon: Gift,
+    image: "https://images.unsplash.com/photo-1512389098783-66b81f86e199?w=600",
+    color: "from-red-500 to-pink-500",
+  },
+  {
+    id: "kids",
+    name: "Детям",
+    description: "Санки, ледянки, снегокаты",
+    icon: Users,
+    image: "https://images.unsplash.com/photo-1545224144-b38cd309ef69?w=600",
+    color: "from-pink-400 to-rose-400",
+  },
+  {
+    id: "accessories",
+    name: "Аксессуары",
+    description: "Всё для зимнего отдыха",
+    icon: Wrench,
+    image: "https://274418.selcdn.ru/cv08300-33250f0d-0664-43fc-9dbf-9d89738d114e/uploads/521356/f78a25ad-bca1-46d9-9b55-e19037428312.jpg",
+    color: "from-slate-500 to-gray-500",
+  },
+  {
+    id: "bicycles",
+    name: "Велосипеды",
+    description: "Фэтбайки для зимы",
+    icon: Bike,
+    image: "https://274418.selcdn.ru/cv08300-33250f0d-0664-43fc-9dbf-9d89738d114e/uploads/521356/7b455a97-82fe-4cde-88fb-58ce8cd299e2.jpg",
+    color: "from-orange-400 to-yellow-400",
+  },
+];
+
 interface CategoryGridProps {
   className?: string;
 }
 
 export function CategoryGrid({ className }: CategoryGridProps) {
+  const { season } = useSeason();
+  const categories = season === "winter" ? winterCategories : summerCategories;
+  
   return (
     <div className={cn("grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 stagger-children", className)}>
       {categories.map((category, index) => (
