@@ -12,17 +12,67 @@ export interface WarrantyContent {
   processing_note: string;
 }
 
+export interface DeliveryMethodItem {
+  icon: string;
+  title: string;
+  description: string;
+  details: string[];
+  badge?: string;
+}
+
+export interface PaymentMethodItem {
+  icon: string;
+  title: string;
+  description: string;
+  details: string;
+}
+
+export interface DeliveryZoneItem {
+  region: string;
+  time: string;
+  price: string;
+}
+
+export interface FaqItem {
+  question: string;
+  answer: string;
+}
+
 export interface DeliveryContent {
-  methods: { name: string; price: string; time: string }[];
-  free_delivery_threshold: number;
-  pickup_address: string;
-  pickup_hours: string;
+  delivery_methods: DeliveryMethodItem[];
+  payment_methods: PaymentMethodItem[];
+  delivery_zones: DeliveryZoneItem[];
+  faq: FaqItem[];
+  important_note: string;
+  contact_phone: string;
+  contact_hours: string;
+}
+
+export interface FeatureItem {
+  icon: string;
+  title: string;
+  description: string;
+}
+
+export interface TeamMemberItem {
+  name: string;
+  role: string;
+  description: string;
+  avatar?: string;
 }
 
 export interface AboutContent {
-  description: string;
-  features: string[];
-  history: string;
+  story: string[];
+  features: FeatureItem[];
+  team: TeamMemberItem[];
+  store_image: string;
+  badge_text: string;
+  badge_subtext: string;
+  address: string;
+  phone: string;
+  email: string;
+  work_hours: string;
+  map_url: string;
 }
 
 export interface ContactsContent {
@@ -34,15 +84,17 @@ export interface ContactsContent {
     telegram?: string;
     whatsapp?: string;
     vk?: string;
+    instagram?: string;
   };
 }
 
+// Use unknown for content since it varies by page type
 export interface PageContent {
   id: string;
   page_key: string;
   title: string;
   subtitle: string | null;
-  content: WarrantyContent | DeliveryContent | AboutContent | ContactsContent;
+  content: unknown;
   updated_at: string;
   created_at: string;
 }
@@ -82,20 +134,16 @@ export function useUpdatePageContent() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({
-      id,
-      title,
-      subtitle,
-      content,
-    }: {
-      id: string;
-      title: string;
-      subtitle: string | null;
-      content: unknown;
-    }) => {
+    mutationFn: async (data: Partial<PageContent> & { id: string }) => {
+      const { id, title, subtitle, content } = data;
+      const updateData: Record<string, unknown> = {};
+      if (title !== undefined) updateData.title = title;
+      if (subtitle !== undefined) updateData.subtitle = subtitle;
+      if (content !== undefined) updateData.content = content;
+
       const { error } = await supabase
         .from("page_content")
-        .update({ title, subtitle, content: content as any })
+        .update(updateData)
         .eq("id", id);
 
       if (error) throw error;

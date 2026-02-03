@@ -3,31 +3,40 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ShopLayout } from "@/components/shop/ShopLayout";
+import { Skeleton } from "@/components/ui/skeleton";
+import { usePageContent } from "@/hooks/use-page-content";
 
-const features = [
+const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
+  Award,
+  Users,
+  Truck,
+  Shield,
+};
+
+const defaultFeatures = [
   {
-    icon: Award,
+    icon: "Award",
     title: "10+ лет опыта",
     description: "Работаем с 2014 года и знаем всё о велосипедах и самокатах",
   },
   {
-    icon: Users,
+    icon: "Users",
     title: "5000+ клиентов",
     description: "Тысячи довольных покупателей в Уссурийске и по всей России",
   },
   {
-    icon: Truck,
+    icon: "Truck",
     title: "Быстрая доставка",
     description: "Доставим в день заказа по городу или отправим в любой регион",
   },
   {
-    icon: Shield,
+    icon: "Shield",
     title: "Гарантия качества",
     description: "Официальная гарантия на все товары и бесплатный сервис",
   },
 ];
 
-const team = [
+const defaultTeam = [
   {
     name: "Александр",
     role: "Основатель",
@@ -45,7 +54,51 @@ const team = [
   },
 ];
 
+const defaultStory = [
+  "SPINRIDE начался с небольшого гаража в Уссурийске, где мы ремонтировали велосипеды для друзей и соседей. Наша страсть к двухколёсному транспорту быстро переросла в полноценный бизнес.",
+  "Сегодня мы — один из крупнейших магазинов велосипедов и самокатов в Приморском крае. У нас вы найдёте технику для всей семьи: от детских беговелов до профессиональных горных велосипедов.",
+  "Мы гордимся индивидуальным подходом к каждому клиенту. Наши консультанты — не просто продавцы, а настоящие эксперты, которые помогут подобрать идеальный вариант под ваши задачи и бюджет.",
+];
+
 export default function AboutPage() {
+  const { data: pageContent, isLoading } = usePageContent("about");
+  
+  const content = pageContent?.content as any || {};
+  const title = pageContent?.title || "О магазине SPINRIDE";
+  const subtitle = pageContent?.subtitle || "Мы — команда энтузиастов, которая помогает людям находить идеальные велосипеды и самокаты для активного отдыха с 2014 года.";
+  
+  const features = content.features?.length > 0 ? content.features : defaultFeatures;
+  const team = content.team?.length > 0 ? content.team : defaultTeam;
+  const story = content.story?.length > 0 ? content.story : defaultStory;
+  const storeImage = content.store_image || "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800";
+  const badgeText = content.badge_text || "Лучший магазин";
+  const badgeSubtext = content.badge_subtext || "Уссурийск 2023";
+  
+  // Contact info
+  const address = content.address || "г. Уссурийск, ул. Пушкина, 13";
+  const phone = content.phone || "+7 924-788-11-11";
+  const email = content.email || "info@spinride.ru";
+  const workHours = content.work_hours || "Пн-Вс: 10:00 - 19:00";
+  const mapUrl = content.map_url || "https://yandex.ru/map-widget/v1/?um=constructor%3A8c9c5e9e7b0f9c8e9c9e9c9e9c9e9c9e&amp;source=constructor&amp;ll=131.9513%2C43.8047&amp;z=16&amp;pt=131.9513%2C43.8047%2Cpm2rdm";
+
+  if (isLoading) {
+    return (
+      <ShopLayout>
+        <div className="container-shop py-16">
+          <div className="max-w-3xl mx-auto text-center mb-12">
+            <Skeleton className="h-12 w-96 mx-auto mb-4" />
+            <Skeleton className="h-6 w-full max-w-xl mx-auto" />
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[1, 2, 3, 4].map((i) => (
+              <Skeleton key={i} className="h-40 rounded-lg" />
+            ))}
+          </div>
+        </div>
+      </ShopLayout>
+    );
+  }
+
   return (
     <ShopLayout>
       {/* Hero */}
@@ -53,11 +106,14 @@ export default function AboutPage() {
         <div className="container-shop relative z-10">
           <div className="max-w-3xl mx-auto text-center animate-fade-in-up">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-black mb-6">
-              О магазине <span className="text-primary">SPINRIDE</span>
+              {title.includes("SPINRIDE") ? (
+                <>О магазине <span className="text-primary">SPINRIDE</span></>
+              ) : (
+                title
+              )}
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
-              Мы — команда энтузиастов, которая помогает людям находить 
-              идеальные велосипеды и самокаты для активного отдыха с 2014 года.
+              {subtitle}
             </p>
           </div>
         </div>
@@ -73,28 +129,16 @@ export default function AboutPage() {
           <div className="space-y-6 animate-slide-in-left">
             <h2 className="text-3xl md:text-4xl font-bold">Наша история</h2>
             <div className="space-y-4 text-muted-foreground leading-relaxed">
-              <p>
-                SPINRIDE начался с небольшого гаража в Уссурийске, где мы ремонтировали 
-                велосипеды для друзей и соседей. Наша страсть к двухколёсному транспорту 
-                быстро переросла в полноценный бизнес.
-              </p>
-              <p>
-                Сегодня мы — один из крупнейших магазинов велосипедов и самокатов 
-                в Приморском крае. У нас вы найдёте технику для всей семьи: 
-                от детских беговелов до профессиональных горных велосипедов.
-              </p>
-              <p>
-                Мы гордимся индивидуальным подходом к каждому клиенту. Наши консультанты — 
-                не просто продавцы, а настоящие эксперты, которые помогут подобрать 
-                идеальный вариант под ваши задачи и бюджет.
-              </p>
+              {story.map((paragraph: string, index: number) => (
+                <p key={index}>{paragraph}</p>
+              ))}
             </div>
           </div>
           
           <div className="relative animate-slide-in-right">
             <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl">
               <img 
-                src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800"
+                src={storeImage}
                 alt="Магазин SPINRIDE"
                 className="w-full h-full object-cover"
               />
@@ -106,8 +150,8 @@ export default function AboutPage() {
                   <span className="text-2xl">🏆</span>
                 </div>
                 <div>
-                  <p className="font-bold">Лучший магазин</p>
-                  <p className="text-sm text-muted-foreground">Уссурийск 2023</p>
+                  <p className="font-bold">{badgeText}</p>
+                  <p className="text-sm text-muted-foreground">{badgeSubtext}</p>
                 </div>
               </div>
             </div>
@@ -123,17 +167,20 @@ export default function AboutPage() {
           </h2>
           
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 stagger-children">
-            {features.map((feature, index) => (
-              <Card key={index} className="text-center hover-lift card-shine border-0 shadow-lg">
-                <CardContent className="p-6">
-                  <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-primary/10 flex items-center justify-center">
-                    <feature.icon className="h-7 w-7 text-primary" />
-                  </div>
-                  <h3 className="font-bold text-lg mb-2">{feature.title}</h3>
-                  <p className="text-sm text-muted-foreground">{feature.description}</p>
-                </CardContent>
-              </Card>
-            ))}
+            {features.map((feature: any, index: number) => {
+              const IconComponent = ICON_MAP[feature.icon] || Award;
+              return (
+                <Card key={index} className="text-center hover-lift card-shine border-0 shadow-lg">
+                  <CardContent className="p-6">
+                    <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-primary/10 flex items-center justify-center">
+                      <IconComponent className="h-7 w-7 text-primary" />
+                    </div>
+                    <h3 className="font-bold text-lg mb-2">{feature.title}</h3>
+                    <p className="text-sm text-muted-foreground">{feature.description}</p>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -148,11 +195,15 @@ export default function AboutPage() {
         </p>
         
         <div className="grid md:grid-cols-3 gap-8 stagger-children">
-          {team.map((member, index) => (
+          {team.map((member: any, index: number) => (
             <Card key={index} className="text-center hover-lift overflow-hidden">
               <CardContent className="p-6">
-                <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
-                  <span className="text-4xl">👤</span>
+                <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center overflow-hidden">
+                  {member.avatar ? (
+                    <img src={member.avatar} alt={member.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-4xl">👤</span>
+                  )}
                 </div>
                 <h3 className="font-bold text-xl mb-1">{member.name}</h3>
                 <p className="text-primary font-medium text-sm mb-3">{member.role}</p>
@@ -183,21 +234,21 @@ export default function AboutPage() {
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
                   <MapPin className="h-5 w-5 shrink-0" />
-                  <span>г. Уссурийск, ул. Пушкина, 13</span>
+                  <span>{address}</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <Phone className="h-5 w-5 shrink-0" />
-                  <a href="tel:+79247881111" className="hover:underline font-semibold">
-                    +7 924-788-11-11
+                  <a href={`tel:${phone.replace(/[^\d+]/g, "")}`} className="hover:underline font-semibold">
+                    {phone}
                   </a>
                 </div>
                 <div className="flex items-center gap-3">
                   <Mail className="h-5 w-5 shrink-0" />
-                  <span>info@spinride.ru</span>
+                  <span>{email}</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <Clock className="h-5 w-5 shrink-0" />
-                  <span>Пн-Вс: 10:00 - 19:00</span>
+                  <span>{workHours}</span>
                 </div>
               </div>
             </div>
@@ -219,7 +270,7 @@ export default function AboutPage() {
                 asChild
                 className="bg-white/10 border-white/30 text-white hover:bg-white/20 font-bold"
               >
-                <a href="tel:+79247881111">
+                <a href={`tel:${phone.replace(/[^\d+]/g, "")}`}>
                   <Phone className="mr-2 h-5 w-5" />
                   Позвонить
                 </a>
@@ -235,11 +286,11 @@ export default function AboutPage() {
           Как нас найти
         </h2>
         <p className="text-center text-muted-foreground mb-8 max-w-2xl mx-auto">
-          г. Уссурийск, ул. Пушкина, 13 — ждём вас ежедневно с 10:00 до 19:00
+          {address} — ждём вас {workHours.toLowerCase().replace("пн-вс:", "ежедневно")}
         </p>
         <div className="rounded-2xl overflow-hidden shadow-lg h-[400px] md:h-[500px]">
           <iframe
-            src="https://yandex.ru/map-widget/v1/?um=constructor%3A8c9c5e9e7b0f9c8e9c9e9c9e9c9e9c9e&amp;source=constructor&amp;ll=131.9513%2C43.8047&amp;z=16&amp;pt=131.9513%2C43.8047%2Cpm2rdm"
+            src={mapUrl}
             width="100%"
             height="100%"
             frameBorder="0"
@@ -252,7 +303,7 @@ export default function AboutPage() {
         <div className="mt-4 flex flex-col sm:flex-row gap-4 justify-center">
           <Button variant="outline" asChild>
             <a 
-              href="https://yandex.ru/maps/?text=Уссурийск%2C%20ул.%20Пушкина%2C%2013" 
+              href={`https://yandex.ru/maps/?text=${encodeURIComponent(address)}`}
               target="_blank" 
               rel="noopener noreferrer"
             >
@@ -262,7 +313,7 @@ export default function AboutPage() {
           </Button>
           <Button variant="outline" asChild>
             <a 
-              href="https://www.google.com/maps/search/?api=1&query=Уссурийск+ул+Пушкина+13" 
+              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`}
               target="_blank" 
               rel="noopener noreferrer"
             >

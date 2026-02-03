@@ -1,14 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAllPageContent, useUpdatePageContent, PageContent } from "@/hooks/use-page-content";
-import { Loader2, Save, FileText, Truck, Info, Phone, Plus, Trash2 } from "lucide-react";
+import { Loader2, Save, FileText, Truck, Info, Phone, Plus, Trash2, GripVertical } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const PAGE_ICONS: Record<string, typeof FileText> = {
   warranty: FileText,
@@ -24,7 +25,19 @@ const PAGE_LABELS: Record<string, string> = {
   contacts: "Контакты",
 };
 
-function WarrantyEditor({ page, onSave, isSaving }: { page: PageContent; onSave: (data: Partial<PageContent>) => void; isSaving: boolean }) {
+const ICON_OPTIONS = [
+  { value: "Truck", label: "Грузовик" },
+  { value: "MapPin", label: "Локация" },
+  { value: "Package", label: "Посылка" },
+  { value: "CreditCard", label: "Карта" },
+  { value: "Banknote", label: "Наличные" },
+  { value: "Shield", label: "Щит" },
+  { value: "Award", label: "Награда" },
+  { value: "Users", label: "Пользователи" },
+];
+
+// ============ WARRANTY EDITOR ============
+function WarrantyEditor({ page, onSave, isSaving }: { page: PageContent; onSave: (data: Partial<PageContent> & { id: string }) => void; isSaving: boolean }) {
   const [title, setTitle] = useState(page.title);
   const [subtitle, setSubtitle] = useState(page.subtitle || "");
   const content = page.content as any;
@@ -223,15 +236,19 @@ function WarrantyEditor({ page, onSave, isSaving }: { page: PageContent; onSave:
   );
 }
 
-function DeliveryEditor({ page, onSave, isSaving }: { page: PageContent; onSave: (data: Partial<PageContent>) => void; isSaving: boolean }) {
+// ============ DELIVERY EDITOR ============
+function DeliveryEditor({ page, onSave, isSaving }: { page: PageContent; onSave: (data: Partial<PageContent> & { id: string }) => void; isSaving: boolean }) {
   const [title, setTitle] = useState(page.title);
   const [subtitle, setSubtitle] = useState(page.subtitle || "");
   const content = page.content as any;
   
-  const [methods, setMethods] = useState(content.methods || []);
-  const [freeThreshold, setFreeThreshold] = useState(content.free_delivery_threshold || 0);
-  const [pickupAddress, setPickupAddress] = useState(content.pickup_address || "");
-  const [pickupHours, setPickupHours] = useState(content.pickup_hours || "");
+  const [deliveryMethods, setDeliveryMethods] = useState(content.delivery_methods || []);
+  const [paymentMethods, setPaymentMethods] = useState(content.payment_methods || []);
+  const [deliveryZones, setDeliveryZones] = useState(content.delivery_zones || []);
+  const [faq, setFaq] = useState(content.faq || []);
+  const [importantNote, setImportantNote] = useState(content.important_note || "");
+  const [contactPhone, setContactPhone] = useState(content.contact_phone || "");
+  const [contactHours, setContactHours] = useState(content.contact_hours || "");
 
   const handleSave = () => {
     onSave({
@@ -239,26 +256,93 @@ function DeliveryEditor({ page, onSave, isSaving }: { page: PageContent; onSave:
       title,
       subtitle,
       content: {
-        methods,
-        free_delivery_threshold: freeThreshold,
-        pickup_address: pickupAddress,
-        pickup_hours: pickupHours,
+        delivery_methods: deliveryMethods,
+        payment_methods: paymentMethods,
+        delivery_zones: deliveryZones,
+        faq,
+        important_note: importantNote,
+        contact_phone: contactPhone,
+        contact_hours: contactHours,
       },
     });
   };
 
-  const updateMethod = (index: number, field: string, value: string) => {
-    const updated = [...methods];
+  // Delivery methods
+  const updateDeliveryMethod = (index: number, field: string, value: any) => {
+    const updated = [...deliveryMethods];
     updated[index] = { ...updated[index], [field]: value };
-    setMethods(updated);
+    setDeliveryMethods(updated);
   };
 
-  const addMethod = () => {
-    setMethods([...methods, { name: "", price: "", time: "" }]);
+  const addDeliveryMethod = () => {
+    setDeliveryMethods([...deliveryMethods, { icon: "Truck", title: "", description: "", details: [], badge: "" }]);
   };
 
-  const removeMethod = (index: number) => {
-    setMethods(methods.filter((_: any, i: number) => i !== index));
+  const removeDeliveryMethod = (index: number) => {
+    setDeliveryMethods(deliveryMethods.filter((_: any, i: number) => i !== index));
+  };
+
+  const updateDeliveryMethodDetail = (methodIndex: number, detailIndex: number, value: string) => {
+    const updated = [...deliveryMethods];
+    updated[methodIndex].details[detailIndex] = value;
+    setDeliveryMethods(updated);
+  };
+
+  const addDeliveryMethodDetail = (methodIndex: number) => {
+    const updated = [...deliveryMethods];
+    updated[methodIndex].details = [...(updated[methodIndex].details || []), ""];
+    setDeliveryMethods(updated);
+  };
+
+  const removeDeliveryMethodDetail = (methodIndex: number, detailIndex: number) => {
+    const updated = [...deliveryMethods];
+    updated[methodIndex].details = updated[methodIndex].details.filter((_: any, i: number) => i !== detailIndex);
+    setDeliveryMethods(updated);
+  };
+
+  // Payment methods
+  const updatePaymentMethod = (index: number, field: string, value: any) => {
+    const updated = [...paymentMethods];
+    updated[index] = { ...updated[index], [field]: value };
+    setPaymentMethods(updated);
+  };
+
+  const addPaymentMethod = () => {
+    setPaymentMethods([...paymentMethods, { icon: "CreditCard", title: "", description: "", details: "" }]);
+  };
+
+  const removePaymentMethod = (index: number) => {
+    setPaymentMethods(paymentMethods.filter((_: any, i: number) => i !== index));
+  };
+
+  // Delivery zones
+  const updateDeliveryZone = (index: number, field: string, value: string) => {
+    const updated = [...deliveryZones];
+    updated[index] = { ...updated[index], [field]: value };
+    setDeliveryZones(updated);
+  };
+
+  const addDeliveryZone = () => {
+    setDeliveryZones([...deliveryZones, { region: "", time: "", price: "" }]);
+  };
+
+  const removeDeliveryZone = (index: number) => {
+    setDeliveryZones(deliveryZones.filter((_: any, i: number) => i !== index));
+  };
+
+  // FAQ
+  const updateFaqItem = (index: number, field: string, value: string) => {
+    const updated = [...faq];
+    updated[index] = { ...updated[index], [field]: value };
+    setFaq(updated);
+  };
+
+  const addFaqItem = () => {
+    setFaq([...faq, { question: "", answer: "" }]);
+  };
+
+  const removeFaqItem = (index: number) => {
+    setFaq(faq.filter((_: any, i: number) => i !== index));
   };
 
   return (
@@ -274,65 +358,219 @@ function DeliveryEditor({ page, onSave, isSaving }: { page: PageContent; onSave:
         </div>
       </div>
 
+      {/* Delivery Methods */}
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-base">Способы доставки</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-2">
-          {methods.map((item: any, index: number) => (
-            <div key={index} className="flex gap-2 items-center flex-wrap">
-              <Input
-                placeholder="Название"
-                value={item.name}
-                onChange={(e) => updateMethod(index, "name", e.target.value)}
-                className="flex-1 min-w-[150px]"
-              />
-              <Input
-                placeholder="Цена"
-                value={item.price}
-                onChange={(e) => updateMethod(index, "price", e.target.value)}
-                className="w-32"
-              />
-              <Input
-                placeholder="Срок"
-                value={item.time}
-                onChange={(e) => updateMethod(index, "time", e.target.value)}
-                className="w-32"
-              />
-              <Button variant="ghost" size="icon" onClick={() => removeMethod(index)}>
-                <Trash2 className="h-4 w-4 text-destructive" />
-              </Button>
-            </div>
+        <CardContent className="space-y-4">
+          {deliveryMethods.map((method: any, index: number) => (
+            <Card key={index} className="p-4 bg-muted/50">
+              <div className="space-y-3">
+                <div className="flex gap-2 items-start">
+                  <Select value={method.icon} onValueChange={(v) => updateDeliveryMethod(index, "icon", v)}>
+                    <SelectTrigger className="w-32">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {ICON_OPTIONS.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Input
+                    placeholder="Название"
+                    value={method.title}
+                    onChange={(e) => updateDeliveryMethod(index, "title", e.target.value)}
+                    className="flex-1"
+                  />
+                  <Input
+                    placeholder="Бейдж (опционально)"
+                    value={method.badge || ""}
+                    onChange={(e) => updateDeliveryMethod(index, "badge", e.target.value)}
+                    className="w-32"
+                  />
+                  <Button variant="ghost" size="icon" onClick={() => removeDeliveryMethod(index)}>
+                    <Trash2 className="h-4 w-4 text-destructive" />
+                  </Button>
+                </div>
+                <Input
+                  placeholder="Описание"
+                  value={method.description}
+                  onChange={(e) => updateDeliveryMethod(index, "description", e.target.value)}
+                />
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">Детали</Label>
+                  {method.details?.map((detail: string, detailIndex: number) => (
+                    <div key={detailIndex} className="flex gap-2 items-center">
+                      <Input
+                        value={detail}
+                        onChange={(e) => updateDeliveryMethodDetail(index, detailIndex, e.target.value)}
+                        placeholder="Деталь"
+                      />
+                      <Button variant="ghost" size="icon" onClick={() => removeDeliveryMethodDetail(index, detailIndex)}>
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </div>
+                  ))}
+                  <Button variant="outline" size="sm" onClick={() => addDeliveryMethodDetail(index)}>
+                    <Plus className="h-4 w-4 mr-1" /> Добавить деталь
+                  </Button>
+                </div>
+              </div>
+            </Card>
           ))}
-          <Button variant="outline" size="sm" onClick={addMethod}>
-            <Plus className="h-4 w-4 mr-1" /> Добавить способ
+          <Button variant="outline" size="sm" onClick={addDeliveryMethod}>
+            <Plus className="h-4 w-4 mr-1" /> Добавить способ доставки
           </Button>
         </CardContent>
       </Card>
 
+      {/* Payment Methods */}
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-base">Самовывоз</CardTitle>
+          <CardTitle className="text-base">Способы оплаты</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          {paymentMethods.map((method: any, index: number) => (
+            <Card key={index} className="p-4 bg-muted/50">
+              <div className="space-y-3">
+                <div className="flex gap-2 items-center">
+                  <Select value={method.icon} onValueChange={(v) => updatePaymentMethod(index, "icon", v)}>
+                    <SelectTrigger className="w-32">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {ICON_OPTIONS.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Input
+                    placeholder="Название"
+                    value={method.title}
+                    onChange={(e) => updatePaymentMethod(index, "title", e.target.value)}
+                    className="flex-1"
+                  />
+                  <Button variant="ghost" size="icon" onClick={() => removePaymentMethod(index)}>
+                    <Trash2 className="h-4 w-4 text-destructive" />
+                  </Button>
+                </div>
+                <Input
+                  placeholder="Короткое описание"
+                  value={method.description}
+                  onChange={(e) => updatePaymentMethod(index, "description", e.target.value)}
+                />
+                <Textarea
+                  placeholder="Подробное описание"
+                  value={method.details}
+                  onChange={(e) => updatePaymentMethod(index, "details", e.target.value)}
+                  className="min-h-[60px]"
+                />
+              </div>
+            </Card>
+          ))}
+          <Button variant="outline" size="sm" onClick={addPaymentMethod}>
+            <Plus className="h-4 w-4 mr-1" /> Добавить способ оплаты
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Delivery Zones */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base">Зоны и сроки доставки</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          {deliveryZones.map((zone: any, index: number) => (
+            <div key={index} className="flex gap-2 items-center flex-wrap">
+              <Input
+                placeholder="Регион"
+                value={zone.region}
+                onChange={(e) => updateDeliveryZone(index, "region", e.target.value)}
+                className="flex-1 min-w-[150px]"
+              />
+              <Input
+                placeholder="Срок"
+                value={zone.time}
+                onChange={(e) => updateDeliveryZone(index, "time", e.target.value)}
+                className="w-28"
+              />
+              <Input
+                placeholder="Стоимость"
+                value={zone.price}
+                onChange={(e) => updateDeliveryZone(index, "price", e.target.value)}
+                className="w-36"
+              />
+              <Button variant="ghost" size="icon" onClick={() => removeDeliveryZone(index)}>
+                <Trash2 className="h-4 w-4 text-destructive" />
+              </Button>
+            </div>
+          ))}
+          <Button variant="outline" size="sm" onClick={addDeliveryZone}>
+            <Plus className="h-4 w-4 mr-1" /> Добавить зону
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* FAQ */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base">Частые вопросы</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {faq.map((item: any, index: number) => (
+            <Card key={index} className="p-4 bg-muted/50">
+              <div className="space-y-3">
+                <div className="flex gap-2 items-center">
+                  <Input
+                    placeholder="Вопрос"
+                    value={item.question}
+                    onChange={(e) => updateFaqItem(index, "question", e.target.value)}
+                    className="flex-1"
+                  />
+                  <Button variant="ghost" size="icon" onClick={() => removeFaqItem(index)}>
+                    <Trash2 className="h-4 w-4 text-destructive" />
+                  </Button>
+                </div>
+                <Textarea
+                  placeholder="Ответ"
+                  value={item.answer}
+                  onChange={(e) => updateFaqItem(index, "answer", e.target.value)}
+                  className="min-h-[60px]"
+                />
+              </div>
+            </Card>
+          ))}
+          <Button variant="outline" size="sm" onClick={addFaqItem}>
+            <Plus className="h-4 w-4 mr-1" /> Добавить вопрос
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Contact & Notes */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base">Дополнительная информация</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <Label>Важное примечание</Label>
+            <Textarea
+              value={importantNote}
+              onChange={(e) => setImportantNote(e.target.value)}
+              placeholder="Текст важного примечания"
+            />
+          </div>
           <div className="grid gap-4 md:grid-cols-2">
             <div>
-              <Label>Адрес самовывоза</Label>
-              <Input value={pickupAddress} onChange={(e) => setPickupAddress(e.target.value)} />
+              <Label>Контактный телефон</Label>
+              <Input value={contactPhone} onChange={(e) => setContactPhone(e.target.value)} />
             </div>
             <div>
               <Label>Часы работы</Label>
-              <Input value={pickupHours} onChange={(e) => setPickupHours(e.target.value)} />
+              <Input value={contactHours} onChange={(e) => setContactHours(e.target.value)} />
             </div>
-          </div>
-          <div>
-            <Label>Бесплатная доставка от (₽)</Label>
-            <Input
-              type="number"
-              value={freeThreshold}
-              onChange={(e) => setFreeThreshold(Number(e.target.value))}
-              className="w-40"
-            />
           </div>
         </CardContent>
       </Card>
@@ -345,22 +583,88 @@ function DeliveryEditor({ page, onSave, isSaving }: { page: PageContent; onSave:
   );
 }
 
-function AboutEditor({ page, onSave, isSaving }: { page: PageContent; onSave: (data: Partial<PageContent>) => void; isSaving: boolean }) {
+// ============ ABOUT EDITOR ============
+function AboutEditor({ page, onSave, isSaving }: { page: PageContent; onSave: (data: Partial<PageContent> & { id: string }) => void; isSaving: boolean }) {
   const [title, setTitle] = useState(page.title);
   const [subtitle, setSubtitle] = useState(page.subtitle || "");
   const content = page.content as any;
   
-  const [description, setDescription] = useState(content.description || "");
+  const [story, setStory] = useState<string[]>(content.story || []);
   const [features, setFeatures] = useState(content.features || []);
-  const [history, setHistory] = useState(content.history || "");
+  const [team, setTeam] = useState(content.team || []);
+  const [storeImage, setStoreImage] = useState(content.store_image || "");
+  const [badgeText, setBadgeText] = useState(content.badge_text || "");
+  const [badgeSubtext, setBadgeSubtext] = useState(content.badge_subtext || "");
+  const [address, setAddress] = useState(content.address || "");
+  const [phone, setPhone] = useState(content.phone || "");
+  const [email, setEmail] = useState(content.email || "");
+  const [workHours, setWorkHours] = useState(content.work_hours || "");
+  const [mapUrl, setMapUrl] = useState(content.map_url || "");
 
   const handleSave = () => {
     onSave({
       id: page.id,
       title,
       subtitle,
-      content: { description, features, history },
+      content: {
+        story,
+        features,
+        team,
+        store_image: storeImage,
+        badge_text: badgeText,
+        badge_subtext: badgeSubtext,
+        address,
+        phone,
+        email,
+        work_hours: workHours,
+        map_url: mapUrl,
+      },
     });
+  };
+
+  // Story paragraphs
+  const updateStory = (index: number, value: string) => {
+    const updated = [...story];
+    updated[index] = value;
+    setStory(updated);
+  };
+
+  const addStoryParagraph = () => {
+    setStory([...story, ""]);
+  };
+
+  const removeStoryParagraph = (index: number) => {
+    setStory(story.filter((_, i) => i !== index));
+  };
+
+  // Features
+  const updateFeature = (index: number, field: string, value: string) => {
+    const updated = [...features];
+    updated[index] = { ...updated[index], [field]: value };
+    setFeatures(updated);
+  };
+
+  const addFeature = () => {
+    setFeatures([...features, { icon: "Award", title: "", description: "" }]);
+  };
+
+  const removeFeature = (index: number) => {
+    setFeatures(features.filter((_: any, i: number) => i !== index));
+  };
+
+  // Team
+  const updateTeamMember = (index: number, field: string, value: string) => {
+    const updated = [...team];
+    updated[index] = { ...updated[index], [field]: value };
+    setTeam(updated);
+  };
+
+  const addTeamMember = () => {
+    setTeam([...team, { name: "", role: "", description: "", avatar: "" }]);
+  };
+
+  const removeTeamMember = (index: number) => {
+    setTeam(team.filter((_: any, i: number) => i !== index));
   };
 
   return (
@@ -376,41 +680,173 @@ function AboutEditor({ page, onSave, isSaving }: { page: PageContent; onSave: (d
         </div>
       </div>
 
-      <div>
-        <Label>Описание</Label>
-        <Textarea value={description} onChange={(e) => setDescription(e.target.value)} className="min-h-[100px]" />
-      </div>
-
+      {/* Story */}
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-base">Преимущества</CardTitle>
+          <CardTitle className="text-base">История компании (параграфы)</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2">
-          {features.map((item: string, index: number) => (
-            <div key={index} className="flex gap-2 items-center">
-              <Input
-                value={item}
-                onChange={(e) => {
-                  const updated = [...features];
-                  updated[index] = e.target.value;
-                  setFeatures(updated);
-                }}
+          {story.map((paragraph: string, index: number) => (
+            <div key={index} className="flex gap-2 items-start">
+              <Textarea
+                value={paragraph}
+                onChange={(e) => updateStory(index, e.target.value)}
+                placeholder={`Параграф ${index + 1}`}
+                className="min-h-[80px]"
               />
-              <Button variant="ghost" size="icon" onClick={() => setFeatures(features.filter((_: any, i: number) => i !== index))}>
+              <Button variant="ghost" size="icon" onClick={() => removeStoryParagraph(index)}>
                 <Trash2 className="h-4 w-4 text-destructive" />
               </Button>
             </div>
           ))}
-          <Button variant="outline" size="sm" onClick={() => setFeatures([...features, ""])}>
-            <Plus className="h-4 w-4 mr-1" /> Добавить
+          <Button variant="outline" size="sm" onClick={addStoryParagraph}>
+            <Plus className="h-4 w-4 mr-1" /> Добавить параграф
           </Button>
         </CardContent>
       </Card>
 
-      <div>
-        <Label>История компании</Label>
-        <Textarea value={history} onChange={(e) => setHistory(e.target.value)} className="min-h-[80px]" />
-      </div>
+      {/* Store image & badge */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base">Изображение магазина</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <Label>URL изображения</Label>
+            <Input value={storeImage} onChange={(e) => setStoreImage(e.target.value)} placeholder="https://..." />
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <Label>Текст бейджа</Label>
+              <Input value={badgeText} onChange={(e) => setBadgeText(e.target.value)} placeholder="Лучший магазин" />
+            </div>
+            <div>
+              <Label>Подтекст бейджа</Label>
+              <Input value={badgeSubtext} onChange={(e) => setBadgeSubtext(e.target.value)} placeholder="Уссурийск 2023" />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Features */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base">Преимущества</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {features.map((feature: any, index: number) => (
+            <Card key={index} className="p-4 bg-muted/50">
+              <div className="space-y-3">
+                <div className="flex gap-2 items-center">
+                  <Select value={feature.icon} onValueChange={(v) => updateFeature(index, "icon", v)}>
+                    <SelectTrigger className="w-32">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {ICON_OPTIONS.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Input
+                    placeholder="Заголовок"
+                    value={feature.title}
+                    onChange={(e) => updateFeature(index, "title", e.target.value)}
+                    className="flex-1"
+                  />
+                  <Button variant="ghost" size="icon" onClick={() => removeFeature(index)}>
+                    <Trash2 className="h-4 w-4 text-destructive" />
+                  </Button>
+                </div>
+                <Input
+                  placeholder="Описание"
+                  value={feature.description}
+                  onChange={(e) => updateFeature(index, "description", e.target.value)}
+                />
+              </div>
+            </Card>
+          ))}
+          <Button variant="outline" size="sm" onClick={addFeature}>
+            <Plus className="h-4 w-4 mr-1" /> Добавить преимущество
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Team */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base">Команда</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {team.map((member: any, index: number) => (
+            <Card key={index} className="p-4 bg-muted/50">
+              <div className="space-y-3">
+                <div className="flex gap-2 items-center">
+                  <Input
+                    placeholder="Имя"
+                    value={member.name}
+                    onChange={(e) => updateTeamMember(index, "name", e.target.value)}
+                    className="flex-1"
+                  />
+                  <Input
+                    placeholder="Должность"
+                    value={member.role}
+                    onChange={(e) => updateTeamMember(index, "role", e.target.value)}
+                    className="flex-1"
+                  />
+                  <Button variant="ghost" size="icon" onClick={() => removeTeamMember(index)}>
+                    <Trash2 className="h-4 w-4 text-destructive" />
+                  </Button>
+                </div>
+                <Input
+                  placeholder="Описание"
+                  value={member.description}
+                  onChange={(e) => updateTeamMember(index, "description", e.target.value)}
+                />
+                <Input
+                  placeholder="URL аватара (опционально)"
+                  value={member.avatar || ""}
+                  onChange={(e) => updateTeamMember(index, "avatar", e.target.value)}
+                />
+              </div>
+            </Card>
+          ))}
+          <Button variant="outline" size="sm" onClick={addTeamMember}>
+            <Plus className="h-4 w-4 mr-1" /> Добавить сотрудника
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Contact info */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base">Контактная информация</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <Label>Адрес</Label>
+              <Input value={address} onChange={(e) => setAddress(e.target.value)} />
+            </div>
+            <div>
+              <Label>Телефон</Label>
+              <Input value={phone} onChange={(e) => setPhone(e.target.value)} />
+            </div>
+            <div>
+              <Label>Email</Label>
+              <Input value={email} onChange={(e) => setEmail(e.target.value)} />
+            </div>
+            <div>
+              <Label>Часы работы</Label>
+              <Input value={workHours} onChange={(e) => setWorkHours(e.target.value)} />
+            </div>
+          </div>
+          <div>
+            <Label>URL виджета карты (Яндекс)</Label>
+            <Input value={mapUrl} onChange={(e) => setMapUrl(e.target.value)} placeholder="https://yandex.ru/map-widget/..." />
+          </div>
+        </CardContent>
+      </Card>
 
       <Button onClick={handleSave} disabled={isSaving}>
         {isSaving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
@@ -420,7 +856,8 @@ function AboutEditor({ page, onSave, isSaving }: { page: PageContent; onSave: (d
   );
 }
 
-function ContactsEditor({ page, onSave, isSaving }: { page: PageContent; onSave: (data: Partial<PageContent>) => void; isSaving: boolean }) {
+// ============ CONTACTS EDITOR ============
+function ContactsEditor({ page, onSave, isSaving }: { page: PageContent; onSave: (data: Partial<PageContent> & { id: string }) => void; isSaving: boolean }) {
   const [title, setTitle] = useState(page.title);
   const [subtitle, setSubtitle] = useState(page.subtitle || "");
   const content = page.content as any;
@@ -467,8 +904,6 @@ function ContactsEditor({ page, onSave, isSaving }: { page: PageContent; onSave:
               <Label>Телефон</Label>
               <Input value={phone} onChange={(e) => setPhone(e.target.value)} />
             </div>
-          </div>
-          <div className="grid gap-4 md:grid-cols-2">
             <div>
               <Label>Email</Label>
               <Input value={email} onChange={(e) => setEmail(e.target.value)} />
@@ -486,29 +921,39 @@ function ContactsEditor({ page, onSave, isSaving }: { page: PageContent; onSave:
           <CardTitle className="text-base">Социальные сети</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div>
-            <Label>Telegram</Label>
-            <Input
-              value={social.telegram || ""}
-              onChange={(e) => setSocial({ ...social, telegram: e.target.value })}
-              placeholder="https://t.me/..."
-            />
-          </div>
-          <div>
-            <Label>WhatsApp</Label>
-            <Input
-              value={social.whatsapp || ""}
-              onChange={(e) => setSocial({ ...social, whatsapp: e.target.value })}
-              placeholder="https://wa.me/..."
-            />
-          </div>
-          <div>
-            <Label>ВКонтакте</Label>
-            <Input
-              value={social.vk || ""}
-              onChange={(e) => setSocial({ ...social, vk: e.target.value })}
-              placeholder="https://vk.com/..."
-            />
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <Label>Telegram</Label>
+              <Input
+                value={social.telegram || ""}
+                onChange={(e) => setSocial({ ...social, telegram: e.target.value })}
+                placeholder="https://t.me/..."
+              />
+            </div>
+            <div>
+              <Label>WhatsApp</Label>
+              <Input
+                value={social.whatsapp || ""}
+                onChange={(e) => setSocial({ ...social, whatsapp: e.target.value })}
+                placeholder="https://wa.me/..."
+              />
+            </div>
+            <div>
+              <Label>VK</Label>
+              <Input
+                value={social.vk || ""}
+                onChange={(e) => setSocial({ ...social, vk: e.target.value })}
+                placeholder="https://vk.com/..."
+              />
+            </div>
+            <div>
+              <Label>Instagram</Label>
+              <Input
+                value={social.instagram || ""}
+                onChange={(e) => setSocial({ ...social, instagram: e.target.value })}
+                placeholder="https://instagram.com/..."
+              />
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -521,98 +966,93 @@ function ContactsEditor({ page, onSave, isSaving }: { page: PageContent; onSave:
   );
 }
 
+// ============ MAIN COMPONENT ============
 export default function AdminPages() {
   const { data: pages, isLoading } = useAllPageContent();
-  const updateMutation = useUpdatePageContent();
+  const { mutate: updatePage, isPending: isSaving } = useUpdatePageContent();
+  const [activeTab, setActiveTab] = useState("warranty");
 
-  const handleSave = (data: Partial<PageContent>) => {
-    updateMutation.mutate({
-      id: data.id!,
-      title: data.title!,
-      subtitle: data.subtitle || null,
-      content: data.content,
-    });
+  const handleSave = (data: Partial<PageContent> & { id: string }) => {
+    updatePage(data);
   };
 
   if (isLoading) {
     return (
-      <AdminLayout title="Страницы" subtitle="Редактирование контента статических страниц">
-        <div className="space-y-4">
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-64 w-full" />
+      <AdminLayout title="Страницы">
+        <div className="space-y-6">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-12 w-full max-w-md" />
+          <Skeleton className="h-96 w-full" />
         </div>
       </AdminLayout>
     );
   }
 
-  const pageMap = pages?.reduce((acc, page) => {
-    acc[page.page_key] = page;
-    return acc;
-  }, {} as Record<string, PageContent>) || {};
+  const pageMap: Record<string, PageContent | undefined> = {};
+  pages?.forEach((p) => {
+    pageMap[p.page_key] = p;
+  });
+
+  const getEditor = (pageKey: string) => {
+    const page = pageMap[pageKey];
+    if (!page) {
+      return (
+        <div className="text-center py-12 text-muted-foreground">
+          <p>Страница "{PAGE_LABELS[pageKey]}" ещё не создана в базе данных.</p>
+          <p className="text-sm mt-2">Данные будут загружены после первого сохранения.</p>
+        </div>
+      );
+    }
+
+    switch (pageKey) {
+      case "warranty":
+        return <WarrantyEditor page={page} onSave={handleSave} isSaving={isSaving} />;
+      case "delivery":
+        return <DeliveryEditor page={page} onSave={handleSave} isSaving={isSaving} />;
+      case "about":
+        return <AboutEditor page={page} onSave={handleSave} isSaving={isSaving} />;
+      case "contacts":
+        return <ContactsEditor page={page} onSave={handleSave} isSaving={isSaving} />;
+      default:
+        return null;
+    }
+  };
 
   return (
-    <AdminLayout title="Страницы" subtitle="Редактирование контента статических страниц">
-      <Tabs defaultValue="warranty" className="w-full">
-        <TabsList className="mb-4 flex-wrap h-auto gap-1">
-          {["warranty", "delivery", "about", "contacts"].map((key) => {
-            const Icon = PAGE_ICONS[key];
-            return (
-              <TabsTrigger key={key} value={key} className="gap-2">
-                <Icon className="h-4 w-4" />
-                <span className="hidden sm:inline">{PAGE_LABELS[key]}</span>
-              </TabsTrigger>
-            );
-          })}
-        </TabsList>
+    <AdminLayout title="Страницы" subtitle="Редактируйте контент статических страниц сайта">
+      <div className="space-y-6">
 
-        <TabsContent value="warranty">
-          {pageMap.warranty ? (
-            <WarrantyEditor page={pageMap.warranty} onSave={handleSave} isSaving={updateMutation.isPending} />
-          ) : (
-            <Card>
-              <CardContent className="py-8 text-center text-muted-foreground">
-                Контент страницы не найден
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="grid grid-cols-4 w-full max-w-md">
+            {Object.entries(PAGE_LABELS).map(([key, label]) => {
+              const Icon = PAGE_ICONS[key];
+              return (
+                <TabsTrigger key={key} value={key} className="gap-2">
+                  <Icon className="h-4 w-4" />
+                  <span className="hidden sm:inline">{label}</span>
+                </TabsTrigger>
+              );
+            })}
+          </TabsList>
 
-        <TabsContent value="delivery">
-          {pageMap.delivery ? (
-            <DeliveryEditor page={pageMap.delivery} onSave={handleSave} isSaving={updateMutation.isPending} />
-          ) : (
-            <Card>
-              <CardContent className="py-8 text-center text-muted-foreground">
-                Контент страницы не найден
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
-
-        <TabsContent value="about">
-          {pageMap.about ? (
-            <AboutEditor page={pageMap.about} onSave={handleSave} isSaving={updateMutation.isPending} />
-          ) : (
-            <Card>
-              <CardContent className="py-8 text-center text-muted-foreground">
-                Контент страницы не найден
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
-
-        <TabsContent value="contacts">
-          {pageMap.contacts ? (
-            <ContactsEditor page={pageMap.contacts} onSave={handleSave} isSaving={updateMutation.isPending} />
-          ) : (
-            <Card>
-              <CardContent className="py-8 text-center text-muted-foreground">
-                Контент страницы не найден
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
-      </Tabs>
+          {Object.keys(PAGE_LABELS).map((key) => (
+            <TabsContent key={key} value={key} className="mt-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    {(() => {
+                      const Icon = PAGE_ICONS[key];
+                      return <Icon className="h-5 w-5" />;
+                    })()}
+                    {PAGE_LABELS[key]}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>{getEditor(key)}</CardContent>
+              </Card>
+            </TabsContent>
+          ))}
+        </Tabs>
+      </div>
     </AdminLayout>
   );
 }
