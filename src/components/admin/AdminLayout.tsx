@@ -13,7 +13,8 @@ import {
   Download,
   Share,
   MessageSquare,
-  WifiOff
+  WifiOff,
+  FolderTree
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { OfflineIndicator } from "@/components/shop/OfflineIndicator";
@@ -55,6 +56,7 @@ import { useState } from "react";
 const navItems = [
   { title: "Обзор", url: "/admin", icon: LayoutDashboard },
   { title: "Товары", url: "/admin/products", icon: Package },
+  { title: "Категории", url: "/admin/categories", icon: FolderTree },
   { title: "Заказы", url: "/admin/orders", icon: ShoppingCart },
   { title: "Отзывы", url: "/admin/reviews", icon: MessageSquare },
   { title: "Настройки", url: "/admin/settings", icon: Settings },
