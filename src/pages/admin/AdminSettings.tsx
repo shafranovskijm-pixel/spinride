@@ -140,7 +140,7 @@ export default function AdminSettings() {
                     <RadioGroupItem value="summer" id="summer" className="mt-1" />
                     <div className="flex-1">
                       <Label htmlFor="summer" className="font-medium cursor-pointer flex items-center gap-2">
-                        <Sun className="h-4 w-4 text-orange-500" />
+                        <Sun className="h-4 w-4 text-primary" />
                         Летний режим
                       </Label>
                       <p className="text-sm text-muted-foreground mt-1">
