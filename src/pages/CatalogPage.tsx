@@ -417,8 +417,8 @@ export default function CatalogPage() {
         {/* Main content */}
         <div className="flex gap-8">
           {/* Desktop sidebar - sticky */}
-          <aside className="hidden lg:block w-64 shrink-0">
-            <div className="sticky top-4 max-h-[calc(100vh-2rem)] overflow-y-auto pr-2 scrollbar-thin">
+          <aside className="hidden lg:block w-64 shrink-0 self-start sticky top-24">
+            <div className="max-h-[calc(100vh-7rem)] overflow-y-auto pr-2 pb-4">
               <FilterContent />
             </div>
           </aside>
