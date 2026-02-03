@@ -243,8 +243,8 @@ export default function ProductPage() {
             <div className="flex items-center gap-2">
               {product.in_stock ? (
                 <>
-                  <Check className="h-5 w-5 text-green-500" />
-                  <span className="text-green-600 font-medium">В наличии</span>
+                  <Check className="h-5 w-5 text-secondary" />
+                  <span className="text-secondary font-medium">В наличии</span>
                   <span className="text-muted-foreground">({product.stock_quantity} шт.)</span>
                 </>
               ) : (
