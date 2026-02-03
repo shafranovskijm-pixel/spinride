@@ -382,6 +382,21 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_validated_order: {
+        Args: {
+          _cart_items: Json
+          _customer_email: string
+          _customer_name: string
+          _customer_phone: string
+          _delivery_address: string
+          _delivery_method: string
+          _notes: string
+        }
+        Returns: {
+          order_id: string
+          order_number: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
