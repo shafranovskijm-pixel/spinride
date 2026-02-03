@@ -1,8 +1,14 @@
 import { Link } from "react-router-dom";
-import { Phone, MapPin, Mail, Clock, Instagram, Send } from "lucide-react";
+import { Phone, MapPin, Mail, Clock, Instagram, Send, MessageCircle } from "lucide-react";
+import { useFooterSettings } from "@/hooks/use-footer-settings";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
+  const { data: settings } = useFooterSettings();
+
+  if (!settings) {
+    return null; // Loading state
+  }
 
   return (
     <footer className="bg-foreground text-white mt-16">
@@ -16,25 +22,53 @@ export function Footer() {
               </span>
             </Link>
             <p className="text-white/70 text-sm leading-relaxed">
-              Велосипеды и самокаты для всей семьи. От городских прогулок до экстремальных поездок.
+              {settings.description}
             </p>
             <div className="flex gap-3">
-              <a 
-                href="https://t.me/actionprim" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="w-10 h-10 rounded-xl bg-white/10 hover:bg-primary hover:text-primary-foreground flex items-center justify-center transition-all hover:scale-110 hover:-translate-y-1"
-              >
-                <Send className="h-5 w-5" />
-              </a>
-              <a 
-                href="https://instagram.com/spinride" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="w-10 h-10 rounded-xl bg-white/10 hover:bg-primary hover:text-primary-foreground flex items-center justify-center transition-all hover:scale-110 hover:-translate-y-1"
-              >
-                <Instagram className="h-5 w-5" />
-              </a>
+              {settings.social.telegram && (
+                <a 
+                  href={settings.social.telegram}
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 rounded-xl bg-white/10 hover:bg-primary hover:text-primary-foreground flex items-center justify-center transition-all hover:scale-110 hover:-translate-y-1"
+                  aria-label="Telegram"
+                >
+                  <Send className="h-5 w-5" />
+                </a>
+              )}
+              {settings.social.instagram && (
+                <a 
+                  href={settings.social.instagram}
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 rounded-xl bg-white/10 hover:bg-primary hover:text-primary-foreground flex items-center justify-center transition-all hover:scale-110 hover:-translate-y-1"
+                  aria-label="Instagram"
+                >
+                  <Instagram className="h-5 w-5" />
+                </a>
+              )}
+              {settings.social.whatsapp && (
+                <a 
+                  href={settings.social.whatsapp}
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 rounded-xl bg-white/10 hover:bg-primary hover:text-primary-foreground flex items-center justify-center transition-all hover:scale-110 hover:-translate-y-1"
+                  aria-label="WhatsApp"
+                >
+                  <MessageCircle className="h-5 w-5" />
+                </a>
+              )}
+              {settings.social.vk && (
+                <a 
+                  href={settings.social.vk}
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 rounded-xl bg-white/10 hover:bg-primary hover:text-primary-foreground flex items-center justify-center transition-all hover:scale-110 hover:-translate-y-1"
+                  aria-label="VK"
+                >
+                  <span className="font-bold text-sm">VK</span>
+                </a>
+              )}
             </div>
           </div>
 
@@ -42,36 +76,16 @@ export function Footer() {
           <div>
             <h4 className="font-bold text-lg mb-4">Каталог</h4>
             <ul className="space-y-2">
-              <li>
-                <Link to="/catalog/bicycles" className="text-white/70 hover:text-primary transition-colors inline-block hover:translate-x-1">
-                  Велосипеды
-                </Link>
-              </li>
-              <li>
-                <Link to="/catalog/e-bikes" className="text-white/70 hover:text-primary transition-colors inline-block hover:translate-x-1">
-                  Электровелосипеды
-                </Link>
-              </li>
-              <li>
-                <Link to="/catalog/e-scooters" className="text-white/70 hover:text-primary transition-colors inline-block hover:translate-x-1">
-                  Электросамокаты
-                </Link>
-              </li>
-              <li>
-                <Link to="/catalog/bmx" className="text-white/70 hover:text-primary transition-colors inline-block hover:translate-x-1">
-                  BMX
-                </Link>
-              </li>
-              <li>
-                <Link to="/catalog/kids" className="text-white/70 hover:text-primary transition-colors inline-block hover:translate-x-1">
-                  Детям
-                </Link>
-              </li>
-              <li>
-                <Link to="/catalog/accessories" className="text-white/70 hover:text-primary transition-colors inline-block hover:translate-x-1">
-                  Аксессуары
-                </Link>
-              </li>
+              {settings.catalog_links.map((link, index) => (
+                <li key={index}>
+                  <Link 
+                    to={link.url} 
+                    className="text-white/70 hover:text-primary transition-colors inline-block hover:translate-x-1"
+                  >
+                    {link.title}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
@@ -79,31 +93,19 @@ export function Footer() {
           <div>
             <h4 className="font-bold text-lg mb-4">Информация</h4>
             <ul className="space-y-2">
-              <li>
-                <Link to="/about" className="text-white/70 hover:text-primary transition-colors">
-                  О магазине
-                </Link>
-              </li>
-              <li>
-                <Link to="/delivery" className="text-white/70 hover:text-primary transition-colors">
-                  Доставка и оплата
-                </Link>
-              </li>
-              <li>
-                <Link to="/warranty" className="text-white/70 hover:text-primary transition-colors">
-                  Гарантия
-                </Link>
-              </li>
-              <li>
-                <Link to="/contacts" className="text-white/70 hover:text-primary transition-colors">
-                  Контакты
-                </Link>
-              </li>
-              <li>
-                <Link to="/quiz" className="text-primary hover:underline font-medium">
-                  🎯 Подобрать велосипед
-                </Link>
-              </li>
+              {settings.info_links.map((link, index) => (
+                <li key={index}>
+                  <Link 
+                    to={link.url} 
+                    className={link.highlight 
+                      ? "text-primary hover:underline font-medium" 
+                      : "text-white/70 hover:text-primary transition-colors"
+                    }
+                  >
+                    {link.title}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
@@ -113,24 +115,24 @@ export function Footer() {
             <ul className="space-y-3">
               <li>
                 <a 
-                  href="tel:+79247881111" 
+                  href={`tel:${settings.phone.replace(/[^\d+]/g, "")}`}
                   className="flex items-center gap-3 text-primary font-bold hover:underline"
                 >
                   <Phone className="h-5 w-5" />
-                  +7 924-788-11-11
+                  {settings.phone}
                 </a>
               </li>
               <li className="flex items-start gap-3 text-white/70">
                 <MapPin className="h-5 w-5 shrink-0 mt-0.5" />
-                <span>г. Уссурийск, ул. Пушкина, 13</span>
+                <span>{settings.address}</span>
               </li>
               <li className="flex items-center gap-3 text-white/70">
                 <Mail className="h-5 w-5" />
-                <span>info@spinride.ru</span>
+                <span>{settings.email}</span>
               </li>
               <li className="flex items-start gap-3 text-white/70">
                 <Clock className="h-5 w-5 shrink-0 mt-0.5" />
-                <span>Пн-Вс: 10:00 - 19:00</span>
+                <span>{settings.work_hours}</span>
               </li>
             </ul>
           </div>
@@ -138,7 +140,7 @@ export function Footer() {
 
         {/* Bottom */}
         <div className="border-t border-white/10 mt-8 pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-white/50">
-          <p>© {currentYear} SPINRIDE. Все права защищены.</p>
+          <p>© {currentYear} {settings.copyright_text}</p>
           <div className="flex gap-6">
             <Link to="/privacy" className="hover:text-white transition-colors">
               Политика конфиденциальности

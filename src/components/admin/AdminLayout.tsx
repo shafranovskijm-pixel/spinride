@@ -16,7 +16,8 @@ import {
   WifiOff,
   FolderTree,
   Users,
-  FileText
+  FileText,
+  PanelBottom
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { OfflineIndicator } from "@/components/shop/OfflineIndicator";
@@ -63,6 +64,7 @@ const navItems = [
   { title: "Отзывы", url: "/admin/reviews", icon: MessageSquare },
   { title: "Пользователи", url: "/admin/users", icon: Users },
   { title: "Страницы", url: "/admin/pages", icon: FileText },
+  { title: "Футер", url: "/admin/footer", icon: PanelBottom },
   { title: "Настройки", url: "/admin/settings", icon: Settings },
 ];
 
