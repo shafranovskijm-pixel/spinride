@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { PushNotificationSettings } from "@/components/admin/PushNotificationSettings";
+import { SEOSettings } from "@/components/admin/SEOSettings";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { getCalendarSeason, applySeason, SeasonMode } from "@/lib/season";
