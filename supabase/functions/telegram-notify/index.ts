@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -7,14 +8,15 @@ const corsHeaders = {
 
 interface OrderNotification {
   type?: 'new' | 'status_change';
-  order_number: string;
-  customer_name: string;
-  customer_phone: string;
+  order_id: string;
+  order_number?: string;
+  customer_name?: string;
+  customer_phone?: string;
   customer_email?: string;
-  delivery_method: string;
+  delivery_method?: string;
   delivery_address?: string;
-  total_amount: number;
-  items: Array<{
+  total_amount?: number;
+  items?: Array<{
     name: string;
     quantity: number;
     price: number;
@@ -40,6 +42,8 @@ serve(async (req) => {
   try {
     const TELEGRAM_BOT_TOKEN = Deno.env.get('TELEGRAM_BOT_TOKEN');
     const TELEGRAM_CHAT_ID = Deno.env.get('TELEGRAM_CHAT_ID');
+    const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
+    const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
     if (!TELEGRAM_BOT_TOKEN) {
       throw new Error('TELEGRAM_BOT_TOKEN is not configured');
@@ -49,16 +53,39 @@ serve(async (req) => {
       throw new Error('TELEGRAM_CHAT_ID is not configured');
     }
 
-    const order: OrderNotification = await req.json();
+    const body: OrderNotification = await req.json();
 
-    let message: string;
-    
+    // Security: Validate order_id is provided and fetch order from database
+    if (!body.order_id) {
+      return new Response(
+        JSON.stringify({ error: 'order_id is required' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Create Supabase client with service role to fetch order data
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+    // Fetch order from database to verify it exists and get real data
+    const { data: order, error: orderError } = await supabase
+      .from('orders')
+      .select('*')
+      .eq('id', body.order_id)
+      .single();
+
+    if (orderError || !order) {
+      console.error('Order not found:', body.order_id, orderError);
+      return new Response(
+        JSON.stringify({ error: 'Order not found' }),
+        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     // Clean phone number for links (remove spaces, dashes, etc.)
     const cleanPhone = order.customer_phone.replace(/[^\d+]/g, '');
     const whatsappPhone = cleanPhone.replace('+', '');
     
     // Build inline keyboard with quick action buttons
-    // Note: Telegram only supports http/https URLs in inline buttons
     const inlineKeyboard = {
       inline_keyboard: [
         [
@@ -68,17 +95,19 @@ serve(async (req) => {
       ],
     };
 
-    if (order.type === 'status_change') {
+    let message: string;
+
+    if (body.type === 'status_change' && body.old_status && body.new_status) {
       // Status change notification
-      const oldStatusLabel = statusLabels[order.old_status || ''] || order.old_status;
-      const newStatusLabel = statusLabels[order.new_status || ''] || order.new_status;
+      const oldStatusLabel = statusLabels[body.old_status] || body.old_status;
+      const newStatusLabel = statusLabels[body.new_status] || body.new_status;
       
       const statusEmoji = {
         processing: '⏳',
         confirmed: '✅',
         completed: '🎉',
         cancelled: '❌',
-      }[order.new_status || ''] || '📋';
+      }[body.new_status] || '📋';
 
       message = `
 ${statusEmoji} *Статус заказа изменён*
@@ -92,8 +121,9 @@ ${statusEmoji} *Статус заказа изменён*
 💰 *Сумма:* ${order.total_amount.toLocaleString('ru-RU')} ₽
       `.trim();
     } else {
-      // New order notification
-      const itemsList = order.items
+      // New order notification - use data from database
+      const items = order.items as Array<{ name: string; quantity: number; price: number }>;
+      const itemsList = items
         .map((item, i) => `  ${i + 1}. ${item.name} × ${item.quantity} — ${item.price.toLocaleString('ru-RU')} ₽`)
         .join('\n');
 
@@ -137,6 +167,8 @@ ${itemsList}
       console.error('Telegram API error:', telegramResult);
       throw new Error(`Telegram API error: ${telegramResult.description || 'Unknown error'}`);
     }
+
+    console.log(`Telegram notification sent for order ${order.order_number}`);
 
     return new Response(
       JSON.stringify({ success: true, message_id: telegramResult.result?.message_id }),

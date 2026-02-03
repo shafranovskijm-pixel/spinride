@@ -66,12 +66,10 @@ export default function CheckoutPage() {
 
     setIsSubmitting(true);
 
-    const orderItems = items.map(({ product, quantity }) => ({
+    // Prepare cart items for server-side validation
+    const cartItems = items.map(({ product, quantity }) => ({
       product_id: product.id,
-      name: product.name,
-      price: product.sale_price ?? product.price,
       quantity,
-      image: product.images?.[0],
     }));
 
     const orderData = {
@@ -80,18 +78,27 @@ export default function CheckoutPage() {
       customer_email: formData.email.trim() || null,
       delivery_method: formData.delivery,
       delivery_address: formData.delivery === "delivery" ? formData.address.trim() : null,
-      items: orderItems,
-      total_amount: total,
       notes: formData.notes.trim() || null,
     };
 
     // Check if offline
     if (!navigator.onLine) {
       try {
+        // For offline, we store cart items for later sync
         await addToSyncQueue({
           type: 'order',
           action: 'create',
-          data: orderData,
+          data: {
+            ...orderData,
+            items: items.map(({ product, quantity }) => ({
+              product_id: product.id,
+              name: product.name,
+              price: product.sale_price ?? product.price,
+              quantity,
+              image: product.images?.[0],
+            })),
+            total_amount: total,
+          },
         });
 
         clearCart();
@@ -114,42 +121,42 @@ export default function CheckoutPage() {
     }
 
     try {
-      const { data: insertedOrder, error } = await supabase.from("orders").insert([{
-        order_number: `SR-${Date.now()}`, // Will be overwritten by trigger
-        ...orderData,
-        items: JSON.parse(JSON.stringify(orderItems)),
-      }]).select('order_number').single();
+      // Use server-side validated order creation via RPC
+      // This prevents price manipulation attacks
+      const { data: orderResult, error } = await supabase.rpc('create_validated_order', {
+        _customer_name: formData.name.trim(),
+        _customer_phone: formData.phone.trim(),
+        _customer_email: formData.email.trim() || null,
+        _delivery_method: formData.delivery,
+        _delivery_address: formData.delivery === "delivery" ? formData.address.trim() : null,
+        _notes: formData.notes.trim() || null,
+        _cart_items: cartItems,
+      });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Order validation error:", error);
+        throw new Error(error.message || 'Order validation failed');
+      }
 
-      // Send Telegram notification (non-blocking)
+      const orderId = orderResult?.[0]?.order_id;
+      const orderNumber = orderResult?.[0]?.order_number;
+
+      if (!orderId) {
+        throw new Error('Order creation failed - no order ID returned');
+      }
+
+      // Send Telegram notification with order_id (non-blocking)
+      // Edge function will fetch order data from database for security
       supabase.functions.invoke('telegram-notify', {
-        body: {
-          order_number: insertedOrder?.order_number || 'N/A',
-          customer_name: formData.name.trim(),
-          customer_phone: formData.phone.trim(),
-          customer_email: formData.email.trim() || undefined,
-          delivery_method: formData.delivery,
-          delivery_address: formData.delivery === "delivery" ? formData.address.trim() : undefined,
-          total_amount: total,
-          items: orderItems.map(item => ({
-            name: item.name,
-            quantity: item.quantity,
-            price: item.price,
-          })),
-        },
+        body: { order_id: orderId },
       }).catch(err => {
         // Don't block order on notification failure
         console.error('Telegram notification failed:', err);
       });
 
-      // Send Push notification to admins (non-blocking)
+      // Send Push notification to admins with order_id (non-blocking)
       supabase.functions.invoke('send-push', {
-        body: {
-          order_number: insertedOrder?.order_number || 'N/A',
-          customer_name: formData.name.trim(),
-          total_amount: total,
-        },
+        body: { order_id: orderId },
       }).catch(err => {
         console.error('Push notification failed:', err);
       });
@@ -157,7 +164,7 @@ export default function CheckoutPage() {
       clearCart();
       toast({
         title: "Заявка отправлена! ✓",
-        description: "Мы свяжемся с вами в ближайшее время",
+        description: `Заказ ${orderNumber} оформлен. Мы свяжемся с вами в ближайшее время`,
       });
       navigate("/order-success");
     } catch (error) {
@@ -169,7 +176,17 @@ export default function CheckoutPage() {
           await addToSyncQueue({
             type: 'order',
             action: 'create',
-            data: orderData,
+            data: {
+              ...orderData,
+              items: items.map(({ product, quantity }) => ({
+                product_id: product.id,
+                name: product.name,
+                price: product.sale_price ?? product.price,
+                quantity,
+                image: product.images?.[0],
+              })),
+              total_amount: total,
+            },
           });
 
           clearCart();
@@ -184,9 +201,13 @@ export default function CheckoutPage() {
         }
       }
       
+      // Show user-friendly error message
+      const errorMessage = error instanceof Error ? error.message : "Неизвестная ошибка";
       toast({
         title: "Ошибка при оформлении",
-        description: "Попробуйте ещё раз или позвоните нам",
+        description: errorMessage.includes('out of stock') 
+          ? "Некоторые товары закончились на складе"
+          : "Попробуйте ещё раз или позвоните нам",
         variant: "destructive",
       });
     } finally {

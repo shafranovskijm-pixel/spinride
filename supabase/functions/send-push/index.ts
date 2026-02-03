@@ -5,36 +5,6 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Web Push cryptography utilities
-async function generatePushHeaders(
-  endpoint: string,
-  p256dh: string,
-  auth: string,
-  vapidPublicKey: string,
-  vapidPrivateKey: string,
-  subject: string
-): Promise<{ headers: HeadersInit; body: Uint8Array; payload: string }> {
-  // For simplicity, we'll use the Web Push API directly
-  // This is a simplified version - in production you'd want a full web-push implementation
-  
-  const payload = JSON.stringify({
-    title: "🛒 Новый заказ!",
-    body: "Поступил новый заказ в магазин SPINRIDE",
-    icon: "/pwa-192x192.png",
-    badge: "/pwa-192x192.png",
-    data: { url: "/admin/orders" },
-  });
-
-  return {
-    headers: {
-      "Content-Type": "application/octet-stream",
-      "TTL": "86400",
-    },
-    body: new TextEncoder().encode(payload),
-    payload,
-  };
-}
-
 Deno.serve(async (req) => {
   // Handle CORS preflight
   if (req.method === "OPTIONS") {
@@ -44,7 +14,6 @@ Deno.serve(async (req) => {
   try {
     const VAPID_PUBLIC_KEY = Deno.env.get("VAPID_PUBLIC_KEY");
     const VAPID_PRIVATE_KEY = Deno.env.get("VAPID_PRIVATE_KEY");
-    const VAPID_SUBJECT = Deno.env.get("VAPID_SUBJECT") || "mailto:admin@spinride.ru";
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
@@ -58,10 +27,33 @@ Deno.serve(async (req) => {
 
     // Parse request body
     const body = await req.json().catch(() => ({}));
-    const { order_number, customer_name, total_amount } = body;
+    const { order_id } = body;
+
+    // Security: Require order_id and validate against database
+    if (!order_id) {
+      return new Response(
+        JSON.stringify({ error: "order_id is required" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     // Create Supabase client with service role
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+    // Fetch order from database to verify it exists and get real data
+    const { data: order, error: orderError } = await supabase
+      .from("orders")
+      .select("order_number, customer_name, total_amount")
+      .eq("id", order_id)
+      .single();
+
+    if (orderError || !order) {
+      console.error("Order not found:", order_id, orderError);
+      return new Response(
+        JSON.stringify({ error: "Order not found" }),
+        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     // Get all push subscriptions (admin users)
     const { data: subscriptions, error: fetchError } = await supabase
@@ -84,20 +76,18 @@ Deno.serve(async (req) => {
       );
     }
 
-    console.log(`Found ${subscriptions.length} push subscriptions`);
+    console.log(`Found ${subscriptions.length} push subscriptions for order ${order.order_number}`);
 
-    // Prepare notification payload
+    // Prepare notification payload using validated order data
     const notificationPayload = JSON.stringify({
       title: "🛒 Новый заказ!",
-      body: order_number 
-        ? `Заказ ${order_number} от ${customer_name || "клиента"} на ${total_amount?.toLocaleString("ru-RU") || "?"} ₽`
-        : "Поступил новый заказ в магазин SPINRIDE",
+      body: `Заказ ${order.order_number} от ${order.customer_name} на ${order.total_amount?.toLocaleString("ru-RU") || "?"} ₽`,
       icon: "/pwa-192x192.png",
       badge: "/pwa-192x192.png",
-      tag: `order-${order_number || Date.now()}`,
+      tag: `order-${order.order_number}`,
       data: { 
         url: "/admin/orders",
-        order_number,
+        order_number: order.order_number,
       },
     });
 
@@ -111,14 +101,11 @@ Deno.serve(async (req) => {
     for (const sub of subscriptions) {
       try {
         // Web Push requires encrypted payload - using simplified fetch approach
-        // In production, use a proper web-push library
         const response = await fetch(sub.endpoint, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             "TTL": "86400",
-            // Note: Full Web Push requires VAPID JWT and encrypted payload
-            // This simplified version may not work with all push services
           },
           body: notificationPayload,
         });
