@@ -49,7 +49,7 @@ const summerCategories = [
     name: "Аксессуары",
     description: "Фонари, замки, запчасти",
     icon: Wrench,
-    image: "https://274418.selcdn.ru/cv08300-33250f0d-0664-43fc-9dbf-9d89738d114e/uploads/521356/f78a25ad-bca1-46d9-9b55-e19037428312.jpg",
+    image: "/categories/bike-accessories.jpg",
     color: "from-green-500 to-emerald-500",
   },
 ];
