@@ -57,7 +57,7 @@ export default function Index() {
       "py-12 relative",
       showDecor && "bg-gradient-to-b from-primary/[0.02] via-primary/[0.04] to-primary/[0.02]"
     )}>
-      <InteractiveParticles count={15} />
+      <InteractiveParticles count={40} />
       {showDecor && <FloatingIcons density="low" />}
       <div className="container-shop relative z-10">
         <div className="flex items-center justify-between mb-6">
@@ -94,7 +94,7 @@ export default function Index() {
 
       {/* Categories with floating background */}
       <section className="container-shop py-12 relative">
-        <InteractiveParticles count={20} />
+        <InteractiveParticles count={50} />
         <FloatingIcons density="low" />
         <div className="flex items-center justify-between mb-6 relative z-10">
           <h2 className="text-2xl font-bold animate-fade-in-up">Категории</h2>
@@ -169,7 +169,7 @@ export default function Index() {
 
       {/* Trust signals */}
       <section className="container-shop py-12 relative">
-        <InteractiveParticles count={20} />
+        <InteractiveParticles count={50} />
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 stagger-children relative z-10">
           <div className="text-center p-4 hover-lift rounded-xl">
             <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-primary/10 flex items-center justify-center icon-bounce">
