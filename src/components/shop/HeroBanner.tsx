@@ -41,7 +41,7 @@ const defaultContent: BannerSettings = {
     subtitle: "доставка по всей России.",
     description: "Тюбинги, санки, ёлки и новогодний декор – всё для зимних радостей!",
     quizButtonText: "🎄 Подобрать подарок",
-    imageUrl: "https://images.unsplash.com/photo-1545048702-79362596cdc9?w=600",
+    imageUrl: "/hero-winter.jpg",
     phone: "+7 924-788-11-11",
     city: "г. Уссурийск",
   },
