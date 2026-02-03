@@ -21,6 +21,8 @@ import DeliveryPage from "./pages/DeliveryPage";
 import AboutPage from "./pages/AboutPage";
 import WarrantyPage from "./pages/WarrantyPage";
 import ContactsPage from "./pages/ContactsPage";
+import PrivacyPage from "./pages/PrivacyPage";
+import TermsPage from "./pages/TermsPage";
 import OrdersPage from "./pages/OrdersPage";
 import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
@@ -69,6 +71,8 @@ const App = () => (
                     <Route path="/profile" element={<ProfilePage />} />
                     <Route path="/warranty" element={<WarrantyPage />} />
                     <Route path="/contacts" element={<ContactsPage />} />
+                    <Route path="/privacy" element={<PrivacyPage />} />
+                    <Route path="/terms" element={<TermsPage />} />
                     <Route path="/orders" element={<OrdersPage />} />
                     {/* Auth routes */}
                     <Route path="/auth/login" element={<LoginPage />} />
