@@ -8,6 +8,7 @@ import { ProductCard } from "@/components/shop/ProductCard";
 import { SectionDivider } from "@/components/shop/SectionDivider";
 import { FloatingIcons } from "@/components/shop/FloatingIcons";
 import { MarqueeStrip } from "@/components/shop/MarqueeStrip";
+import { InteractiveParticles } from "@/components/shop/InteractiveParticles";
 import { useSeason } from "@/hooks/use-season";
 import { useProducts } from "@/hooks/use-products";
 import { useDocumentSEO } from "@/hooks/use-seo";
@@ -165,8 +166,9 @@ export default function Index() {
       </section>
 
       {/* Trust signals */}
-      <section className="container-shop py-12">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 stagger-children">
+      <section className="container-shop py-12 relative">
+        <InteractiveParticles count={25} />
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 stagger-children relative z-10">
           <div className="text-center p-4 hover-lift rounded-xl">
             <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-primary/10 flex items-center justify-center icon-bounce">
               <span className="text-2xl">🚚</span>
