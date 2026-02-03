@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { 
@@ -27,6 +27,7 @@ import { useCart } from "@/hooks/use-cart";
 import { useFavorites } from "@/hooks/use-favorites";
 import { useCompare } from "@/hooks/use-compare";
 import { useProduct, useRelatedProducts } from "@/hooks/use-products";
+import { useDocumentSEO } from "@/hooks/use-seo";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
