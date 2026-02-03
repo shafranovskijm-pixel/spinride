@@ -1,12 +1,15 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, ArrowRight, Check, RotateCcw } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, RotateCcw, Loader2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { Skeleton } from "@/components/ui/skeleton";
 import { ShopLayout } from "@/components/shop/ShopLayout";
 import { ProductCard } from "@/components/shop/ProductCard";
-import { mockProducts } from "@/data/mock-products";
+import { supabase } from "@/integrations/supabase/client";
+import { useSeason } from "@/hooks/use-season";
 import { Product } from "@/types/shop";
 import { cn } from "@/lib/utils";
 
@@ -25,7 +28,7 @@ interface QuizStep {
   multiSelect?: boolean;
 }
 
-const quizSteps: QuizStep[] = [
+const summerQuizSteps: QuizStep[] = [
   {
     id: "rider",
     question: "Для кого выбираете?",
@@ -80,62 +83,165 @@ const quizSteps: QuizStep[] = [
   },
 ];
 
+const winterQuizSteps: QuizStep[] = [
+  {
+    id: "recipient",
+    question: "Для кого выбираете подарок?",
+    subtitle: "Выберите получателя",
+    options: [
+      { id: "adult", label: "Взрослый", icon: "🧑", description: "От 14 лет" },
+      { id: "teen", label: "Подросток", icon: "🧒", description: "10-14 лет" },
+      { id: "child", label: "Ребёнок", icon: "👶", description: "До 10 лет" },
+      { id: "family", label: "Для всей семьи", icon: "👨‍👩‍👧", description: "Универсальное" },
+    ],
+  },
+  {
+    id: "category",
+    question: "Что ищете?",
+    subtitle: "Можно выбрать несколько",
+    multiSelect: true,
+    options: [
+      { id: "tubing", label: "Тюбинги", icon: "🛷", description: "Катание с горок" },
+      { id: "tree", label: "Ёлки", icon: "🎄", description: "Новогодние ёлки" },
+      { id: "decor", label: "Декор", icon: "✨", description: "Украшения" },
+      { id: "figures", label: "Фигуры", icon: "🎅", description: "Деды Морозы, Снегурочки" },
+    ],
+  },
+  {
+    id: "budget",
+    question: "Какой у вас бюджет?",
+    subtitle: "Выберите ценовой диапазон",
+    options: [
+      { id: "economy", label: "До 5 000 ₽", icon: "💰", description: "Эконом" },
+      { id: "standard", label: "5 000 — 15 000 ₽", icon: "💳", description: "Стандарт" },
+      { id: "premium", label: "15 000 — 30 000 ₽", icon: "💎", description: "Премиум" },
+      { id: "pro", label: "От 30 000 ₽", icon: "🚀", description: "Люкс" },
+    ],
+  },
+  {
+    id: "priority",
+    question: "Что для вас важнее всего?",
+    options: [
+      { id: "price", label: "Низкая цена", icon: "🏷️", description: "Главное — экономия" },
+      { id: "quality", label: "Качество", icon: "✨", description: "Надёжность и долговечность" },
+      { id: "style", label: "Дизайн", icon: "🎨", description: "Красивый внешний вид" },
+      { id: "originality", label: "Оригинальность", icon: "🎁", description: "Уникальный подарок" },
+    ],
+  },
+];
+
 type Answers = Record<string, string | string[]>;
 
-function getRecommendations(answers: Answers): Product[] {
-  let products = [...mockProducts];
+function getRecommendations(answers: Answers, products: Product[], season: "summer" | "winter"): Product[] {
+  let filtered = [...products];
 
-  // Filter by rider type
-  if (answers.rider === "child") {
-    products = products.filter(
-      (p) => p.category_id === "kids" || p.name.toLowerCase().includes("детск")
-    );
-  }
+  if (season === "summer") {
+    // Filter by rider type
+    if (answers.rider === "child") {
+      filtered = filtered.filter(
+        (p) => p.category?.slug === "kids" || p.name.toLowerCase().includes("детск")
+      );
+    }
 
-  // Filter by purpose
-  const purposes = answers.purpose as string[];
-  if (purposes?.includes("tricks")) {
-    products = products.filter(
-      (p) => p.category_id === "bmx" || p.name.toLowerCase().includes("bmx")
-    );
-  }
+    // Filter by purpose
+    const purposes = answers.purpose as string[];
+    if (purposes?.includes("tricks")) {
+      filtered = filtered.filter(
+        (p) => p.category?.slug === "bmx" || p.name.toLowerCase().includes("bmx")
+      );
+    }
 
-  // Filter by budget
-  const budgetRanges: Record<string, [number, number]> = {
-    economy: [0, 15000],
-    standard: [15000, 35000],
-    premium: [35000, 60000],
-    pro: [60000, Infinity],
-  };
-  
-  const range = budgetRanges[answers.budget as string];
-  if (range) {
-    products = products.filter((p) => {
-      const price = p.sale_price ?? p.price;
-      return price >= range[0] && price <= range[1];
-    });
+    // Filter by budget
+    const budgetRanges: Record<string, [number, number]> = {
+      economy: [0, 15000],
+      standard: [15000, 35000],
+      premium: [35000, 60000],
+      pro: [60000, Infinity],
+    };
+    
+    const range = budgetRanges[answers.budget as string];
+    if (range) {
+      filtered = filtered.filter((p) => {
+        const price = p.sale_price ?? p.price;
+        return price >= range[0] && price <= range[1];
+      });
+    }
+  } else {
+    // Winter logic
+    const categories = answers.category as string[];
+    if (categories?.length > 0) {
+      const categoryMap: Record<string, string[]> = {
+        tubing: ["tubing"],
+        tree: ["christmas-trees", "decor"],
+        decor: ["decor"],
+        figures: ["party"],
+      };
+      const slugs = categories.flatMap(c => categoryMap[c] || []);
+      if (slugs.length > 0) {
+        filtered = filtered.filter(p => slugs.includes(p.category?.slug || ""));
+      }
+    }
+
+    // Winter budget
+    const budgetRanges: Record<string, [number, number]> = {
+      economy: [0, 5000],
+      standard: [5000, 15000],
+      premium: [15000, 30000],
+      pro: [30000, Infinity],
+    };
+    
+    const range = budgetRanges[answers.budget as string];
+    if (range) {
+      filtered = filtered.filter((p) => {
+        const price = p.sale_price ?? p.price;
+        return price >= range[0] && price <= range[1];
+      });
+    }
   }
 
   // Sort by rating and featured
-  products.sort((a, b) => {
+  filtered.sort((a, b) => {
     if (a.is_featured !== b.is_featured) return a.is_featured ? -1 : 1;
     return b.rating_average - a.rating_average;
   });
 
   // If no exact matches, return top rated products
-  if (products.length === 0) {
-    products = [...mockProducts]
+  if (filtered.length === 0) {
+    filtered = [...products]
       .sort((a, b) => b.rating_average - a.rating_average)
       .slice(0, 4);
   }
 
-  return products.slice(0, 4);
+  return filtered.slice(0, 4);
 }
 
 export default function QuizPage() {
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<Answers>({});
   const [showResults, setShowResults] = useState(false);
+  const { season } = useSeason();
+
+  const quizSteps = season === "winter" ? winterQuizSteps : summerQuizSteps;
+
+  const { data: products = [], isLoading } = useQuery({
+    queryKey: ["quiz-products", season],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("products")
+        .select("*, category:categories(*)")
+        .eq("in_stock", true)
+        .order("rating_average", { ascending: false });
+      
+      if (error) throw error;
+      
+      return (data || []).map(p => ({
+        ...p,
+        specifications: (p.specifications || {}) as Record<string, string>,
+        images: p.images || [],
+        season: p.season as "summer" | "winter" | "all",
+      })) as Product[];
+    },
+  });
 
   const step = quizSteps[currentStep];
   const progress = ((currentStep + 1) / quizSteps.length) * 100;
@@ -191,9 +297,23 @@ export default function QuizPage() {
     return currentAnswer === optionId;
   };
 
+  // Loading state
+  if (isLoading) {
+    return (
+      <ShopLayout>
+        <div className="container-shop py-8 max-w-2xl mx-auto">
+          <div className="flex items-center justify-center gap-2 py-20">
+            <Loader2 className="h-6 w-6 animate-spin text-primary" />
+            <span className="text-muted-foreground">Загрузка...</span>
+          </div>
+        </div>
+      </ShopLayout>
+    );
+  }
+
   // Results screen
   if (showResults) {
-    const recommendations = getRecommendations(answers);
+    const recommendations = getRecommendations(answers, products, season);
 
     return (
       <ShopLayout>
@@ -210,11 +330,19 @@ export default function QuizPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-8">
-            {recommendations.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
+          {recommendations.length > 0 ? (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-8">
+              {recommendations.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 mb-8">
+              <p className="text-muted-foreground">
+                К сожалению, по вашим критериям ничего не найдено. Попробуйте изменить параметры.
+              </p>
+            </div>
+          )}
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button variant="outline" onClick={handleRestart}>
@@ -248,7 +376,9 @@ export default function QuizPage() {
 
         {/* Question */}
         <div className="text-center mb-8">
-          <span className="text-4xl mb-4 block">{step.options[0]?.icon.split("")[0] === "🧑" ? "🎯" : "🚴"}</span>
+          <span className="text-4xl mb-4 block">
+            {season === "winter" ? "🎁" : "🚴"}
+          </span>
           <h1 className="text-2xl md:text-3xl font-bold mb-2">{step.question}</h1>
           {step.subtitle && (
             <p className="text-muted-foreground">{step.subtitle}</p>

@@ -18,12 +18,21 @@ import { useSeason } from "@/hooks/use-season";
 import { useAuth } from "@/hooks/use-auth";
 import { SearchAutocomplete } from "./SearchAutocomplete";
 
-const navigation = [
+const summerNavigation = [
   { name: "Каталог", href: "/catalog" },
   { name: "Велосипеды", href: "/catalog/bicycles" },
   { name: "Электро", href: "/catalog/e-bikes" },
   { name: "Самокаты", href: "/catalog/scooters" },
   { name: "BMX", href: "/catalog/bmx" },
+  { name: "Детям", href: "/catalog/kids" },
+];
+
+const winterNavigation = [
+  { name: "Каталог", href: "/catalog" },
+  { name: "Тюбинги", href: "/catalog/tubing" },
+  { name: "Ёлки", href: "/catalog/christmas-trees" },
+  { name: "Декор", href: "/catalog/decor" },
+  { name: "Праздник", href: "/catalog/party" },
   { name: "Детям", href: "/catalog/kids" },
 ];
 
@@ -41,6 +50,9 @@ export function Header() {
   const { season } = useSeason();
   const { user, profile, isAdmin, signOut } = useAuth();
   const navigate = useNavigate();
+
+  const navigation = season === "winter" ? winterNavigation : summerNavigation;
+  const quizText = season === "winter" ? "🎁 Подобрать подарок" : "🎯 Подобрать велосипед";
 
   const handleSignOut = async () => {
     await signOut();
@@ -242,7 +254,7 @@ export function Header() {
                       to="/quiz"
                       className="flex items-center gap-2 text-lg font-medium text-primary p-3"
                     >
-                      🎯 Подобрать велосипед
+                      {quizText}
                     </Link>
                   </div>
 
@@ -312,7 +324,7 @@ export function Header() {
             to="/quiz"
             className="ml-auto text-sm font-bold text-primary hover:scale-105 transition-transform"
           >
-            🎯 Подобрать велосипед
+            {quizText}
           </Link>
         </nav>
       </div>
