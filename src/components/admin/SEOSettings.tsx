@@ -82,14 +82,14 @@ export function SEOSettings() {
         // Update existing
         const result = await supabase
           .from("site_settings")
-          .update({ value: seoData as unknown as Record<string, unknown>, updated_at: new Date().toISOString() })
+          .update({ value: JSON.parse(JSON.stringify(seoData)), updated_at: new Date().toISOString() })
           .eq("key", "seo_global");
         error = result.error;
       } else {
         // Insert new
         const result = await supabase
           .from("site_settings")
-          .insert({ key: "seo_global", value: seoData as unknown as Record<string, unknown> });
+          .insert([{ key: "seo_global", value: JSON.parse(JSON.stringify(seoData)) }]);
         error = result.error;
       }
 
