@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Image, Save, Loader2, Sun, Snowflake } from "lucide-react";
 import { toast } from "sonner";
+import { SingleImageUpload } from "./SingleImageUpload";
 
 interface BannerContent {
   summer: {
@@ -221,26 +222,12 @@ export function BannerSettings() {
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <Label>URL изображения</Label>
-                  <Input
-                    value={currentSeason.imageUrl}
-                    onChange={(e) => updateField(activeSeason, "imageUrl", e.target.value)}
-                    placeholder="https://..."
-                  />
-                  {currentSeason.imageUrl && (
-                    <div className="mt-2 rounded-lg overflow-hidden border bg-muted/50">
-                      <img
-                        src={currentSeason.imageUrl}
-                        alt="Preview"
-                        className="w-full h-32 object-contain"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src = "/placeholder.svg";
-                        }}
-                      />
-                    </div>
-                  )}
-                </div>
+                <SingleImageUpload
+                  imageUrl={currentSeason.imageUrl}
+                  onImageChange={(url) => updateField(activeSeason, "imageUrl", url)}
+                  folder={`banners/${activeSeason}`}
+                  label={`Изображение баннера (${activeSeason === "summer" ? "лето" : "зима"})`}
+                />
 
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
