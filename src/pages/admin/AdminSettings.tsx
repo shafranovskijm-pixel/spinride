@@ -7,6 +7,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { PushNotificationSettings } from "@/components/admin/PushNotificationSettings";
 import { SEOSettings } from "@/components/admin/SEOSettings";
+import { BannerSettings } from "@/components/admin/BannerSettings";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { getCalendarSeason, applySeason, SeasonMode } from "@/lib/season";
@@ -86,6 +87,9 @@ export default function AdminSettings() {
       <div className="max-w-2xl space-y-6">
         {/* SEO settings */}
         <SEOSettings />
+
+        {/* Banner settings */}
+        <BannerSettings />
         
         {/* Push notifications */}
         <PushNotificationSettings />
