@@ -76,14 +76,30 @@ export function InteractiveParticles({
     const container = containerRef.current;
     if (!container) return;
 
-    container.addEventListener("mousemove", handleMouseMove);
-    container.addEventListener("mouseleave", handleMouseLeave);
+    const onMouseMove = (e: MouseEvent) => {
+      const rect = container.getBoundingClientRect();
+      // Check if mouse is within container bounds
+      if (
+        e.clientX >= rect.left &&
+        e.clientX <= rect.right &&
+        e.clientY >= rect.top &&
+        e.clientY <= rect.bottom
+      ) {
+        setMousePos({
+          x: e.clientX - rect.left,
+          y: e.clientY - rect.top,
+        });
+      } else {
+        setMousePos({ x: -1000, y: -1000 });
+      }
+    };
+
+    document.addEventListener("mousemove", onMouseMove);
 
     return () => {
-      container.removeEventListener("mousemove", handleMouseMove);
-      container.removeEventListener("mouseleave", handleMouseLeave);
+      document.removeEventListener("mousemove", onMouseMove);
     };
-  }, [handleMouseMove, handleMouseLeave]);
+  }, []);
 
   // Animate particles
   useEffect(() => {
@@ -134,7 +150,7 @@ export function InteractiveParticles({
     <div 
       ref={containerRef}
       className={cn(
-        "absolute inset-0 overflow-hidden pointer-events-auto",
+        "absolute inset-0 overflow-hidden pointer-events-none",
         className
       )}
     >
