@@ -83,6 +83,9 @@ export default function AdminSettings() {
   return (
     <AdminLayout title="Настройки" subtitle="Управление настройками сайта">
       <div className="max-w-2xl space-y-6">
+        {/* Push notifications */}
+        <PushNotificationSettings />
+        
         {/* Season settings */}
         <Card>
           <CardHeader>
