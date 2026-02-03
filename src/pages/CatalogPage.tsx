@@ -271,7 +271,10 @@ export default function CatalogPage() {
 
   return (
     <ShopLayout>
-      <div className="container-shop py-8">
+      {/* Background pattern */}
+      <div className="fixed inset-0 pattern-hexagon pointer-events-none" style={{ zIndex: 0 }} />
+      
+      <div className="container-shop py-8 relative" style={{ zIndex: 1 }}>
         {/* Breadcrumbs */}
         <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
           <Link to="/" className="hover:text-primary">Главная</Link>
