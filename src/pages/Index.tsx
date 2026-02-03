@@ -5,6 +5,9 @@ import { ShopLayout } from "@/components/shop/ShopLayout";
 import { HeroBanner } from "@/components/shop/HeroBanner";
 import { CategoryGrid } from "@/components/shop/CategoryGrid";
 import { ProductCard } from "@/components/shop/ProductCard";
+import { SectionDivider } from "@/components/shop/SectionDivider";
+import { FloatingIcons } from "@/components/shop/FloatingIcons";
+import { MarqueeStrip } from "@/components/shop/MarqueeStrip";
 import { useSeason } from "@/hooks/use-season";
 import { useProducts } from "@/hooks/use-products";
 import { useDocumentSEO } from "@/hooks/use-seo";
@@ -75,16 +78,23 @@ export default function Index() {
       {/* Hero */}
       <HeroBanner />
 
-      {/* Categories */}
-      <section className="container-shop py-12">
-        <div className="flex items-center justify-between mb-6">
+      {/* Decorative divider after hero */}
+      <SectionDivider variant="wave" />
+
+      {/* Categories with floating background */}
+      <section className="container-shop py-12 relative">
+        <FloatingIcons density="low" />
+        <div className="flex items-center justify-between mb-6 relative z-10">
           <h2 className="text-2xl font-bold animate-fade-in-up">Категории</h2>
           <Link to="/catalog" className="text-sm text-primary hover:underline flex items-center gap-1 underline-animate">
             Все категории <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
-        <CategoryGrid />
+        <CategoryGrid className="relative z-10" />
       </section>
+
+      {/* Marquee promotional strip */}
+      <MarqueeStrip />
 
       {/* Seasonal Products */}
       <ProductSection

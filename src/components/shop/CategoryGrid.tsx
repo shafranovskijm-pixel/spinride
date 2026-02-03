@@ -119,7 +119,7 @@ export function CategoryGrid({ className }: CategoryGridProps) {
         <Link
           key={category.id}
           to={`/catalog/${category.id}`}
-          className="group relative overflow-hidden rounded-2xl aspect-[3/4] bg-card shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 card-shine"
+          className="group relative overflow-hidden rounded-2xl aspect-[3/4] bg-card shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 card-shine corner-decoration"
           style={{ animationDelay: `${index * 0.1}s` }}
         >
           {/* Background image */}
@@ -135,13 +135,21 @@ export function CategoryGrid({ className }: CategoryGridProps) {
             )} />
           </div>
           
+          {/* Decorative ring on hover */}
+          <div className="absolute inset-2 rounded-xl border-2 border-white/0 group-hover:border-white/20 transition-all duration-300 pointer-events-none" />
+          
           {/* Content */}
           <div className="absolute inset-0 p-4 flex flex-col justify-end text-white">
-            <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center mb-3 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
+            <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center mb-3 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 group-hover:bg-white/30">
               <category.icon className="h-5 w-5" />
             </div>
             <h3 className="font-bold text-lg leading-tight group-hover:translate-x-1 transition-transform duration-300">{category.name}</h3>
             <p className="text-sm text-white/80 line-clamp-2 mt-1 group-hover:translate-x-1 transition-transform duration-300 delay-75">{category.description}</p>
+          </div>
+          
+          {/* Sparkle effect on hover */}
+          <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <div className="w-2 h-2 bg-white rounded-full animate-ping" />
           </div>
         </Link>
       ))}
