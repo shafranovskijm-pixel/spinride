@@ -265,7 +265,7 @@ export function PushNotificationSettings() {
             <div className="flex items-center justify-between p-4 border rounded-lg">
               <div className="flex items-center gap-3">
                 {isSubscribed ? (
-                  <BellRing className="h-8 w-8 text-green-500" />
+                  <BellRing className="h-8 w-8 text-secondary" />
                 ) : (
                   <BellOff className="h-8 w-8 text-muted-foreground" />
                 )}
