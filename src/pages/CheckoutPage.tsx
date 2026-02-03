@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, Check, Send } from "lucide-react";
+import { ArrowLeft, Send, WifiOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,6 +12,8 @@ import { ShopLayout } from "@/components/shop/ShopLayout";
 import { useCart } from "@/hooks/use-cart";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { addToSyncQueue } from "@/lib/offline-db";
+import { formatPhone, isValidPhone } from "@/hooks/use-phone-mask";
 
 export default function CheckoutPage() {
   const navigate = useNavigate();
@@ -53,27 +55,69 @@ export default function CheckoutPage() {
       return;
     }
 
+    if (!isValidPhone(formData.phone)) {
+      toast({
+        title: "Некорректный номер телефона",
+        description: "Введите номер в формате +7 (XXX) XXX-XX-XX",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
 
-    try {
-      const orderItems = items.map(({ product, quantity }) => ({
-        product_id: product.id,
-        name: product.name,
-        price: product.sale_price ?? product.price,
-        quantity,
-        image: product.images?.[0],
-      }));
+    const orderItems = items.map(({ product, quantity }) => ({
+      product_id: product.id,
+      name: product.name,
+      price: product.sale_price ?? product.price,
+      quantity,
+      image: product.images?.[0],
+    }));
 
+    const orderData = {
+      customer_name: formData.name.trim(),
+      customer_phone: formData.phone.trim(),
+      customer_email: formData.email.trim() || null,
+      delivery_method: formData.delivery,
+      delivery_address: formData.delivery === "delivery" ? formData.address.trim() : null,
+      items: orderItems,
+      total_amount: total,
+      notes: formData.notes.trim() || null,
+    };
+
+    // Check if offline
+    if (!navigator.onLine) {
+      try {
+        await addToSyncQueue({
+          type: 'order',
+          action: 'create',
+          data: orderData,
+        });
+
+        clearCart();
+        toast({
+          title: "Заказ сохранён офлайн ✓",
+          description: "Будет отправлен при восстановлении сети",
+        });
+        navigate("/order-success");
+      } catch (error) {
+        console.error("Offline save error:", error);
+        toast({
+          title: "Ошибка сохранения",
+          description: "Попробуйте ещё раз",
+          variant: "destructive",
+        });
+      } finally {
+        setIsSubmitting(false);
+      }
+      return;
+    }
+
+    try {
       const { data: insertedOrder, error } = await supabase.from("orders").insert([{
         order_number: `SR-${Date.now()}`, // Will be overwritten by trigger
-        customer_name: formData.name.trim(),
-        customer_phone: formData.phone.trim(),
-        customer_email: formData.email.trim() || null,
-        delivery_method: formData.delivery,
-        delivery_address: formData.delivery === "delivery" ? formData.address.trim() : null,
+        ...orderData,
         items: JSON.parse(JSON.stringify(orderItems)),
-        total_amount: total,
-        notes: formData.notes.trim() || null,
       }]).select('order_number').single();
 
       if (error) throw error;
@@ -107,6 +151,28 @@ export default function CheckoutPage() {
       navigate("/order-success");
     } catch (error) {
       console.error("Order error:", error);
+      
+      // If network error, save offline
+      if (error instanceof Error && error.message.includes('fetch')) {
+        try {
+          await addToSyncQueue({
+            type: 'order',
+            action: 'create',
+            data: orderData,
+          });
+
+          clearCart();
+          toast({
+            title: "Заказ сохранён офлайн ✓",
+            description: "Будет отправлен при восстановлении сети",
+          });
+          navigate("/order-success");
+          return;
+        } catch (offlineError) {
+          console.error("Offline save fallback error:", offlineError);
+        }
+      }
+      
       toast({
         title: "Ошибка при оформлении",
         description: "Попробуйте ещё раз или позвоните нам",
@@ -156,9 +222,13 @@ export default function CheckoutPage() {
                         type="tel"
                         placeholder="+7 (999) 123-45-67"
                         value={formData.phone}
-                        onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+                        onChange={(e) => setFormData(prev => ({ ...prev, phone: formatPhone(e.target.value) }))}
                         required
+                        className={formData.phone && !isValidPhone(formData.phone) ? "border-destructive" : ""}
                       />
+                      {formData.phone && !isValidPhone(formData.phone) && (
+                        <p className="text-xs text-destructive">Введите полный номер телефона</p>
+                      )}
                     </div>
                     <div className="sm:col-span-2 space-y-2">
                       <Label htmlFor="email">Email (для уведомлений)</Label>

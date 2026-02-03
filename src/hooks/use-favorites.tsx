@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect, useCallback, ReactNode 
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./use-auth";
 import { toast } from "sonner";
+import { addToSyncQueue } from "@/lib/offline-db";
 
 interface FavoritesContextType {
   favorites: string[];
@@ -135,6 +136,18 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
     setFavorites((prev) => [...prev, productId]);
 
     if (user) {
+      // Check if online
+      if (!navigator.onLine) {
+        // Queue for sync when back online
+        await addToSyncQueue({
+          type: 'favorite',
+          action: 'add',
+          data: { productId, userId: user.id },
+        });
+        toast.info("Сохранено для синхронизации");
+        return;
+      }
+
       try {
         const { error } = await supabase.from("favorites").insert({
           user_id: user.id,
@@ -143,7 +156,17 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
 
         if (error) throw error;
       } catch (error) {
-        // Rollback on error
+        // If network error, queue for sync
+        if (error instanceof Error && error.message.includes('fetch')) {
+          await addToSyncQueue({
+            type: 'favorite',
+            action: 'add',
+            data: { productId, userId: user.id },
+          });
+          toast.info("Сохранено для синхронизации");
+          return;
+        }
+        // Rollback on other errors
         setFavorites((prev) => prev.filter((id) => id !== productId));
         console.error("Error adding favorite:", error);
         toast.error("Не удалось добавить в избранное");
@@ -156,6 +179,18 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
     setFavorites((prev) => prev.filter((id) => id !== productId));
 
     if (user) {
+      // Check if online
+      if (!navigator.onLine) {
+        // Queue for sync when back online
+        await addToSyncQueue({
+          type: 'favorite',
+          action: 'remove',
+          data: { productId, userId: user.id },
+        });
+        toast.info("Сохранено для синхронизации");
+        return;
+      }
+
       try {
         const { error } = await supabase
           .from("favorites")
@@ -165,7 +200,17 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
 
         if (error) throw error;
       } catch (error) {
-        // Rollback on error
+        // If network error, queue for sync
+        if (error instanceof Error && error.message.includes('fetch')) {
+          await addToSyncQueue({
+            type: 'favorite',
+            action: 'remove',
+            data: { productId, userId: user.id },
+          });
+          toast.info("Сохранено для синхронизации");
+          return;
+        }
+        // Rollback on other errors
         setFavorites((prev) => [...prev, productId]);
         console.error("Error removing favorite:", error);
         toast.error("Не удалось удалить из избранного");
