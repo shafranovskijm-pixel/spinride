@@ -19,6 +19,9 @@ import OrderSuccessPage from "./pages/OrderSuccessPage";
 import QuizPage from "./pages/QuizPage";
 import DeliveryPage from "./pages/DeliveryPage";
 import AboutPage from "./pages/AboutPage";
+import WarrantyPage from "./pages/WarrantyPage";
+import ContactsPage from "./pages/ContactsPage";
+import OrdersPage from "./pages/OrdersPage";
 import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
 import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
@@ -60,6 +63,9 @@ const App = () => (
                     <Route path="/compare" element={<ComparePage />} />
                     <Route path="/favorites" element={<FavoritesPage />} />
                     <Route path="/profile" element={<ProfilePage />} />
+                    <Route path="/warranty" element={<WarrantyPage />} />
+                    <Route path="/contacts" element={<ContactsPage />} />
+                    <Route path="/orders" element={<OrdersPage />} />
                     {/* Auth routes */}
                     <Route path="/auth/login" element={<LoginPage />} />
                     <Route path="/auth/register" element={<RegisterPage />} />
