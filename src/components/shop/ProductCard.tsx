@@ -7,7 +7,6 @@ import { Product } from "@/types/shop";
 import { useCart } from "@/hooks/use-cart";
 import { useFavorites } from "@/hooks/use-favorites";
 import { useCompare } from "@/hooks/use-compare";
-import { InteractiveParticles } from "@/components/shop/InteractiveParticles";
 import { cn } from "@/lib/utils";
 
 interface ProductCardProps {
@@ -48,9 +47,8 @@ export function ProductCard({ product, className }: ProductCardProps) {
   };
 
   return (
-    <Card className={cn("product-card card-shine overflow-hidden group relative", className)}>
-      <InteractiveParticles count={18} interactionRadius={100} className="z-0" />
-      <Link to={`/product/${product.slug}`} className="relative z-10">
+    <Card className={cn("product-card card-shine overflow-hidden group", className)}>
+      <Link to={`/product/${product.slug}`}>
         {/* Image container */}
         <div className="relative aspect-square overflow-hidden bg-muted">
           <img
