@@ -48,20 +48,9 @@ import {
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { ProductFormDialog } from "@/components/admin/ProductFormDialog";
 import { ProductListMobile } from "@/components/admin/ProductListMobile";
-import { Product } from "@/types/shop";
+import { Product, Category } from "@/types/shop";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-
-const categories = [
-  { value: "all", label: "Все категории" },
-  { value: "bicycles", label: "Велосипеды" },
-  { value: "e-bikes", label: "Электровелосипеды" },
-  { value: "e-scooters", label: "Электросамокаты" },
-  { value: "scooters", label: "Самокаты" },
-  { value: "bmx", label: "BMX" },
-  { value: "kids", label: "Детям" },
-  { value: "accessories", label: "Аксессуары" },
-];
 
 export default function AdminProducts() {
   const { toast } = useToast();
@@ -71,6 +60,26 @@ export default function AdminProducts() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [deleteProduct, setDeleteProduct] = useState<Product | null>(null);
+
+  // Fetch categories from Supabase
+  const { data: dbCategories = [] } = useQuery({
+    queryKey: ["admin-categories"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("categories")
+        .select("*")
+        .order("sort_order", { ascending: true });
+
+      if (error) throw error;
+      return data as Category[];
+    },
+  });
+
+  // Build categories array with "all" option
+  const categories = [
+    { value: "all", label: "Все категории" },
+    ...dbCategories.map((cat) => ({ value: cat.id, label: cat.name })),
+  ];
 
   // Fetch products from Supabase
   const { data: products = [], isLoading, error, refetch } = useQuery({
@@ -261,7 +270,7 @@ export default function AdminProducts() {
                   </TableCell>
                   <TableCell className="hidden md:table-cell">
                     <Badge variant="outline">
-                      {categories.find(c => c.value === product.category_id)?.label || product.category_id}
+                      {categories.find(c => c.value === product.category_id)?.label || product.category_id || "—"}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
