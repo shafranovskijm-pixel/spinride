@@ -20,7 +20,7 @@ export function Footer() {
             </p>
             <div className="flex gap-3">
               <a 
-                href="https://t.me/spinride" 
+                href="https://t.me/actionprim" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="w-10 h-10 rounded-xl bg-white/10 hover:bg-primary hover:text-primary-foreground flex items-center justify-center transition-all hover:scale-110 hover:-translate-y-1"
