@@ -121,8 +121,17 @@ export function PushNotificationSettings() {
         throw new Error("Failed to get subscription keys");
       }
 
+      // Convert ArrayBuffer to base64
+      const p256dhBase64 = btoa(String.fromCharCode(...new Uint8Array(p256dh as ArrayBuffer)));
+      const authBase64 = btoa(String.fromCharCode(...new Uint8Array(auth as ArrayBuffer)));
+
       // Save to database
       const { error } = await supabase.from("push_subscriptions").insert({
+        user_id: user.id,
+        endpoint: subscription.endpoint,
+        p256dh: p256dhBase64,
+        auth: authBase64,
+      });
         user_id: user.id,
         endpoint: subscription.endpoint,
         p256dh: btoa(String.fromCharCode(...new Uint8Array(p256dh))),
