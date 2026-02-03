@@ -70,13 +70,28 @@ export function SEOSettings() {
   const saveSEOSettings = async () => {
     setIsSaving(true);
     try {
-      const { error } = await supabase
+      // First check if record exists
+      const { data: existing } = await supabase
         .from("site_settings")
-        .upsert({
-          key: "seo_global",
-          value: seoData,
-          updated_at: new Date().toISOString(),
-        }, { onConflict: "key" });
+        .select("id")
+        .eq("key", "seo_global")
+        .maybeSingle();
+
+      let error;
+      if (existing) {
+        // Update existing
+        const result = await supabase
+          .from("site_settings")
+          .update({ value: seoData as unknown as Record<string, unknown>, updated_at: new Date().toISOString() })
+          .eq("key", "seo_global");
+        error = result.error;
+      } else {
+        // Insert new
+        const result = await supabase
+          .from("site_settings")
+          .insert({ key: "seo_global", value: seoData as unknown as Record<string, unknown> });
+        error = result.error;
+      }
 
       if (error) throw error;
 
