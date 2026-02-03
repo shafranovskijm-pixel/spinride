@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Phone, MapPin, Mail, Clock, Instagram, Send, MessageCircle } from "lucide-react";
+import { Phone, MapPin, Mail, Clock, Instagram, Send, MessageCircle, Heart } from "lucide-react";
 import { useFooterSettings } from "@/hooks/use-footer-settings";
 
 export function Footer() {
@@ -141,6 +141,18 @@ export function Footer() {
         {/* Bottom */}
         <div className="border-t border-white/10 mt-8 pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-white/50">
           <p>© {currentYear} {settings.copyright_text}</p>
+          <div className="flex items-center gap-1 text-white/50">
+            <span>Сделано с</span>
+            <Heart className="h-4 w-4 text-red-500 animate-pulse" fill="currentColor" />
+            <a 
+              href="https://24zxc.ru" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="hover:text-white transition-colors"
+            >
+              24zxc.ru
+            </a>
+          </div>
           <div className="flex gap-6">
             <Link to="/privacy" className="hover:text-white transition-colors">
               Политика конфиденциальности
