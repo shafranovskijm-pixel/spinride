@@ -37,6 +37,7 @@ import {
 import { ShopLayout } from "@/components/shop/ShopLayout";
 import { ProductCard } from "@/components/shop/ProductCard";
 import { useProducts, useCategories } from "@/hooks/use-products";
+import { useDocumentSEO } from "@/hooks/use-seo";
 import { cn } from "@/lib/utils";
 
 const seasons = [
@@ -57,6 +58,9 @@ export default function CatalogPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
+
+  // Apply SEO
+  useDocumentSEO("Каталог", "Полный каталог товаров SPINRIDE — самокаты, велосипеды и аксессуары");
 
   // Fetch categories from DB
   const { data: categories = [], isLoading: categoriesLoading } = useCategories();

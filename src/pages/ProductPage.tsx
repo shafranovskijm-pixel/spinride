@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { 
@@ -27,6 +27,7 @@ import { useCart } from "@/hooks/use-cart";
 import { useFavorites } from "@/hooks/use-favorites";
 import { useCompare } from "@/hooks/use-compare";
 import { useProduct, useRelatedProducts } from "@/hooks/use-products";
+import { useDocumentSEO } from "@/hooks/use-seo";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
@@ -41,6 +42,17 @@ export default function ProductPage() {
 
   // Fetch product from database
   const { data: product, isLoading: productLoading, error } = useProduct(slug || "");
+
+  // Dynamic SEO for product page
+  useEffect(() => {
+    if (product) {
+      document.title = `${product.name} | SPINRIDE`;
+      const metaDescription = document.querySelector('meta[name="description"]');
+      if (metaDescription && product.description) {
+        metaDescription.setAttribute("content", product.description.slice(0, 160));
+      }
+    }
+  }, [product]);
 
   // Fetch related products
   const { data: relatedProducts = [] } = useRelatedProducts(
@@ -231,8 +243,8 @@ export default function ProductPage() {
             <div className="flex items-center gap-2">
               {product.in_stock ? (
                 <>
-                  <Check className="h-5 w-5 text-green-500" />
-                  <span className="text-green-600 font-medium">В наличии</span>
+                  <Check className="h-5 w-5 text-secondary" />
+                  <span className="text-secondary font-medium">В наличии</span>
                   <span className="text-muted-foreground">({product.stock_quantity} шт.)</span>
                 </>
               ) : (
