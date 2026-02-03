@@ -49,7 +49,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
 
   return (
     <Card className={cn("product-card card-shine overflow-hidden group relative", className)}>
-      <InteractiveParticles count={12} interactionRadius={80} className="z-0" />
+      <InteractiveParticles count={18} interactionRadius={100} className="z-0" />
       <Link to={`/product/${product.slug}`} className="relative z-10">
         {/* Image container */}
         <div className="relative aspect-square overflow-hidden bg-muted">

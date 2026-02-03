@@ -47,7 +47,7 @@ export function InteractiveParticles({
         y,
         originalX: x,
         originalY: y,
-        size: Math.random() * 4 + 2,
+        size: Math.random() * 6 + 3,
         offsetX: 0,
         offsetY: 0,
       });
@@ -127,8 +127,8 @@ export function InteractiveParticles({
   }, [mousePos, interactionRadius]);
 
   const particleColor = season === "winter" 
-    ? "bg-blue-400/20" 
-    : "bg-amber-400/20";
+    ? "bg-blue-400/40" 
+    : "bg-amber-400/40";
 
   return (
     <div 
