@@ -159,7 +159,7 @@ export default function AdminSettings() {
                     <RadioGroupItem value="winter" id="winter" className="mt-1" />
                     <div className="flex-1">
                       <Label htmlFor="winter" className="font-medium cursor-pointer flex items-center gap-2">
-                        <Snowflake className="h-4 w-4 text-blue-500" />
+                        <Snowflake className="h-4 w-4 text-accent-foreground" />
                         Зимний режим
                       </Label>
                       <p className="text-sm text-muted-foreground mt-1">
