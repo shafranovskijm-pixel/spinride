@@ -1,10 +1,32 @@
 import { Link } from "react-router-dom";
 import { Phone, MapPin, Mail, Clock, Instagram, Send, MessageCircle, Heart } from "lucide-react";
 import { useFooterSettings } from "@/hooks/use-footer-settings";
+import { useSeason } from "@/hooks/use-season";
+
+const summerCatalogLinks = [
+  { title: "Велосипеды", url: "/catalog/bicycles" },
+  { title: "Электровелосипеды", url: "/catalog/e-bikes" },
+  { title: "Электросамокаты", url: "/catalog/scooters" },
+  { title: "BMX", url: "/catalog/bmx" },
+  { title: "Детям", url: "/catalog/kids" },
+  { title: "Аксессуары", url: "/catalog/accessories" },
+];
+
+const winterCatalogLinks = [
+  { title: "Тюбинги", url: "/catalog/tubing" },
+  { title: "Ёлки", url: "/catalog/christmas-trees" },
+  { title: "Декор", url: "/catalog/decor" },
+  { title: "Праздничные товары", url: "/catalog/party" },
+  { title: "Детям", url: "/catalog/kids" },
+  { title: "Аксессуары", url: "/catalog/accessories" },
+];
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
   const { data: settings } = useFooterSettings();
+  const { season } = useSeason();
+
+  const catalogLinks = season === "winter" ? winterCatalogLinks : summerCatalogLinks;
 
   if (!settings) {
     return null; // Loading state
@@ -72,11 +94,11 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Catalog */}
+          {/* Catalog - Seasonal */}
           <div>
             <h4 className="font-bold text-lg mb-4">Каталог</h4>
             <ul className="space-y-2">
-              {settings.catalog_links.map((link, index) => (
+              {catalogLinks.map((link, index) => (
                 <li key={index}>
                   <Link 
                     to={link.url} 
