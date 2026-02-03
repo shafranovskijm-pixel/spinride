@@ -20,10 +20,13 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { Skeleton } from "@/components/ui/skeleton";
+import { usePageContent } from "@/hooks/use-page-content";
 
-const deliveryMethods = [
+// Fallback data
+const defaultDeliveryMethods = [
   {
-    icon: Truck,
+    icon: "Truck",
     title: "Курьерская доставка",
     description: "Доставим заказ прямо до двери",
     details: [
@@ -35,7 +38,7 @@ const deliveryMethods = [
     badge: "Популярно",
   },
   {
-    icon: MapPin,
+    icon: "MapPin",
     title: "Самовывоз из магазина",
     description: "Заберите заказ в удобное время",
     details: [
@@ -47,7 +50,7 @@ const deliveryMethods = [
     badge: "Бесплатно",
   },
   {
-    icon: Package,
+    icon: "Package",
     title: "Транспортная компания",
     description: "Доставка в любой регион России",
     details: [
@@ -59,28 +62,36 @@ const deliveryMethods = [
   },
 ];
 
-const paymentMethods = [
+const defaultPaymentMethods = [
   {
-    icon: CreditCard,
+    icon: "CreditCard",
     title: "Банковская карта",
     description: "Visa, MasterCard, МИР",
     details: "Безопасная оплата через защищённое соединение. Поддерживаем карты всех российских банков.",
   },
   {
-    icon: Banknote,
+    icon: "Banknote",
     title: "Наличные",
     description: "При получении заказа",
     details: "Оплата курьеру или в магазине при самовывозе. Сдача с крупных купюр.",
   },
   {
-    icon: Shield,
+    icon: "Shield",
     title: "СБП (Система быстрых платежей)",
     description: "Моментальный перевод",
     details: "Переводите оплату напрямую с вашего банковского приложения по QR-коду или номеру телефона.",
   },
 ];
 
-const faqItems = [
+const defaultDeliveryZones = [
+  { region: "г. Уссурийск", time: "1-2 дня", price: "Бесплатно от 5 000 ₽" },
+  { region: "Приморский край", time: "2-5 дней", price: "от 500 ₽" },
+  { region: "Дальний Восток", time: "5-10 дней", price: "от 800 ₽" },
+  { region: "Сибирь, Урал", time: "7-12 дней", price: "от 1 200 ₽" },
+  { region: "Центральная Россия, Москва", time: "10-14 дней", price: "от 1 500 ₽" },
+];
+
+const defaultFaqItems = [
   {
     question: "Как узнать статус моего заказа?",
     answer: "После оформления заказа вы получите SMS и email с номером заказа. Отслеживать статус можно в личном кабинете или позвонив нам по телефону +7 924-788-11-11.",
@@ -107,19 +118,55 @@ const faqItems = [
   },
 ];
 
+const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
+  Truck,
+  MapPin,
+  Package,
+  CreditCard,
+  Banknote,
+  Shield,
+};
+
 export default function DeliveryPage() {
+  const { data: pageContent, isLoading } = usePageContent("delivery");
+  
+  const content = pageContent?.content as any || {};
+  const title = pageContent?.title || "Доставка и оплата";
+  const subtitle = pageContent?.subtitle || "Выберите удобный способ получения и оплаты вашего заказа. Мы доставляем по всей России!";
+  
+  const deliveryMethods = content.delivery_methods?.length > 0 ? content.delivery_methods : defaultDeliveryMethods;
+  const paymentMethods = content.payment_methods?.length > 0 ? content.payment_methods : defaultPaymentMethods;
+  const deliveryZones = content.delivery_zones?.length > 0 ? content.delivery_zones : defaultDeliveryZones;
+  const faqItems = content.faq?.length > 0 ? content.faq : defaultFaqItems;
+  const importantNote = content.important_note || "Крупногабаритные товары (велосипеды, электросамокаты) доставляются в разобранном виде. При необходимости наши специалисты могут собрать товар за дополнительную плату (от 500 ₽).";
+  const contactPhone = content.contact_phone || "+7 924-788-11-11";
+  const contactHours = content.contact_hours || "Пн-Сб 10:00-19:00, Вс 11:00-17:00";
+
+  if (isLoading) {
+    return (
+      <ShopLayout>
+        <div className="container-shop py-8 md:py-12">
+          <div className="text-center mb-12">
+            <Skeleton className="h-10 w-64 mx-auto mb-4" />
+            <Skeleton className="h-6 w-96 mx-auto" />
+          </div>
+          <div className="grid gap-6 md:grid-cols-3">
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-64 rounded-lg" />
+            ))}
+          </div>
+        </div>
+      </ShopLayout>
+    );
+  }
+
   return (
     <ShopLayout>
       <div className="container-shop py-8 md:py-12">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-3xl md:text-4xl font-bold mb-4">
-            Доставка и оплата
-          </h1>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            Выберите удобный способ получения и оплаты вашего заказа. 
-            Мы доставляем по всей России!
-          </p>
+          <h1 className="text-3xl md:text-4xl font-bold mb-4">{title}</h1>
+          <p className="text-muted-foreground max-w-2xl mx-auto">{subtitle}</p>
         </div>
 
         {/* Delivery section */}
@@ -132,34 +179,37 @@ export default function DeliveryPage() {
           </div>
 
           <div className="grid gap-6 md:grid-cols-3">
-            {deliveryMethods.map((method) => (
-              <Card key={method.title} className="relative overflow-hidden">
-                {method.badge && (
-                  <Badge className="absolute top-4 right-4 bg-primary">
-                    {method.badge}
-                  </Badge>
-                )}
-                <CardHeader>
-                  <div className="p-3 rounded-xl bg-muted w-fit mb-2">
-                    <method.icon className="h-6 w-6 text-foreground" />
-                  </div>
-                  <CardTitle className="text-lg">{method.title}</CardTitle>
-                  <p className="text-sm text-muted-foreground">
-                    {method.description}
-                  </p>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2">
-                    {method.details.map((detail, index) => (
-                      <li key={index} className="flex items-start gap-2 text-sm">
-                        <CheckCircle2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                        <span>{detail}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-            ))}
+            {deliveryMethods.map((method: any, index: number) => {
+              const IconComponent = ICON_MAP[method.icon] || Truck;
+              return (
+                <Card key={index} className="relative overflow-hidden">
+                  {method.badge && (
+                    <Badge className="absolute top-4 right-4 bg-primary">
+                      {method.badge}
+                    </Badge>
+                  )}
+                  <CardHeader>
+                    <div className="p-3 rounded-xl bg-muted w-fit mb-2">
+                      <IconComponent className="h-6 w-6 text-foreground" />
+                    </div>
+                    <CardTitle className="text-lg">{method.title}</CardTitle>
+                    <p className="text-sm text-muted-foreground">
+                      {method.description}
+                    </p>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-2">
+                      {method.details?.map((detail: string, detailIndex: number) => (
+                        <li key={detailIndex} className="flex items-start gap-2 text-sm">
+                          <CheckCircle2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                          <span>{detail}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
 
           {/* Delivery info banner */}
@@ -167,10 +217,7 @@ export default function DeliveryPage() {
             <Info className="h-5 w-5 text-primary shrink-0 mt-0.5" />
             <div className="text-sm">
               <p className="font-medium mb-1">Важная информация</p>
-              <p className="text-muted-foreground">
-                Крупногабаритные товары (велосипеды, электросамокаты) доставляются в разобранном виде. 
-                При необходимости наши специалисты могут собрать товар за дополнительную плату (от 500 ₽).
-              </p>
+              <p className="text-muted-foreground">{importantNote}</p>
             </div>
           </div>
         </section>
@@ -187,22 +234,25 @@ export default function DeliveryPage() {
           </div>
 
           <div className="grid gap-6 md:grid-cols-3">
-            {paymentMethods.map((method) => (
-              <Card key={method.title}>
-                <CardHeader>
-                  <div className="p-3 rounded-xl bg-muted w-fit mb-2">
-                    <method.icon className="h-6 w-6 text-foreground" />
-                  </div>
-                  <CardTitle className="text-lg">{method.title}</CardTitle>
-                  <p className="text-sm text-muted-foreground">
-                    {method.description}
-                  </p>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm">{method.details}</p>
-                </CardContent>
-              </Card>
-            ))}
+            {paymentMethods.map((method: any, index: number) => {
+              const IconComponent = ICON_MAP[method.icon] || CreditCard;
+              return (
+                <Card key={index}>
+                  <CardHeader>
+                    <div className="p-3 rounded-xl bg-muted w-fit mb-2">
+                      <IconComponent className="h-6 w-6 text-foreground" />
+                    </div>
+                    <CardTitle className="text-lg">{method.title}</CardTitle>
+                    <p className="text-sm text-muted-foreground">
+                      {method.description}
+                    </p>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm">{method.details}</p>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
 
           {/* Security badge */}
@@ -238,33 +288,21 @@ export default function DeliveryPage() {
                 </tr>
               </thead>
               <tbody>
-                <tr className="border-b">
-                  <td className="p-4">г. Уссурийск</td>
-                  <td className="p-4">1-2 дня</td>
-                  <td className="p-4">
-                    <span className="text-primary font-medium">Бесплатно</span> от 5 000 ₽
-                  </td>
-                </tr>
-                <tr className="border-b">
-                  <td className="p-4">Приморский край</td>
-                  <td className="p-4">2-5 дней</td>
-                  <td className="p-4">от 500 ₽</td>
-                </tr>
-                <tr className="border-b">
-                  <td className="p-4">Дальний Восток</td>
-                  <td className="p-4">5-10 дней</td>
-                  <td className="p-4">от 800 ₽</td>
-                </tr>
-                <tr className="border-b">
-                  <td className="p-4">Сибирь, Урал</td>
-                  <td className="p-4">7-12 дней</td>
-                  <td className="p-4">от 1 200 ₽</td>
-                </tr>
-                <tr>
-                  <td className="p-4 rounded-bl-lg">Центральная Россия, Москва</td>
-                  <td className="p-4">10-14 дней</td>
-                  <td className="p-4 rounded-br-lg">от 1 500 ₽</td>
-                </tr>
+                {deliveryZones.map((zone: any, index: number) => (
+                  <tr key={index} className={index < deliveryZones.length - 1 ? "border-b" : ""}>
+                    <td className={`p-4 ${index === deliveryZones.length - 1 ? "rounded-bl-lg" : ""}`}>
+                      {zone.region}
+                    </td>
+                    <td className="p-4">{zone.time}</td>
+                    <td className={`p-4 ${index === deliveryZones.length - 1 ? "rounded-br-lg" : ""}`}>
+                      {zone.price?.includes("Бесплатно") ? (
+                        <span><span className="text-primary font-medium">Бесплатно</span> {zone.price.replace("Бесплатно", "")}</span>
+                      ) : (
+                        zone.price
+                      )}
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
@@ -282,7 +320,7 @@ export default function DeliveryPage() {
           </div>
 
           <Accordion type="single" collapsible className="w-full">
-            {faqItems.map((item, index) => (
+            {faqItems.map((item: any, index: number) => (
               <AccordionItem key={index} value={`item-${index}`}>
                 <AccordionTrigger className="text-left">
                   {item.question}
@@ -302,15 +340,13 @@ export default function DeliveryPage() {
             Наши менеджеры с радостью помогут вам с оформлением заказа
           </p>
           <a 
-            href="tel:+79247881111" 
+            href={`tel:${contactPhone.replace(/[^\d+]/g, "")}`}
             className="inline-flex items-center gap-2 text-xl font-bold text-primary hover:underline"
           >
             <Phone className="h-5 w-5" />
-            +7 924-788-11-11
+            {contactPhone}
           </a>
-          <p className="text-sm text-muted-foreground mt-2">
-            Пн-Сб 10:00-19:00, Вс 11:00-17:00
-          </p>
+          <p className="text-sm text-muted-foreground mt-2">{contactHours}</p>
         </section>
       </div>
     </ShopLayout>
