@@ -11,6 +11,7 @@ import { MarqueeStrip } from "@/components/shop/MarqueeStrip";
 import { useSeason } from "@/hooks/use-season";
 import { useProducts } from "@/hooks/use-products";
 import { useDocumentSEO } from "@/hooks/use-seo";
+import { cn } from "@/lib/utils";
 
 export default function Index() {
   const { season } = useSeason();
@@ -40,7 +41,8 @@ export default function Index() {
     title, 
     icon, 
     link, 
-    linkText 
+    linkText,
+    showDecor = false
   }: { 
     products: typeof featuredProducts;
     isLoading: boolean;
@@ -48,28 +50,35 @@ export default function Index() {
     icon: React.ReactNode;
     link: string;
     linkText: string;
+    showDecor?: boolean;
   }) => (
-    <section className="container-shop py-12">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          {icon}
-          <h2 className="text-2xl font-bold">{title}</h2>
+    <section className={cn(
+      "py-12 relative",
+      showDecor && "bg-gradient-to-b from-primary/[0.02] via-primary/[0.04] to-primary/[0.02]"
+    )}>
+      {showDecor && <FloatingIcons density="low" />}
+      <div className="container-shop relative z-10">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            {icon}
+            <h2 className="text-2xl font-bold">{title}</h2>
+          </div>
+          <Link to={link} className="text-sm text-primary hover:underline flex items-center gap-1 underline-animate">
+            {linkText} <ArrowRight className="h-4 w-4" />
+          </Link>
         </div>
-        <Link to={link} className="text-sm text-primary hover:underline flex items-center gap-1 underline-animate">
-          {linkText} <ArrowRight className="h-4 w-4" />
-        </Link>
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 stagger-children">
+            {products.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        )}
       </div>
-      {isLoading ? (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
-      ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 stagger-children">
-          {products.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
-      )}
     </section>
   );
 
@@ -118,6 +127,7 @@ export default function Index() {
         icon={<TrendingUp className="h-6 w-6 text-primary" />}
         link="/catalog?featured=true"
         linkText="Все популярные"
+        showDecor={true}
       />
 
       {/* New Arrivals */}
@@ -129,6 +139,7 @@ export default function Index() {
           icon={<Sparkles className="h-6 w-6 text-primary animate-pulse" />}
           link="/catalog?new=true"
           linkText="Все новинки"
+          showDecor={true}
         />
       )}
 
