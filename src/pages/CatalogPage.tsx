@@ -416,9 +416,11 @@ export default function CatalogPage() {
 
         {/* Main content */}
         <div className="flex gap-8">
-          {/* Desktop sidebar */}
+          {/* Desktop sidebar - sticky */}
           <aside className="hidden lg:block w-64 shrink-0">
-            <FilterContent />
+            <div className="sticky top-4 max-h-[calc(100vh-2rem)] overflow-y-auto pr-2 scrollbar-thin">
+              <FilterContent />
+            </div>
           </aside>
 
           {/* Products grid */}
