@@ -143,6 +143,17 @@ export default function CheckoutPage() {
         console.error('Telegram notification failed:', err);
       });
 
+      // Send Push notification to admins (non-blocking)
+      supabase.functions.invoke('send-push', {
+        body: {
+          order_number: insertedOrder?.order_number || 'N/A',
+          customer_name: formData.name.trim(),
+          total_amount: total,
+        },
+      }).catch(err => {
+        console.error('Push notification failed:', err);
+      });
+
       clearCart();
       toast({
         title: "Заявка отправлена! ✓",

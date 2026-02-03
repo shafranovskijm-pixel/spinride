@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { AdminLayout } from "@/components/admin/AdminLayout";
+import { PushNotificationSettings } from "@/components/admin/PushNotificationSettings";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { getCalendarSeason, applySeason, SeasonMode } from "@/lib/season";
@@ -82,6 +83,9 @@ export default function AdminSettings() {
   return (
     <AdminLayout title="Настройки" subtitle="Управление настройками сайта">
       <div className="max-w-2xl space-y-6">
+        {/* Push notifications */}
+        <PushNotificationSettings />
+        
         {/* Season settings */}
         <Card>
           <CardHeader>
@@ -136,7 +140,7 @@ export default function AdminSettings() {
                     <RadioGroupItem value="summer" id="summer" className="mt-1" />
                     <div className="flex-1">
                       <Label htmlFor="summer" className="font-medium cursor-pointer flex items-center gap-2">
-                        <Sun className="h-4 w-4 text-orange-500" />
+                        <Sun className="h-4 w-4 text-primary" />
                         Летний режим
                       </Label>
                       <p className="text-sm text-muted-foreground mt-1">
@@ -155,7 +159,7 @@ export default function AdminSettings() {
                     <RadioGroupItem value="winter" id="winter" className="mt-1" />
                     <div className="flex-1">
                       <Label htmlFor="winter" className="font-medium cursor-pointer flex items-center gap-2">
-                        <Snowflake className="h-4 w-4 text-blue-500" />
+                        <Snowflake className="h-4 w-4 text-accent-foreground" />
                         Зимний режим
                       </Label>
                       <p className="text-sm text-muted-foreground mt-1">
@@ -165,25 +169,25 @@ export default function AdminSettings() {
                   </div>
                 </RadioGroup>
 
-                <div className="pt-4 border-t">
-                  <div className="flex items-center justify-between mb-4">
-                    <div>
-                      <p className="font-medium">Предпросмотр</p>
-                      <p className="text-sm text-muted-foreground">
-                        Текущий активный сезон: <strong>{effectiveSeason === "summer" ? "Лето ☀️" : "Зима ❄️"}</strong>
-                      </p>
-                    </div>
-                    <div 
-                      className={cn(
-                        "w-20 h-12 rounded-lg flex items-center justify-center text-2xl",
-                        effectiveSeason === "summer" 
-                          ? "bg-gradient-to-r from-orange-400 to-yellow-400" 
-                          : "bg-gradient-to-r from-blue-400 to-cyan-400"
-                      )}
-                    >
-                      {effectiveSeason === "summer" ? "☀️" : "❄️"}
-                    </div>
-                  </div>
+                    <div className="pt-4 border-t">
+                      <div className="flex items-center justify-between mb-4">
+                        <div>
+                          <p className="font-medium">Предпросмотр</p>
+                          <p className="text-sm text-muted-foreground">
+                            Текущий активный сезон: <strong>{effectiveSeason === "summer" ? "Лето ☀️" : "Зима ❄️"}</strong>
+                          </p>
+                        </div>
+                        <div 
+                          className={cn(
+                            "w-20 h-12 rounded-lg flex items-center justify-center text-2xl",
+                            effectiveSeason === "summer" 
+                              ? "bg-gradient-to-r from-primary to-secondary" 
+                              : "bg-gradient-to-r from-accent to-primary"
+                          )}
+                        >
+                          {effectiveSeason === "summer" ? "☀️" : "❄️"}
+                        </div>
+                      </div>
 
                   <Button onClick={saveSettings} disabled={saving}>
                     <Save className="h-4 w-4 mr-2" />
