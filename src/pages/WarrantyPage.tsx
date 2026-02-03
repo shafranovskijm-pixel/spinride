@@ -1,16 +1,39 @@
 import { ShopLayout } from "@/components/shop/ShopLayout";
 import { Shield, CheckCircle, Clock, Phone, Mail } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { usePageContent, WarrantyContent } from "@/hooks/use-page-content";
 
 export default function WarrantyPage() {
+  const { data: page, isLoading } = usePageContent("warranty");
+  const content = page?.content as WarrantyContent | undefined;
+
+  if (isLoading) {
+    return (
+      <ShopLayout>
+        <div className="container mx-auto px-4 py-8 max-w-4xl">
+          <div className="text-center mb-8">
+            <Skeleton className="h-16 w-16 rounded-full mx-auto mb-4" />
+            <Skeleton className="h-8 w-48 mx-auto mb-2" />
+            <Skeleton className="h-4 w-64 mx-auto" />
+          </div>
+          <div className="grid gap-6 md:grid-cols-2 mb-8">
+            <Skeleton className="h-48" />
+            <Skeleton className="h-48" />
+          </div>
+        </div>
+      </ShopLayout>
+    );
+  }
+
   return (
     <ShopLayout>
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="text-center mb-8">
           <Shield className="h-16 w-16 text-primary mx-auto mb-4" />
-          <h1 className="text-3xl font-bold mb-2">Гарантия</h1>
+          <h1 className="text-3xl font-bold mb-2">{page?.title || "Гарантия"}</h1>
           <p className="text-muted-foreground">
-            Мы гарантируем качество всех товаров в нашем магазине
+            {page?.subtitle || "Мы гарантируем качество всех товаров в нашем магазине"}
           </p>
         </div>
 
@@ -23,22 +46,12 @@ export default function WarrantyPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <div className="flex justify-between border-b pb-2">
-                <span>Снегокаты и снежные тюбинги</span>
-                <span className="font-semibold">1 год</span>
-              </div>
-              <div className="flex justify-between border-b pb-2">
-                <span>Ледянки и санки</span>
-                <span className="font-semibold">6 месяцев</span>
-              </div>
-              <div className="flex justify-between border-b pb-2">
-                <span>Снежколепы и аксессуары</span>
-                <span className="font-semibold">3 месяца</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Электротранспорт</span>
-                <span className="font-semibold">1 год</span>
-              </div>
+              {content?.warranty_periods?.map((item, index) => (
+                <div key={index} className={`flex justify-between ${index < (content.warranty_periods?.length || 0) - 1 ? 'border-b pb-2' : ''}`}>
+                  <span>{item.category}</span>
+                  <span className="font-semibold">{item.period}</span>
+                </div>
+              ))}
             </CardContent>
           </Card>
 
@@ -51,22 +64,12 @@ export default function WarrantyPage() {
             </CardHeader>
             <CardContent>
               <ul className="space-y-2">
-                <li className="flex items-start gap-2">
-                  <CheckCircle className="h-4 w-4 text-primary mt-1 shrink-0" />
-                  <span>Заводской брак материалов</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle className="h-4 w-4 text-primary mt-1 shrink-0" />
-                  <span>Дефекты сборки и пошива</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle className="h-4 w-4 text-primary mt-1 shrink-0" />
-                  <span>Неисправность механизмов</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle className="h-4 w-4 text-primary mt-1 shrink-0" />
-                  <span>Расхождение швов при нормальной эксплуатации</span>
-                </li>
+                {content?.coverage?.map((item, index) => (
+                  <li key={index} className="flex items-start gap-2">
+                    <CheckCircle className="h-4 w-4 text-primary mt-1 shrink-0" />
+                    <span>{item}</span>
+                  </li>
+                ))}
               </ul>
             </CardContent>
           </Card>
@@ -80,20 +83,18 @@ export default function WarrantyPage() {
             <div>
               <h3 className="font-semibold mb-2">Для обращения по гарантии необходимо:</h3>
               <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                <li>Сохранить чек или накладную о покупке</li>
-                <li>Предоставить товар в чистом виде</li>
-                <li>Описать характер неисправности</li>
-                <li>Обратиться в течение гарантийного срока</li>
+                {content?.requirements?.map((item, index) => (
+                  <li key={index}>{item}</li>
+                ))}
               </ul>
             </div>
 
             <div>
               <h3 className="font-semibold mb-2">Гарантия не распространяется на:</h3>
               <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                <li>Механические повреждения по вине покупателя</li>
-                <li>Естественный износ при интенсивном использовании</li>
-                <li>Повреждения из-за несоблюдения условий эксплуатации</li>
-                <li>Следы ненадлежащего хранения</li>
+                {content?.exclusions?.map((item, index) => (
+                  <li key={index}>{item}</li>
+                ))}
               </ul>
             </div>
           </CardContent>
@@ -105,25 +106,30 @@ export default function WarrantyPage() {
           </CardHeader>
           <CardContent>
             <div className="flex flex-col sm:flex-row gap-4">
-              <a 
-                href="tel:+79991234567" 
-                className="flex items-center gap-2 text-primary hover:underline"
-              >
-                <Phone className="h-5 w-5" />
-                +7 (999) 123-45-67
-              </a>
-              <a 
-                href="mailto:warranty@spinride.ru" 
-                className="flex items-center gap-2 text-primary hover:underline"
-              >
-                <Mail className="h-5 w-5" />
-                warranty@spinride.ru
-              </a>
+              {content?.contact_phone && (
+                <a 
+                  href={`tel:${content.contact_phone.replace(/\D/g, '')}`}
+                  className="flex items-center gap-2 text-primary hover:underline"
+                >
+                  <Phone className="h-5 w-5" />
+                  {content.contact_phone}
+                </a>
+              )}
+              {content?.contact_email && (
+                <a 
+                  href={`mailto:${content.contact_email}`}
+                  className="flex items-center gap-2 text-primary hover:underline"
+                >
+                  <Mail className="h-5 w-5" />
+                  {content.contact_email}
+                </a>
+              )}
             </div>
-            <p className="text-sm text-muted-foreground mt-4">
-              Срок рассмотрения гарантийного обращения — до 14 рабочих дней. 
-              При подтверждении гарантийного случая товар будет отремонтирован или заменён на аналогичный.
-            </p>
+            {content?.processing_note && (
+              <p className="text-sm text-muted-foreground mt-4">
+                {content.processing_note}
+              </p>
+            )}
           </CardContent>
         </Card>
       </div>
