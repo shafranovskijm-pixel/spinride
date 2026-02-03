@@ -1,11 +1,74 @@
 import { Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { ArrowRight, Phone, MapPin, Snowflake, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSeason } from "@/hooks/use-season";
+import { supabase } from "@/integrations/supabase/client";
+
+interface BannerContent {
+  title: string;
+  titleLine2: string;
+  titleLine3: string;
+  subtitle: string;
+  description: string;
+  quizButtonText: string;
+  imageUrl: string;
+  phone: string;
+  city: string;
+}
+
+interface BannerSettings {
+  summer: BannerContent;
+  winter: BannerContent;
+}
+
+const defaultContent: BannerSettings = {
+  summer: {
+    title: "Велосипеды и",
+    titleLine2: "самокаты",
+    titleLine3: "для всей семьи",
+    subtitle: "доставка по всей России.",
+    description: "От городских прогулок до экстремальных поездок – найдите свой идеальный велосипед в Уссурийске!",
+    quizButtonText: "🎯 Подобрать велосипед",
+    imageUrl: "https://274418.selcdn.ru/cv08300-33250f0d-0664-43fc-9dbf-9d89738d114e/uploads/521356/653fe1a0-538e-4f32-802a-654787767f95.jpg",
+    phone: "+7 924-788-11-11",
+    city: "г. Уссурийск",
+  },
+  winter: {
+    title: "Зимние товары",
+    titleLine2: "для всей семьи",
+    titleLine3: "❄️",
+    subtitle: "доставка по всей России.",
+    description: "Тюбинги, санки, ёлки и новогодний декор – всё для зимних радостей!",
+    quizButtonText: "🎄 Подобрать подарок",
+    imageUrl: "https://images.unsplash.com/photo-1545048702-79362596cdc9?w=600",
+    phone: "+7 924-788-11-11",
+    city: "г. Уссурийск",
+  },
+};
 
 export function HeroBanner() {
   const { season, toggleSeason } = useSeason();
   const isWinter = season === "winter";
+
+  const { data: bannerSettings } = useQuery({
+    queryKey: ["banner-content"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("site_settings")
+        .select("value")
+        .eq("key", "banner_content")
+        .maybeSingle();
+
+      if (error) throw error;
+      return data?.value as unknown as BannerSettings | null;
+    },
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+
+  const content = bannerSettings
+    ? { ...defaultContent[season], ...(bannerSettings[season] || {}) }
+    : defaultContent[season];
 
   return (
     <section className="relative overflow-hidden min-h-[600px] lg:min-h-[700px]">
@@ -21,7 +84,6 @@ export function HeroBanner() {
       {/* Floating particles / snowflakes */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {isWinter ? (
-          // Snowflakes for winter
           <>
             <Snowflake className="absolute text-white/30 h-6 w-6 animate-float" style={{ top: '15%', left: '8%', animationDelay: '0s' }} />
             <Snowflake className="absolute text-white/20 h-8 w-8 animate-float" style={{ top: '25%', left: '20%', animationDelay: '0.5s' }} />
@@ -33,7 +95,6 @@ export function HeroBanner() {
             <Snowflake className="absolute text-white/20 h-6 w-6 animate-float" style={{ top: '55%', left: '45%', animationDelay: '1.5s' }} />
           </>
         ) : (
-          // Particles for summer
           <>
             <div className="particle" style={{ top: '20%', left: '10%' }} />
             <div className="particle" style={{ top: '60%', left: '5%' }} />
@@ -50,30 +111,17 @@ export function HeroBanner() {
           {/* Text */}
           <div className="space-y-6 text-center lg:text-left">
             <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black leading-[1.1] text-foreground animate-fade-in-up">
-              {isWinter ? (
-                <>
-                  Зимние товары{" "}
-                  <span className="block animate-fade-in-up" style={{ animationDelay: '0.1s' }}>для всей семьи</span>
-                  <span className="block text-foreground/90 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>❄️</span>
-                </>
-              ) : (
-                <>
-                  Велосипеды и{" "}
-                  <span className="block animate-fade-in-up" style={{ animationDelay: '0.1s' }}>самокаты</span>
-                  <span className="block text-foreground/90 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>для всей семьи</span>
-                </>
-              )}
+              {content.title}{" "}
+              <span className="block animate-fade-in-up" style={{ animationDelay: '0.1s' }}>{content.titleLine2}</span>
+              <span className="block text-foreground/90 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>{content.titleLine3}</span>
             </h1>
             
             <p className="text-lg md:text-xl text-foreground/70 max-w-lg mx-auto lg:mx-0 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
-              доставка по всей России.
+              {content.subtitle}
             </p>
             
             <p className="text-base md:text-lg font-medium text-foreground/80 max-w-lg mx-auto lg:mx-0 animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
-              {isWinter 
-                ? "Тюбинги, санки, ёлки и новогодний декор – всё для зимних радостей!"
-                : "От городских прогулок до экстремальных поездок – найдите свой идеальный велосипед в Уссурийске!"
-              }
+              {content.description}
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-4 animate-fade-in-up" style={{ animationDelay: '0.5s' }}>
@@ -94,7 +142,7 @@ export function HeroBanner() {
                 className="bg-background/90 hover:bg-background font-bold text-base px-8 py-6 rounded-xl border-2 hover:-translate-y-1 transition-all duration-300"
               >
                 <Link to="/quiz">
-                  {isWinter ? "🎄 Подобрать подарок" : "🎯 Подобрать велосипед"}
+                  {content.quizButtonText}
                 </Link>
               </Button>
             </div>
@@ -124,16 +172,16 @@ export function HeroBanner() {
             {/* Contact info */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-4 text-foreground/80">
               <a 
-                href="tel:+79247881111" 
+                href={`tel:${content.phone.replace(/[^+\d]/g, '')}`}
                 className="flex items-center gap-2 hover:text-secondary transition-colors font-semibold"
               >
                 <Phone className="h-5 w-5" />
-                <span>+7 924-788-11-11</span>
+                <span>{content.phone}</span>
               </a>
               <span className="hidden sm:block text-foreground/40">•</span>
               <div className="flex items-center gap-2">
                 <MapPin className="h-5 w-5" />
-                <span>г. Уссурийск</span>
+                <span>{content.city}</span>
               </div>
             </div>
           </div>
@@ -168,11 +216,8 @@ export function HeroBanner() {
               {/* Product image */}
               <div className="relative z-10 p-8">
                 <img 
-                  src={isWinter 
-                    ? "https://images.unsplash.com/photo-1545048702-79362596cdc9?w=600"
-                    : "https://274418.selcdn.ru/cv08300-33250f0d-0664-43fc-9dbf-9d89738d114e/uploads/521356/653fe1a0-538e-4f32-802a-654787767f95.jpg"
-                  }
-                  alt={isWinter ? "Новогодняя ёлка" : "Велосипед CRONUS"}
+                  src={content.imageUrl}
+                  alt={isWinter ? "Зимние товары" : "Велосипед"}
                   className="w-full h-auto object-contain drop-shadow-2xl animate-float"
                 />
               </div>

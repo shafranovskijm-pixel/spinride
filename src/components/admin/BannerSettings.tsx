@@ -1,0 +1,281 @@
+import { useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Image, Save, Loader2, Sun, Snowflake } from "lucide-react";
+import { toast } from "sonner";
+
+interface BannerContent {
+  summer: {
+    title: string;
+    titleLine2: string;
+    titleLine3: string;
+    subtitle: string;
+    description: string;
+    quizButtonText: string;
+    imageUrl: string;
+    phone: string;
+    city: string;
+  };
+  winter: {
+    title: string;
+    titleLine2: string;
+    titleLine3: string;
+    subtitle: string;
+    description: string;
+    quizButtonText: string;
+    imageUrl: string;
+    phone: string;
+    city: string;
+  };
+}
+
+const defaultBannerContent: BannerContent = {
+  summer: {
+    title: "Велосипеды и",
+    titleLine2: "самокаты",
+    titleLine3: "для всей семьи",
+    subtitle: "доставка по всей России.",
+    description: "От городских прогулок до экстремальных поездок – найдите свой идеальный велосипед в Уссурийске!",
+    quizButtonText: "🎯 Подобрать велосипед",
+    imageUrl: "https://274418.selcdn.ru/cv08300-33250f0d-0664-43fc-9dbf-9d89738d114e/uploads/521356/653fe1a0-538e-4f32-802a-654787767f95.jpg",
+    phone: "+7 924-788-11-11",
+    city: "г. Уссурийск",
+  },
+  winter: {
+    title: "Зимние товары",
+    titleLine2: "для всей семьи",
+    titleLine3: "❄️",
+    subtitle: "доставка по всей России.",
+    description: "Тюбинги, санки, ёлки и новогодний декор – всё для зимних радостей!",
+    quizButtonText: "🎄 Подобрать подарок",
+    imageUrl: "https://images.unsplash.com/photo-1545048702-79362596cdc9?w=600",
+    phone: "+7 924-788-11-11",
+    city: "г. Уссурийск",
+  },
+};
+
+export function BannerSettings() {
+  const queryClient = useQueryClient();
+  const [content, setContent] = useState<BannerContent>(defaultBannerContent);
+  const [activeSeason, setActiveSeason] = useState<"summer" | "winter">("summer");
+
+  const { data: savedContent, isLoading } = useQuery({
+    queryKey: ["banner-settings"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("site_settings")
+        .select("value")
+        .eq("key", "banner_content")
+        .maybeSingle();
+
+      if (error) throw error;
+      return data?.value as unknown as BannerContent | null;
+    },
+  });
+
+  useEffect(() => {
+    if (savedContent) {
+      setContent({
+        summer: { ...defaultBannerContent.summer, ...savedContent.summer },
+        winter: { ...defaultBannerContent.winter, ...savedContent.winter },
+      });
+    }
+  }, [savedContent]);
+
+  const saveMutation = useMutation({
+    mutationFn: async (newContent: BannerContent) => {
+      const { data: existing } = await supabase
+        .from("site_settings")
+        .select("id")
+        .eq("key", "banner_content")
+        .maybeSingle();
+
+      if (existing) {
+        const { error } = await supabase
+          .from("site_settings")
+          .update({ value: newContent as unknown as Record<string, never> })
+          .eq("key", "banner_content");
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from("site_settings")
+          .insert([{ key: "banner_content", value: newContent as unknown as Record<string, never> }]);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["banner-settings"] });
+      toast.success("Настройки баннера сохранены");
+    },
+    onError: (err: Error) => {
+      toast.error("Ошибка: " + err.message);
+    },
+  });
+
+  const updateField = (season: "summer" | "winter", field: keyof BannerContent["summer"], value: string) => {
+    setContent((prev) => ({
+      ...prev,
+      [season]: {
+        ...prev[season],
+        [field]: value,
+      },
+    }));
+  };
+
+  const handleSave = () => {
+    saveMutation.mutate(content);
+  };
+
+  const currentSeason = content[activeSeason];
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Image className="h-5 w-5 text-primary" />
+          Редактор баннера
+        </CardTitle>
+        <CardDescription>
+          Настройте содержимое главного баннера для летнего и зимнего сезонов
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <div className="flex justify-center py-8">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          </div>
+        ) : (
+          <div className="space-y-6">
+            <Tabs value={activeSeason} onValueChange={(v) => setActiveSeason(v as "summer" | "winter")}>
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="summer" className="gap-2">
+                  <Sun className="h-4 w-4" />
+                  Лето
+                </TabsTrigger>
+                <TabsTrigger value="winter" className="gap-2">
+                  <Snowflake className="h-4 w-4" />
+                  Зима
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value={activeSeason} className="space-y-4 mt-4">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label>Заголовок (строка 1)</Label>
+                    <Input
+                      value={currentSeason.title}
+                      onChange={(e) => updateField(activeSeason, "title", e.target.value)}
+                      placeholder="Велосипеды и"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Заголовок (строка 2)</Label>
+                    <Input
+                      value={currentSeason.titleLine2}
+                      onChange={(e) => updateField(activeSeason, "titleLine2", e.target.value)}
+                      placeholder="самокаты"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Заголовок (строка 3)</Label>
+                  <Input
+                    value={currentSeason.titleLine3}
+                    onChange={(e) => updateField(activeSeason, "titleLine3", e.target.value)}
+                    placeholder="для всей семьи"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Подзаголовок</Label>
+                  <Input
+                    value={currentSeason.subtitle}
+                    onChange={(e) => updateField(activeSeason, "subtitle", e.target.value)}
+                    placeholder="доставка по всей России."
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Описание</Label>
+                  <Textarea
+                    value={currentSeason.description}
+                    onChange={(e) => updateField(activeSeason, "description", e.target.value)}
+                    placeholder="Описание..."
+                    rows={2}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Текст кнопки "Квиз"</Label>
+                  <Input
+                    value={currentSeason.quizButtonText}
+                    onChange={(e) => updateField(activeSeason, "quizButtonText", e.target.value)}
+                    placeholder="🎯 Подобрать велосипед"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>URL изображения</Label>
+                  <Input
+                    value={currentSeason.imageUrl}
+                    onChange={(e) => updateField(activeSeason, "imageUrl", e.target.value)}
+                    placeholder="https://..."
+                  />
+                  {currentSeason.imageUrl && (
+                    <div className="mt-2 rounded-lg overflow-hidden border bg-muted/50">
+                      <img
+                        src={currentSeason.imageUrl}
+                        alt="Preview"
+                        className="w-full h-32 object-contain"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = "/placeholder.svg";
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label>Телефон</Label>
+                    <Input
+                      value={currentSeason.phone}
+                      onChange={(e) => updateField(activeSeason, "phone", e.target.value)}
+                      placeholder="+7 924-788-11-11"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Город</Label>
+                    <Input
+                      value={currentSeason.city}
+                      onChange={(e) => updateField(activeSeason, "city", e.target.value)}
+                      placeholder="г. Уссурийск"
+                    />
+                  </div>
+                </div>
+              </TabsContent>
+            </Tabs>
+
+            <div className="pt-4 border-t">
+              <Button onClick={handleSave} disabled={saveMutation.isPending}>
+                {saveMutation.isPending ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Save className="h-4 w-4 mr-2" />
+                )}
+                Сохранить баннер
+              </Button>
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
