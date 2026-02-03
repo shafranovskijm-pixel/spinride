@@ -43,6 +43,17 @@ export default function ProductPage() {
   // Fetch product from database
   const { data: product, isLoading: productLoading, error } = useProduct(slug || "");
 
+  // Dynamic SEO for product page
+  useEffect(() => {
+    if (product) {
+      document.title = `${product.name} | SPINRIDE`;
+      const metaDescription = document.querySelector('meta[name="description"]');
+      if (metaDescription && product.description) {
+        metaDescription.setAttribute("content", product.description.slice(0, 160));
+      }
+    }
+  }, [product]);
+
   // Fetch related products
   const { data: relatedProducts = [] } = useRelatedProducts(
     product?.id || "",
