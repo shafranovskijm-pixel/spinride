@@ -132,11 +132,6 @@ export function PushNotificationSettings() {
         p256dh: p256dhBase64,
         auth: authBase64,
       });
-        user_id: user.id,
-        endpoint: subscription.endpoint,
-        p256dh: btoa(String.fromCharCode(...new Uint8Array(p256dh))),
-        auth: btoa(String.fromCharCode(...new Uint8Array(auth))),
-      });
 
       if (error) throw error;
 
