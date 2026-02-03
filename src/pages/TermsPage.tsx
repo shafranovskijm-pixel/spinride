@@ -104,7 +104,7 @@ const defaultContent: TermsContentData = {
     }
   ],
   contact_email: "info@spinride.ru",
-  contact_phone: "+7 924-111-22-33"
+  contact_phone: "+7 924-788-11-11"
 };
 
 export default function TermsPage() {
