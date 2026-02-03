@@ -29,6 +29,7 @@ import AdminReviews from "./pages/admin/AdminReviews";
 import AdminSettings from "./pages/admin/AdminSettings";
 import ComparePage from "./pages/ComparePage";
 import FavoritesPage from "./pages/FavoritesPage";
+import ProfilePage from "./pages/ProfilePage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -58,6 +59,7 @@ const App = () => (
                     <Route path="/about" element={<AboutPage />} />
                     <Route path="/compare" element={<ComparePage />} />
                     <Route path="/favorites" element={<FavoritesPage />} />
+                    <Route path="/profile" element={<ProfilePage />} />
                     {/* Auth routes */}
                     <Route path="/auth/login" element={<LoginPage />} />
                     <Route path="/auth/register" element={<RegisterPage />} />
