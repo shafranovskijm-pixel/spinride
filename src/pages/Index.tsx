@@ -7,9 +7,13 @@ import { CategoryGrid } from "@/components/shop/CategoryGrid";
 import { ProductCard } from "@/components/shop/ProductCard";
 import { useSeason } from "@/hooks/use-season";
 import { useProducts } from "@/hooks/use-products";
+import { useDocumentSEO } from "@/hooks/use-seo";
 
 export default function Index() {
   const { season } = useSeason();
+  
+  // Apply SEO settings
+  useDocumentSEO();
   
   // Fetch products from database
   const { data: featuredProducts = [], isLoading: featuredLoading } = useProducts({
