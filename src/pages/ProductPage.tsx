@@ -23,6 +23,7 @@ import { ShopLayout } from "@/components/shop/ShopLayout";
 import { ProductCard } from "@/components/shop/ProductCard";
 import { ReviewForm } from "@/components/shop/ReviewForm";
 import { ReviewList } from "@/components/shop/ReviewList";
+import { InteractiveParticles } from "@/components/shop/InteractiveParticles";
 import { useCart } from "@/hooks/use-cart";
 import { useFavorites } from "@/hooks/use-favorites";
 import { useCompare } from "@/hooks/use-compare";
@@ -125,7 +126,8 @@ export default function ProductPage() {
 
   return (
     <ShopLayout>
-      <div className="container-shop py-8">
+      <div className="container-shop py-8 relative">
+        <InteractiveParticles count={60} interactionRadius={150} />
         {/* Breadcrumbs */}
         <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
           <Link to="/" className="hover:text-primary">Главная</Link>
