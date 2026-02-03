@@ -1,9 +1,10 @@
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowRight, Phone, MapPin, Snowflake, Sun } from "lucide-react";
+import { ArrowRight, Phone, MapPin, Snowflake, Sun, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSeason } from "@/hooks/use-season";
 import { supabase } from "@/integrations/supabase/client";
+import { useState, useEffect, useCallback } from "react";
 
 interface BannerContent {
   title: string;
@@ -21,6 +22,14 @@ interface BannerSettings {
   summer: BannerContent;
   winter: BannerContent;
 }
+
+const winterSliderImages = [
+  "/hero/slide-1.jpg",
+  "/hero/slide-2.jpg",
+  "/hero/slide-3.jpg",
+  "/hero/slide-4.jpg",
+  "/hero/slide-5.jpg",
+];
 
 const defaultContent: BannerSettings = {
   summer: {
@@ -41,7 +50,7 @@ const defaultContent: BannerSettings = {
     subtitle: "доставка по всей России.",
     description: "Тюбинги, санки, ёлки и новогодний декор – всё для зимних радостей!",
     quizButtonText: "🎄 Подобрать подарок",
-    imageUrl: "/hero-winter.jpg",
+    imageUrl: "/hero/slide-1.jpg",
     phone: "+7 924-788-11-11",
     city: "г. Уссурийск",
   },
@@ -50,6 +59,7 @@ const defaultContent: BannerSettings = {
 export function HeroBanner() {
   const { season, toggleSeason } = useSeason();
   const isWinter = season === "winter";
+  const [currentSlide, setCurrentSlide] = useState(0);
 
   const { data: bannerSettings } = useQuery({
     queryKey: ["banner-content"],
@@ -69,6 +79,27 @@ export function HeroBanner() {
   const content = bannerSettings
     ? { ...defaultContent[season], ...(bannerSettings[season] || {}) }
     : defaultContent[season];
+
+  // Auto-slide for winter
+  useEffect(() => {
+    if (!isWinter) return;
+    
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % winterSliderImages.length);
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, [isWinter]);
+
+  const nextSlide = useCallback(() => {
+    setCurrentSlide((prev) => (prev + 1) % winterSliderImages.length);
+  }, []);
+
+  const prevSlide = useCallback(() => {
+    setCurrentSlide((prev) => (prev - 1 + winterSliderImages.length) % winterSliderImages.length);
+  }, []);
+
+  const currentImage = isWinter ? winterSliderImages[currentSlide] : content.imageUrl;
 
   return (
     <section className="relative overflow-hidden min-h-[600px] lg:min-h-[700px]">
@@ -186,7 +217,7 @@ export function HeroBanner() {
             </div>
           </div>
 
-          {/* Hero Image */}
+          {/* Hero Image with Slider */}
           <div className="hidden lg:flex justify-center items-center relative">
             <div className="relative w-full max-w-xl">
               {/* Decorative rings */}
@@ -213,20 +244,55 @@ export function HeroBanner() {
               {/* Decorative background blob */}
               <div className="absolute inset-0 bg-gradient-to-br from-background/60 via-primary/5 to-secondary/10 rounded-[3rem] blob animate-pulse-soft" />
               
-              {/* Product image */}
+              {/* Product image with slider */}
               <div className="relative z-10 p-8">
                 <img 
-                  src={content.imageUrl}
+                  src={currentImage}
                   alt={isWinter ? "Зимние товары" : "Велосипед"}
-                  className="w-full h-auto object-contain drop-shadow-2xl animate-float"
+                  className="w-full h-auto object-contain drop-shadow-2xl animate-float rounded-2xl"
+                  key={currentSlide}
                 />
               </div>
+
+              {/* Slider controls for winter */}
+              {isWinter && (
+                <>
+                  <button
+                    onClick={prevSlide}
+                    className="absolute left-2 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-background/80 hover:bg-background shadow-lg flex items-center justify-center transition-all hover:scale-110"
+                  >
+                    <ChevronLeft className="h-5 w-5" />
+                  </button>
+                  <button
+                    onClick={nextSlide}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-background/80 hover:bg-background shadow-lg flex items-center justify-center transition-all hover:scale-110"
+                  >
+                    <ChevronRight className="h-5 w-5" />
+                  </button>
+                </>
+              )}
               
-              {/* Bottom decorative dots */}
-              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 flex gap-2">
-                <div className="w-3 h-3 rounded-full bg-primary/40 animate-pulse" style={{ animationDelay: '0s' }} />
-                <div className="w-3 h-3 rounded-full bg-secondary/50 animate-pulse" style={{ animationDelay: '0.2s' }} />
-                <div className="w-3 h-3 rounded-full bg-primary/40 animate-pulse" style={{ animationDelay: '0.4s' }} />
+              {/* Slide indicators */}
+              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 flex gap-2 z-20">
+                {isWinter ? (
+                  winterSliderImages.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setCurrentSlide(index)}
+                      className={`w-3 h-3 rounded-full transition-all ${
+                        index === currentSlide 
+                          ? 'bg-primary scale-125' 
+                          : 'bg-primary/40 hover:bg-primary/60'
+                      }`}
+                    />
+                  ))
+                ) : (
+                  <>
+                    <div className="w-3 h-3 rounded-full bg-primary/40 animate-pulse" style={{ animationDelay: '0s' }} />
+                    <div className="w-3 h-3 rounded-full bg-secondary/50 animate-pulse" style={{ animationDelay: '0.2s' }} />
+                    <div className="w-3 h-3 rounded-full bg-primary/40 animate-pulse" style={{ animationDelay: '0.4s' }} />
+                  </>
+                )}
               </div>
             </div>
           </div>
