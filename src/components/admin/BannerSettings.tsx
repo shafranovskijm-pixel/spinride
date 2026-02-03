@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Image, Save, Loader2, Sun, Snowflake } from "lucide-react";
+import { Image, Save, Loader2, Sun, Snowflake, Phone, MapPin, ArrowRight, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { SingleImageUpload } from "./SingleImageUpload";
 
@@ -61,10 +61,93 @@ const defaultBannerContent: BannerContent = {
   },
 };
 
+// Preview component for the banner
+function BannerPreview({ content, season }: { content: BannerContent["summer"]; season: "summer" | "winter" }) {
+  const isWinter = season === "winter";
+  
+  return (
+    <div className={`relative overflow-hidden rounded-xl ${isWinter ? "bg-gradient-to-br from-sky-500 to-blue-600" : "bg-gradient-to-br from-orange-400 to-amber-500"}`}>
+      <div className="relative z-10 p-4 sm:p-6">
+        <div className="grid lg:grid-cols-2 gap-4 items-center">
+          {/* Text */}
+          <div className="space-y-2 text-white">
+            <h2 className="text-lg sm:text-xl lg:text-2xl font-black leading-tight">
+              {content.title || "Заголовок"}{" "}
+              <span className="block">{content.titleLine2 || "строка 2"}</span>
+              <span className="block opacity-90">{content.titleLine3 || "строка 3"}</span>
+            </h2>
+            
+            <p className="text-xs sm:text-sm opacity-80">
+              {content.subtitle || "Подзаголовок"}
+            </p>
+            
+            <p className="text-xs opacity-70 hidden sm:block">
+              {content.description || "Описание..."}
+            </p>
+            
+            <div className="flex flex-wrap gap-2 pt-2">
+              <div className="bg-yellow-400 text-black text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1">
+                Каталог
+                <ArrowRight className="h-3 w-3" />
+              </div>
+              <div className="bg-white/90 text-black text-xs font-medium px-3 py-1.5 rounded-lg">
+                {content.quizButtonText || "Квиз"}
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-3 pt-2 text-xs opacity-80">
+              <span className="flex items-center gap-1">
+                <Phone className="h-3 w-3" />
+                {content.phone || "+7 000-000-00-00"}
+              </span>
+              <span className="flex items-center gap-1">
+                <MapPin className="h-3 w-3" />
+                {content.city || "Город"}
+              </span>
+            </div>
+          </div>
+
+          {/* Image */}
+          <div className="hidden lg:flex justify-center">
+            {content.imageUrl ? (
+              <img 
+                src={content.imageUrl}
+                alt="Preview"
+                className="w-32 h-32 object-contain drop-shadow-lg"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = "/placeholder.svg";
+                }}
+              />
+            ) : (
+              <div className="w-32 h-32 bg-white/20 rounded-xl flex items-center justify-center">
+                <Image className="h-12 w-12 text-white/50" />
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+      
+      {/* Decorative elements */}
+      <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
+      <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2" />
+      
+      {/* Season indicator */}
+      <div className="absolute top-2 right-2 bg-white/20 backdrop-blur-sm rounded-full p-1.5">
+        {isWinter ? (
+          <Snowflake className="h-4 w-4 text-white" />
+        ) : (
+          <Sun className="h-4 w-4 text-white" />
+        )}
+      </div>
+    </div>
+  );
+}
+
 export function BannerSettings() {
   const queryClient = useQueryClient();
   const [content, setContent] = useState<BannerContent>(defaultBannerContent);
   const [activeSeason, setActiveSeason] = useState<"summer" | "winter">("summer");
+  const [showPreview, setShowPreview] = useState(true);
 
   const { data: savedContent, isLoading } = useQuery({
     queryKey: ["banner-settings"],
@@ -112,6 +195,7 @@ export function BannerSettings() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["banner-settings"] });
+      queryClient.invalidateQueries({ queryKey: ["banner-content"] });
       toast.success("Настройки баннера сохранены");
     },
     onError: (err: Error) => {
@@ -138,13 +222,35 @@ export function BannerSettings() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Image className="h-5 w-5 text-primary" />
-          Редактор баннера
-        </CardTitle>
-        <CardDescription>
-          Настройте содержимое главного баннера для летнего и зимнего сезонов
-        </CardDescription>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="flex items-center gap-2">
+              <Image className="h-5 w-5 text-primary" />
+              Редактор баннера
+            </CardTitle>
+            <CardDescription>
+              Настройте содержимое главного баннера для летнего и зимнего сезонов
+            </CardDescription>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowPreview(!showPreview)}
+            className="gap-2"
+          >
+            {showPreview ? (
+              <>
+                <EyeOff className="h-4 w-4" />
+                <span className="hidden sm:inline">Скрыть</span>
+              </>
+            ) : (
+              <>
+                <Eye className="h-4 w-4" />
+                <span className="hidden sm:inline">Предпросмотр</span>
+              </>
+            )}
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
         {isLoading ? (
@@ -153,6 +259,16 @@ export function BannerSettings() {
           </div>
         ) : (
           <div className="space-y-6">
+            {/* Live Preview */}
+            {showPreview && (
+              <div className="space-y-2">
+                <Label className="text-muted-foreground text-xs uppercase tracking-wide">
+                  Предпросмотр в реальном времени
+                </Label>
+                <BannerPreview content={currentSeason} season={activeSeason} />
+              </div>
+            )}
+
             <Tabs value={activeSeason} onValueChange={(v) => setActiveSeason(v as "summer" | "winter")}>
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="summer" className="gap-2">
