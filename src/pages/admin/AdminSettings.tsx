@@ -169,25 +169,25 @@ export default function AdminSettings() {
                   </div>
                 </RadioGroup>
 
-                <div className="pt-4 border-t">
-                  <div className="flex items-center justify-between mb-4">
-                    <div>
-                      <p className="font-medium">Предпросмотр</p>
-                      <p className="text-sm text-muted-foreground">
-                        Текущий активный сезон: <strong>{effectiveSeason === "summer" ? "Лето ☀️" : "Зима ❄️"}</strong>
-                      </p>
-                    </div>
-                    <div 
-                      className={cn(
-                        "w-20 h-12 rounded-lg flex items-center justify-center text-2xl",
-                        effectiveSeason === "summer" 
-                          ? "bg-gradient-to-r from-orange-400 to-yellow-400" 
-                          : "bg-gradient-to-r from-blue-400 to-cyan-400"
-                      )}
-                    >
-                      {effectiveSeason === "summer" ? "☀️" : "❄️"}
-                    </div>
-                  </div>
+                    <div className="pt-4 border-t">
+                      <div className="flex items-center justify-between mb-4">
+                        <div>
+                          <p className="font-medium">Предпросмотр</p>
+                          <p className="text-sm text-muted-foreground">
+                            Текущий активный сезон: <strong>{effectiveSeason === "summer" ? "Лето ☀️" : "Зима ❄️"}</strong>
+                          </p>
+                        </div>
+                        <div 
+                          className={cn(
+                            "w-20 h-12 rounded-lg flex items-center justify-center text-2xl",
+                            effectiveSeason === "summer" 
+                              ? "bg-gradient-to-r from-primary to-secondary" 
+                              : "bg-gradient-to-r from-accent to-primary"
+                          )}
+                        >
+                          {effectiveSeason === "summer" ? "☀️" : "❄️"}
+                        </div>
+                      </div>
 
                   <Button onClick={saveSettings} disabled={saving}>
                     <Save className="h-4 w-4 mr-2" />
