@@ -8,7 +8,7 @@ import { useCart } from "@/hooks/use-cart";
 import { useFavorites } from "@/hooks/use-favorites";
 import { useCompare } from "@/hooks/use-compare";
 import { cn } from "@/lib/utils";
-
+import { getImageUrl } from "@/lib/image-utils";
 interface ProductCardProps {
   product: Product;
   className?: string;
@@ -24,7 +24,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
     ? Math.round((1 - product.sale_price! / product.price) * 100)
     : 0;
   const displayPrice = hasDiscount ? product.sale_price! : product.price;
-  const productImage = product.images?.[0] || "/placeholder.svg";
+  const productImage = getImageUrl(product.images?.[0]);
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();

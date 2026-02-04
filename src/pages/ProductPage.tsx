@@ -31,6 +31,7 @@ import { useProduct, useRelatedProducts } from "@/hooks/use-products";
 import { useDocumentSEO } from "@/hooks/use-seo";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import { getImageUrls } from "@/lib/image-utils";
 
 export default function ProductPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -111,7 +112,7 @@ export default function ProductPage() {
     ? Math.round((1 - product.sale_price! / product.price) * 100)
     : 0;
   
-  const images = product.images?.length ? product.images : ["/placeholder.svg"];
+  const images = getImageUrls(product.images);
 
   const handleAddToCart = () => {
     addItem(product, quantity);
