@@ -131,6 +131,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setSession(null);
     setProfile(null);
     setIsAdmin(false);
+    // Force full page reload to clear any cached state and ensure clean OAuth flow
+    window.location.href = "/";
   };
 
   return (

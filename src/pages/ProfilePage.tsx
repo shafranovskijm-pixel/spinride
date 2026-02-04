@@ -20,7 +20,7 @@ export default function ProfilePage() {
 
   const handleSignOut = async () => {
     await signOut();
-    navigate("/");
+    // signOut now handles redirect via window.location.href
   };
 
   if (isLoading) {
