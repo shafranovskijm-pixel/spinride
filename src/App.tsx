@@ -27,6 +27,7 @@ import OrdersPage from "./pages/OrdersPage";
 import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
 import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
+import CallbackPage from "./pages/auth/CallbackPage";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminProducts from "./pages/admin/AdminProducts";
 import AdminOrders from "./pages/admin/AdminOrders";
@@ -77,6 +78,8 @@ const App = () => (
                     {/* Auth routes */}
                     <Route path="/auth/login" element={<LoginPage />} />
                     <Route path="/auth/register" element={<RegisterPage />} />
+                    <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
+                    <Route path="/auth/callback" element={<CallbackPage />} />
                     <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
                     {/* Protected Admin routes */}
                     <Route path="/admin" element={<ProtectedAdminRoute><AdminDashboard /></ProtectedAdminRoute>} />
