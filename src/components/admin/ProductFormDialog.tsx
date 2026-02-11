@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
+import { useQuery } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Plus, Trash2 } from "lucide-react";
@@ -33,15 +34,7 @@ import { Product } from "@/types/shop";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
-const categories = [
-  { value: "bicycles", label: "Велосипеды" },
-  { value: "e-bikes", label: "Электровелосипеды" },
-  { value: "e-scooters", label: "Электросамокаты" },
-  { value: "scooters", label: "Самокаты" },
-  { value: "bmx", label: "BMX" },
-  { value: "kids", label: "Детям" },
-  { value: "accessories", label: "Аксессуары" },
-];
+// Categories are now fetched from DB inside the component
 
 const seasons = [
   { value: "all", label: "Всесезонный" },
@@ -83,6 +76,19 @@ export function ProductFormDialog({
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [specs, setSpecs] = useState<Array<{ key: string; value: string }>>([]);
+
+  // Fetch categories from DB
+  const { data: categories = [] } = useQuery({
+    queryKey: ["admin-categories"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("categories")
+        .select("*")
+        .order("sort_order", { ascending: true });
+      if (error) throw error;
+      return data.map((cat) => ({ value: cat.id, label: cat.name }));
+    },
+  });
 
   const isEditing = !!product;
 
