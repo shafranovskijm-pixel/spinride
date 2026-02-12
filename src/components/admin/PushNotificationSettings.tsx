@@ -7,6 +7,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 
+// Extend ServiceWorkerRegistration to include pushManager (Web Push API)
+interface PushServiceWorkerRegistration extends ServiceWorkerRegistration {
+  pushManager: PushManager;
+}
+
 // VAPID public key from environment
 const VAPID_PUBLIC_KEY = "BE1o7iDQKgenj79UhKKpfX9oStS919wl_p35oP3DRUxSbd0HT3-1FIjHd-EIIHOvI5eWB5fc8J52s0DSbH_clt8";
 
@@ -55,7 +60,7 @@ export function PushNotificationSettings() {
         return;
       }
 
-      const registration = await navigator.serviceWorker.ready;
+      const registration = await navigator.serviceWorker.ready as PushServiceWorkerRegistration;
       const subscription = await registration.pushManager.getSubscription();
 
       if (subscription) {
@@ -105,7 +110,7 @@ export function PushNotificationSettings() {
       }
 
       // Get service worker registration
-      const registration = await navigator.serviceWorker.ready;
+      const registration = await navigator.serviceWorker.ready as PushServiceWorkerRegistration;
 
       // Subscribe to push
       const applicationServerKey = urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
@@ -159,7 +164,7 @@ export function PushNotificationSettings() {
     setIsProcessing(true);
 
     try {
-      const registration = await navigator.serviceWorker.ready;
+      const registration = await navigator.serviceWorker.ready as PushServiceWorkerRegistration;
       const subscription = await registration.pushManager.getSubscription();
 
       if (subscription) {
