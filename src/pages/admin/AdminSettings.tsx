@@ -268,30 +268,51 @@ export default function AdminSettings() {
         {/* Store info */}
         <Card>
           <CardHeader>
-            <CardTitle>Информация о магазине</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <Store className="h-5 w-5 text-primary" />
+              Информация о магазине
+            </CardTitle>
             <CardDescription>
               Контактные данные и адрес магазина
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-4 text-sm">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Название:</span>
-                <span className="font-medium">SPINRIDE</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Телефон:</span>
-                <span className="font-medium">+7 (999) 123-45-67</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Адрес:</span>
-                <span className="font-medium">г. Уссурийск, ул. Комсомольская, 29</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Email:</span>
-                <span className="font-medium">info@spinride.ru</span>
-              </div>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="store-name">Название</Label>
+              <Input
+                id="store-name"
+                value={storeInfo.name}
+                onChange={(e) => setStoreInfo(prev => ({ ...prev, name: e.target.value }))}
+              />
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="store-phone">Телефон</Label>
+              <Input
+                id="store-phone"
+                value={storeInfo.phone}
+                onChange={(e) => setStoreInfo(prev => ({ ...prev, phone: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="store-address">Адрес</Label>
+              <Input
+                id="store-address"
+                value={storeInfo.address}
+                onChange={(e) => setStoreInfo(prev => ({ ...prev, address: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="store-email">Email</Label>
+              <Input
+                id="store-email"
+                value={storeInfo.email}
+                onChange={(e) => setStoreInfo(prev => ({ ...prev, email: e.target.value }))}
+              />
+            </div>
+            <Button onClick={saveStoreInfo} disabled={savingStore}>
+              <Save className="h-4 w-4 mr-2" />
+              {savingStore ? "Сохранение..." : "Сохранить"}
+            </Button>
           </CardContent>
         </Card>
       </div>
