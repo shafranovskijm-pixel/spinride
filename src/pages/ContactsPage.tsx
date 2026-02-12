@@ -54,10 +54,10 @@ export default function ContactsPage() {
             </CardHeader>
             <CardContent>
               <a 
-                href={`tel:${content?.phone?.replace(/\D/g, '') || '+79991234567'}`}
+                href={`tel:${phoneNumber.replace(/\D/g, '')}`}
                 className="text-xl font-semibold text-primary hover:underline block mb-2"
               >
-                {content?.phone || "+7 (999) 123-45-67"}
+                {phoneNumber}
               </a>
               <p className="text-sm text-muted-foreground">
                 Звоните для консультации и оформления заказа
