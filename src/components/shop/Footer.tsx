@@ -25,9 +25,15 @@ const winterCatalogLinks = [
 export function Footer() {
   const currentYear = new Date().getFullYear();
   const { data: settings } = useFooterSettings();
+  const { data: storeInfo } = useStoreInfo();
   const { season } = useSeason();
 
   const catalogLinks = season === "winter" ? winterCatalogLinks : summerCatalogLinks;
+
+  // Merge store_info into footer settings for phone/address/email
+  const phone = storeInfo?.phone || settings?.phone || "";
+  const address = storeInfo?.address || settings?.address || "";
+  const email = storeInfo?.email || settings?.email || "";
 
   if (!settings) {
     return null; // Loading state
