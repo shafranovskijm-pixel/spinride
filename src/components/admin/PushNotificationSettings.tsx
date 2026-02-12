@@ -7,6 +7,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 
+// Extend ServiceWorkerRegistration to include pushManager (Web Push API)
+interface PushServiceWorkerRegistration extends ServiceWorkerRegistration {
+  pushManager: PushManager;
+}
+
 // VAPID public key from environment
 const VAPID_PUBLIC_KEY = "BE1o7iDQKgenj79UhKKpfX9oStS919wl_p35oP3DRUxSbd0HT3-1FIjHd-EIIHOvI5eWB5fc8J52s0DSbH_clt8";
 
