@@ -4,10 +4,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePageContent, ContactsContent } from "@/hooks/use-page-content";
+import { useStoreInfo } from "@/hooks/use-store-info";
 
 export default function ContactsPage() {
   const { data: page, isLoading } = usePageContent("contacts");
+  const { data: storeInfo } = useStoreInfo();
   const content = page?.content as ContactsContent | undefined;
+
+  // Use store_info as primary source, fallback to page content
+  const phoneNumber = storeInfo?.phone || content?.phone || "+7 924-788-11-11";
+  const emailAddr = storeInfo?.email || content?.email || "info@spinride.ru";
+  const addressText = storeInfo?.address || content?.address || "г. Уссурийск, ул. Пушкина, 13";
 
   if (isLoading) {
     return (
@@ -47,10 +54,10 @@ export default function ContactsPage() {
             </CardHeader>
             <CardContent>
               <a 
-                href={`tel:${content?.phone?.replace(/\D/g, '') || '+79991234567'}`}
+                href={`tel:${phoneNumber.replace(/\D/g, '')}`}
                 className="text-xl font-semibold text-primary hover:underline block mb-2"
               >
-                {content?.phone || "+7 (999) 123-45-67"}
+                {phoneNumber}
               </a>
               <p className="text-sm text-muted-foreground">
                 Звоните для консультации и оформления заказа
@@ -67,10 +74,10 @@ export default function ContactsPage() {
             </CardHeader>
             <CardContent>
               <a 
-                href={`mailto:${content?.email || 'info@spinride.ru'}`}
+                href={`mailto:${emailAddr}`}
                 className="text-xl font-semibold text-primary hover:underline block mb-2"
               >
-                {content?.email || "info@spinride.ru"}
+                {emailAddr}
               </a>
               <p className="text-sm text-muted-foreground">
                 Для вопросов и предложений
@@ -140,14 +147,14 @@ export default function ContactsPage() {
             </CardHeader>
             <CardContent>
               <p className="font-semibold mb-2">
-                {content?.address || "г. Москва, ул. Примерная, д. 123"}
+                {addressText}
               </p>
               <p className="text-sm text-muted-foreground mb-4">
                 Заберите заказ в удобное время
               </p>
               <Button variant="outline" className="w-full" asChild>
                 <a 
-                  href={`https://yandex.ru/maps/?text=${encodeURIComponent(content?.address || '')}`}
+                  href={`https://yandex.ru/maps/?text=${encodeURIComponent(addressText)}`}
                   target="_blank" 
                   rel="noopener noreferrer"
                 >

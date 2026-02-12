@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Phone, MapPin, Mail, Clock, Instagram, Send, MessageCircle, Heart } from "lucide-react";
 import { useFooterSettings } from "@/hooks/use-footer-settings";
+import { useStoreInfo } from "@/hooks/use-store-info";
 import { useSeason } from "@/hooks/use-season";
 
 const summerCatalogLinks = [
@@ -24,9 +25,15 @@ const winterCatalogLinks = [
 export function Footer() {
   const currentYear = new Date().getFullYear();
   const { data: settings } = useFooterSettings();
+  const { data: storeInfo } = useStoreInfo();
   const { season } = useSeason();
 
   const catalogLinks = season === "winter" ? winterCatalogLinks : summerCatalogLinks;
+
+  // Merge store_info into footer settings for phone/address/email
+  const phone = storeInfo?.phone || settings?.phone || "";
+  const address = storeInfo?.address || settings?.address || "";
+  const email = storeInfo?.email || settings?.email || "";
 
   if (!settings) {
     return null; // Loading state
@@ -137,20 +144,20 @@ export function Footer() {
             <ul className="space-y-3">
               <li>
                 <a 
-                  href={`tel:${settings.phone.replace(/[^\d+]/g, "")}`}
+                  href={`tel:${phone.replace(/[^\d+]/g, "")}`}
                   className="flex items-center gap-3 text-primary font-bold hover:underline"
                 >
                   <Phone className="h-5 w-5" />
-                  {settings.phone}
+                  {phone}
                 </a>
               </li>
               <li className="flex items-start gap-3 text-white/70">
                 <MapPin className="h-5 w-5 shrink-0 mt-0.5" />
-                <span>{settings.address}</span>
+                <span>{address}</span>
               </li>
               <li className="flex items-center gap-3 text-white/70">
                 <Mail className="h-5 w-5" />
-                <span>{settings.email}</span>
+                <span>{email}</span>
               </li>
               <li className="flex items-start gap-3 text-white/70">
                 <Clock className="h-5 w-5 shrink-0 mt-0.5" />
