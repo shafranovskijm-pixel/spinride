@@ -18,6 +18,13 @@ export default function AdminSettings() {
   const [seasonMode, setSeasonMode] = useState<SeasonMode>("auto");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [storeInfo, setStoreInfo] = useState({
+    name: "SPINRIDE",
+    phone: "+7 924-788-11-11",
+    address: "г. Уссурийск, ул. Пушкина, 13",
+    email: "info@spinride.ru",
+  });
+  const [savingStore, setSavingStore] = useState(false);
   const { toast } = useToast();
 
   const calendarSeason = getCalendarSeason();
