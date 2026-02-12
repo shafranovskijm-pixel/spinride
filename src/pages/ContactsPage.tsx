@@ -8,7 +8,13 @@ import { useStoreInfo } from "@/hooks/use-store-info";
 
 export default function ContactsPage() {
   const { data: page, isLoading } = usePageContent("contacts");
+  const { data: storeInfo } = useStoreInfo();
   const content = page?.content as ContactsContent | undefined;
+
+  // Use store_info as primary source, fallback to page content
+  const phoneNumber = storeInfo?.phone || content?.phone || "+7 924-788-11-11";
+  const emailAddr = storeInfo?.email || content?.email || "info@spinride.ru";
+  const addressText = storeInfo?.address || content?.address || "г. Уссурийск, ул. Пушкина, 13";
 
   if (isLoading) {
     return (
