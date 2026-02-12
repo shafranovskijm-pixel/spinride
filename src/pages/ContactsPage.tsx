@@ -74,10 +74,10 @@ export default function ContactsPage() {
             </CardHeader>
             <CardContent>
               <a 
-                href={`mailto:${content?.email || 'info@spinride.ru'}`}
+                href={`mailto:${emailAddr}`}
                 className="text-xl font-semibold text-primary hover:underline block mb-2"
               >
-                {content?.email || "info@spinride.ru"}
+                {emailAddr}
               </a>
               <p className="text-sm text-muted-foreground">
                 Для вопросов и предложений
