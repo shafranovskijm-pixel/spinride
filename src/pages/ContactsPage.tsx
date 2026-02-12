@@ -147,14 +147,14 @@ export default function ContactsPage() {
             </CardHeader>
             <CardContent>
               <p className="font-semibold mb-2">
-                {content?.address || "г. Москва, ул. Примерная, д. 123"}
+                {addressText}
               </p>
               <p className="text-sm text-muted-foreground mb-4">
                 Заберите заказ в удобное время
               </p>
               <Button variant="outline" className="w-full" asChild>
                 <a 
-                  href={`https://yandex.ru/maps/?text=${encodeURIComponent(content?.address || '')}`}
+                  href={`https://yandex.ru/maps/?text=${encodeURIComponent(addressText)}`}
                   target="_blank" 
                   rel="noopener noreferrer"
                 >
