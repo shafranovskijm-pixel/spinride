@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePageContent, ContactsContent } from "@/hooks/use-page-content";
+import { useStoreInfo } from "@/hooks/use-store-info";
 
 export default function ContactsPage() {
   const { data: page, isLoading } = usePageContent("contacts");
