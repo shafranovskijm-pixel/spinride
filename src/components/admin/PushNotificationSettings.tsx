@@ -164,7 +164,7 @@ export function PushNotificationSettings() {
     setIsProcessing(true);
 
     try {
-      const registration = await navigator.serviceWorker.ready;
+      const registration = await navigator.serviceWorker.ready as PushServiceWorkerRegistration;
       const subscription = await registration.pushManager.getSubscription();
 
       if (subscription) {
