@@ -110,7 +110,7 @@ export function PushNotificationSettings() {
       }
 
       // Get service worker registration
-      const registration = await navigator.serviceWorker.ready;
+      const registration = await navigator.serviceWorker.ready as PushServiceWorkerRegistration;
 
       // Subscribe to push
       const applicationServerKey = urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
