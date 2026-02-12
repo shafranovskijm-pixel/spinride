@@ -35,6 +35,7 @@ export default function AdminSettings() {
 
   const fetchSettings = async () => {
     try {
+      // Fetch season mode
       const { data, error } = await supabase
         .from("site_settings")
         .select("value")
@@ -51,10 +52,59 @@ export default function AdminSettings() {
           setSeasonMode(value);
         }
       }
+
+      // Fetch store info
+      const { data: storeData, error: storeError } = await supabase
+        .from("site_settings")
+        .select("value")
+        .eq("key", "store_info")
+        .maybeSingle();
+
+      if (!storeError && storeData?.value) {
+        setStoreInfo(prev => ({ ...prev, ...(storeData.value as any) }));
+      }
     } catch (error) {
       console.error("Error fetching settings:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const saveStoreInfo = async () => {
+    setSavingStore(true);
+    try {
+      const { data: existing } = await supabase
+        .from("site_settings")
+        .select("id")
+        .eq("key", "store_info")
+        .maybeSingle();
+
+      if (existing) {
+        const { error } = await supabase
+          .from("site_settings")
+          .update({ value: storeInfo as any })
+          .eq("key", "store_info");
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from("site_settings")
+          .insert({ key: "store_info", value: storeInfo as any });
+        if (error) throw error;
+      }
+
+      toast({
+        title: "Сохранено",
+        description: "Информация о магазине обновлена",
+      });
+    } catch (error) {
+      console.error("Error saving store info:", error);
+      toast({
+        title: "Ошибка",
+        description: "Не удалось сохранить",
+        variant: "destructive",
+      });
+    } finally {
+      setSavingStore(false);
     }
   };
 
