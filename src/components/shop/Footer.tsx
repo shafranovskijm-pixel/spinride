@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Phone, MapPin, Mail, Clock, Instagram, Send, MessageCircle, Heart } from "lucide-react";
 import { useFooterSettings } from "@/hooks/use-footer-settings";
+import { useStoreInfo } from "@/hooks/use-store-info";
 import { useSeason } from "@/hooks/use-season";
 
 const summerCatalogLinks = [
