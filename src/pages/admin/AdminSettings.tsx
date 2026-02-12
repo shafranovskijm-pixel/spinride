@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
-import { Sun, Snowflake, RefreshCw, Save } from "lucide-react";
+import { Sun, Snowflake, RefreshCw, Save, Store } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { PushNotificationSettings } from "@/components/admin/PushNotificationSettings";
@@ -17,6 +18,13 @@ export default function AdminSettings() {
   const [seasonMode, setSeasonMode] = useState<SeasonMode>("auto");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [storeInfo, setStoreInfo] = useState({
+    name: "SPINRIDE",
+    phone: "+7 924-788-11-11",
+    address: "г. Уссурийск, ул. Пушкина, 13",
+    email: "info@spinride.ru",
+  });
+  const [savingStore, setSavingStore] = useState(false);
   const { toast } = useToast();
 
   const calendarSeason = getCalendarSeason();
@@ -27,6 +35,7 @@ export default function AdminSettings() {
 
   const fetchSettings = async () => {
     try {
+      // Fetch season mode
       const { data, error } = await supabase
         .from("site_settings")
         .select("value")
@@ -43,10 +52,59 @@ export default function AdminSettings() {
           setSeasonMode(value);
         }
       }
+
+      // Fetch store info
+      const { data: storeData, error: storeError } = await supabase
+        .from("site_settings")
+        .select("value")
+        .eq("key", "store_info")
+        .maybeSingle();
+
+      if (!storeError && storeData?.value) {
+        setStoreInfo(prev => ({ ...prev, ...(storeData.value as any) }));
+      }
     } catch (error) {
       console.error("Error fetching settings:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const saveStoreInfo = async () => {
+    setSavingStore(true);
+    try {
+      const { data: existing } = await supabase
+        .from("site_settings")
+        .select("id")
+        .eq("key", "store_info")
+        .maybeSingle();
+
+      if (existing) {
+        const { error } = await supabase
+          .from("site_settings")
+          .update({ value: storeInfo as any })
+          .eq("key", "store_info");
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from("site_settings")
+          .insert({ key: "store_info", value: storeInfo as any });
+        if (error) throw error;
+      }
+
+      toast({
+        title: "Сохранено",
+        description: "Информация о магазине обновлена",
+      });
+    } catch (error) {
+      console.error("Error saving store info:", error);
+      toast({
+        title: "Ошибка",
+        description: "Не удалось сохранить",
+        variant: "destructive",
+      });
+    } finally {
+      setSavingStore(false);
     }
   };
 
@@ -210,30 +268,51 @@ export default function AdminSettings() {
         {/* Store info */}
         <Card>
           <CardHeader>
-            <CardTitle>Информация о магазине</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <Store className="h-5 w-5 text-primary" />
+              Информация о магазине
+            </CardTitle>
             <CardDescription>
               Контактные данные и адрес магазина
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-4 text-sm">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Название:</span>
-                <span className="font-medium">SPINRIDE</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Телефон:</span>
-                <span className="font-medium">+7 (999) 123-45-67</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Адрес:</span>
-                <span className="font-medium">г. Уссурийск, ул. Комсомольская, 29</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Email:</span>
-                <span className="font-medium">info@spinride.ru</span>
-              </div>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="store-name">Название</Label>
+              <Input
+                id="store-name"
+                value={storeInfo.name}
+                onChange={(e) => setStoreInfo(prev => ({ ...prev, name: e.target.value }))}
+              />
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="store-phone">Телефон</Label>
+              <Input
+                id="store-phone"
+                value={storeInfo.phone}
+                onChange={(e) => setStoreInfo(prev => ({ ...prev, phone: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="store-address">Адрес</Label>
+              <Input
+                id="store-address"
+                value={storeInfo.address}
+                onChange={(e) => setStoreInfo(prev => ({ ...prev, address: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="store-email">Email</Label>
+              <Input
+                id="store-email"
+                value={storeInfo.email}
+                onChange={(e) => setStoreInfo(prev => ({ ...prev, email: e.target.value }))}
+              />
+            </div>
+            <Button onClick={saveStoreInfo} disabled={savingStore}>
+              <Save className="h-4 w-4 mr-2" />
+              {savingStore ? "Сохранение..." : "Сохранить"}
+            </Button>
           </CardContent>
         </Card>
       </div>
