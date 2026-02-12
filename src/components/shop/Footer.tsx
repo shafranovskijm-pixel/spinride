@@ -144,20 +144,20 @@ export function Footer() {
             <ul className="space-y-3">
               <li>
                 <a 
-                  href={`tel:${settings.phone.replace(/[^\d+]/g, "")}`}
+                  href={`tel:${phone.replace(/[^\d+]/g, "")}`}
                   className="flex items-center gap-3 text-primary font-bold hover:underline"
                 >
                   <Phone className="h-5 w-5" />
-                  {settings.phone}
+                  {phone}
                 </a>
               </li>
               <li className="flex items-start gap-3 text-white/70">
                 <MapPin className="h-5 w-5 shrink-0 mt-0.5" />
-                <span>{settings.address}</span>
+                <span>{address}</span>
               </li>
               <li className="flex items-center gap-3 text-white/70">
                 <Mail className="h-5 w-5" />
-                <span>{settings.email}</span>
+                <span>{email}</span>
               </li>
               <li className="flex items-start gap-3 text-white/70">
                 <Clock className="h-5 w-5 shrink-0 mt-0.5" />
