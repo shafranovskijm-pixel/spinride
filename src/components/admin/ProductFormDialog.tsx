@@ -252,9 +252,18 @@ export function ProductFormDialog({
       onSuccess();
       onOpenChange(false);
     } catch (error: any) {
+      console.error("❌ Product save error:", JSON.stringify(error, null, 2));
+      console.error("❌ Error details:", {
+        message: error.message,
+        code: error.code,
+        status: error.status,
+        statusText: error.statusText,
+        details: error.details,
+        hint: error.hint,
+      });
       toast({
         title: "Ошибка",
-        description: error.message || "Не удалось сохранить товар",
+        description: `${error.message || "Не удалось сохранить товар"} (code: ${error.code || "unknown"}, status: ${error.status || "unknown"})`,
         variant: "destructive",
       });
     } finally {
