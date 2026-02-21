@@ -393,7 +393,7 @@ export default function AdminDashboard() {
         </CardHeader>
         <CardContent className="flex flex-wrap gap-3">
           <Button variant="outline" asChild>
-            <Link to="/admin/products/new">
+            <Link to="/admin/products">
               <Package className="h-4 w-4 mr-2" />
               Добавить товар
             </Link>
