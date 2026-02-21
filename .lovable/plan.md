@@ -1,72 +1,33 @@
 
-# План: Декоративные элементы для каталога и категорий
+## Fix Quick Action Buttons on Admin Dashboard
 
-## Анализ текущего дизайна
+### Problem
+The "Quick Actions" section on the admin dashboard has three buttons that don't work correctly:
 
-Проект уже имеет отличную систему анимаций и декоративных элементов:
-- Плавающие частицы и снежинки в Hero-секции
-- Декоративные круги с градиентами
-- Эффект shine на карточках
-- Stagger-анимации для появления элементов
+1. **"Добавить товар"** -- links to `/admin/products/new`, a route that does not exist. Product creation now uses a dialog on the `/admin/products` page.
+2. **"Обработать заказы"** and **"Настройки"** -- these routes exist (`/admin/orders`, `/admin/settings`), but likely also have issues with click handling.
 
-## Предлагаемые дизайнерские решения
+### Solution
 
-### 1. Декоративные разделители между секциями
+Update the quick action buttons in `src/pages/admin/AdminDashboard.tsx` (lines 394-413):
 
-Волнистые SVG-разделители между секциями на главной странице для создания плавного перехода между блоками. Меняют цвет в зависимости от сезона (оранжево-желтые летом, сине-голубые зимой).
+1. **"Добавить товар"** -- change the link from `/admin/products/new` to `/admin/products` (the product list page, where the user can click "Add Product" to open the dialog).
+2. **"Обработать заказы"** -- keep link to `/admin/orders` (already correct).
+3. **"Настройки"** -- keep link to `/admin/settings` (already correct).
 
-### 2. Плавающий фоновый декор для секции категорий
+All three buttons use `Button asChild` with `Link` inside, which is the correct pattern. The main fix is the broken route for "Добавить товар".
 
-Большие полупрозрачные иконки категорий на фоне (велосипеды, снежинки, ёлки) которые медленно двигаются. Создаёт глубину и динамику без отвлечения от товаров.
+### Technical Details
 
-### 3. Декоративные метки на сетке категорий
+**File:** `src/pages/admin/AdminDashboard.tsx`, lines 395-400
 
-Анимированные "уголки" или рамки на карточках категорий при наведении. Добавляет интерактивности и премиальности.
-
-### 4. Промо-баннер между секциями
-
-Горизонтальная полоса с бегущими иконками или эмодзи (велосипеды, самокаты, или снежинки/ёлки зимой) как декоративный разделитель. Добавляет игривости.
-
-### 5. Фоновый паттерн для каталога
-
-Легкий геометрический паттерн (шестиугольники или точки) на фоне страницы каталога для текстуры, адаптируемый под сезон.
-
----
-
-## Технические детали
-
-### Новые компоненты
-
-1. `src/components/shop/SectionDivider.tsx` - волнистый SVG-разделитель с сезонной адаптацией
-2. `src/components/shop/FloatingIcons.tsx` - плавающие декоративные иконки на фоне
-3. `src/components/shop/MarqueeStrip.tsx` - бегущая строка с иконками
-
-### Обновление существующих компонентов
-
-- `src/pages/Index.tsx` - добавление разделителей и фонового декора между секциями
-- `src/pages/CatalogPage.tsx` - добавление фонового паттерна
-- `src/components/shop/CategoryGrid.tsx` - улучшенные hover-эффекты
-- `src/index.css` - новые CSS-анимации и декоративные классы
-
-### Новые CSS-классы и анимации
-
-```css
-/* Marquee анимация */
-@keyframes marquee {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-
-/* Фоновый паттерн */
-.pattern-dots { ... }
-.pattern-grid { ... }
-
-/* Декоративные углы */
-.corner-decoration { ... }
+Change:
+```tsx
+<Link to="/admin/products/new">
+```
+To:
+```tsx
+<Link to="/admin/products">
 ```
 
-### Адаптация под сезоны
-
-Все декоративные элементы будут использовать существующий hook `useSeason()` для динамической смены:
-- **Лето**: оранжево-желтые градиенты, иконки велосипедов и самокатов
-- **Зима**: сине-голубые тона, снежинки, ёлки, подарки
+This is a one-line fix. The other two buttons point to valid routes and should work correctly once the page is deployed/previewed with the latest code.
