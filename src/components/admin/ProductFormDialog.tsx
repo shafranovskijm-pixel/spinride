@@ -198,6 +198,8 @@ export function ProductFormDialog({
 
   const onSubmit = async (data: ProductFormData) => {
     setIsSubmitting(true);
+    console.log("📦 Form data:", JSON.stringify(data, null, 2));
+    console.log("📂 Available categories:", JSON.stringify(categories, null, 2));
 
     try {
       // Convert specs array to object
