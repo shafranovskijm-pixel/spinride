@@ -86,7 +86,7 @@ export function HeroBanner() {
     
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % winterSliderImages.length);
-    }, 4000);
+    }, 7000);
 
     return () => clearInterval(interval);
   }, [isWinter]);
@@ -246,12 +246,26 @@ export function HeroBanner() {
               
               {/* Product image with slider */}
               <div className="relative z-10 p-8">
-                <img 
-                  src={currentImage}
-                  alt={isWinter ? "Зимние товары" : "Велосипед"}
-                  className="w-full h-auto object-contain drop-shadow-2xl animate-float rounded-2xl"
-                  key={currentSlide}
-                />
+                {isWinter ? (
+                  <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden">
+                    {winterSliderImages.map((src, index) => (
+                      <img
+                        key={src}
+                        src={src}
+                        alt={`Зимние товары ${index + 1}`}
+                        className={`absolute inset-0 w-full h-full object-cover drop-shadow-2xl transition-opacity duration-1000 ease-in-out ${
+                          index === currentSlide ? 'opacity-100' : 'opacity-0'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <img 
+                    src={currentImage}
+                    alt="Велосипед"
+                    className="w-full h-auto object-contain drop-shadow-2xl animate-float rounded-2xl"
+                  />
+                )}
               </div>
 
               {/* Slider controls for winter */}
