@@ -86,7 +86,7 @@ export function HeroBanner() {
     
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % winterSliderImages.length);
-    }, 4000);
+    }, 7000);
 
     return () => clearInterval(interval);
   }, [isWinter]);
