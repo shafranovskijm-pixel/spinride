@@ -196,10 +196,21 @@ export function ProductFormDialog({
     setSpecs(newSpecs);
   };
 
+  const ensureUniqueSlug = async (baseSlug: string, excludeId?: string): Promise<string> => {
+    let slug = baseSlug;
+    let counter = 1;
+    while (true) {
+      let query = supabase.from("products").select("id").eq("slug", slug).limit(1);
+      if (excludeId) query = query.neq("id", excludeId);
+      const { data } = await query;
+      if (!data || data.length === 0) return slug;
+      slug = `${baseSlug}-${counter}`;
+      counter++;
+    }
+  };
+
   const onSubmit = async (data: ProductFormData) => {
     setIsSubmitting(true);
-    console.log("📦 Form data:", JSON.stringify(data, null, 2));
-    console.log("📂 Available categories:", JSON.stringify(categories, null, 2));
 
     try {
       // Convert specs array to object
@@ -210,9 +221,11 @@ export function ProductFormDialog({
         }
       });
 
+      const uniqueSlug = await ensureUniqueSlug(data.slug, isEditing ? product?.id : undefined);
+
       const productData = {
         name: data.name,
-        slug: data.slug,
+        slug: uniqueSlug,
         description: data.description || null,
         category_id: data.category_id,
         price: data.price,
