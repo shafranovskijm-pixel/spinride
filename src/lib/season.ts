@@ -51,7 +51,11 @@ export async function fetchSeasonMode(): Promise<SeasonMode> {
       return "auto";
     }
     
-    const value = data.value as string;
+    let value = data.value as string;
+    // Handle both raw strings and JSON-stringified values
+    if (typeof value === "string" && value.startsWith('"')) {
+      try { value = JSON.parse(value); } catch {}
+    }
     if (value === "summer" || value === "winter" || value === "auto") {
       return value;
     }
@@ -69,7 +73,7 @@ export async function updateSeasonMode(mode: SeasonMode): Promise<boolean> {
   try {
     const { error } = await supabase
       .from("site_settings")
-      .update({ value: JSON.stringify(mode) })
+      .update({ value: mode as any })
       .eq("key", "season_mode");
     
     return !error;
