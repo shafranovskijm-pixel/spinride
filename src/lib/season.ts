@@ -73,7 +73,7 @@ export async function updateSeasonMode(mode: SeasonMode): Promise<boolean> {
   try {
     const { error } = await supabase
       .from("site_settings")
-      .update({ value: JSON.stringify(mode) })
+      .update({ value: mode as any })
       .eq("key", "season_mode");
     
     return !error;

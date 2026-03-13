@@ -113,7 +113,7 @@ export default function AdminSettings() {
     try {
       const { error } = await supabase
         .from("site_settings")
-        .update({ value: JSON.stringify(seasonMode) })
+        .update({ value: seasonMode as any })
         .eq("key", "season_mode");
 
       if (error) throw error;
