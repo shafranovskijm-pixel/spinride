@@ -51,7 +51,11 @@ export async function fetchSeasonMode(): Promise<SeasonMode> {
       return "auto";
     }
     
-    const value = data.value as string;
+    let value = data.value as string;
+    // Handle both raw strings and JSON-stringified values
+    if (typeof value === "string" && value.startsWith('"')) {
+      try { value = JSON.parse(value); } catch {}
+    }
     if (value === "summer" || value === "winter" || value === "auto") {
       return value;
     }
