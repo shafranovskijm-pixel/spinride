@@ -54,6 +54,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
           <img
             src={productImage}
             alt={product.name}
+            onError={(e) => { e.currentTarget.src = "/placeholder.svg"; }}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
           

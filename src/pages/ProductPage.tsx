@@ -196,7 +196,7 @@ export default function ProductPage() {
                       currentImage === idx ? "border-primary" : "border-transparent"
                     )}
                   >
-                    <img src={img} alt="" className="w-full h-full object-cover" />
+                    <img src={img} alt="" onError={(e) => { e.currentTarget.src = "/placeholder.svg"; }} className="w-full h-full object-cover" />
                   </button>
                 ))}
               </div>
