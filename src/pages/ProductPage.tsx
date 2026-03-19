@@ -147,6 +147,7 @@ export default function ProductPage() {
               <img
                 src={images[currentImage]}
                 alt={product.name}
+                onError={(e) => { e.currentTarget.src = "/placeholder.svg"; }}
                 className="w-full h-full object-cover"
               />
               
