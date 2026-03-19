@@ -1,31 +1,33 @@
 
+## Fix Quick Action Buttons on Admin Dashboard
 
-## Проблема: Битые изображения товаров
+### Problem
+The "Quick Actions" section on the admin dashboard has three buttons that don't work correctly:
 
-Изображения, загруженные через админку, хранятся в хранилище (bucket `product-images`), но некоторые файлы могут быть утеряны. В коде нет обработки ошибок загрузки картинок -- если файл не найден (404), вместо заглушки показывается пустое место или иконка битой картинки.
+1. **"Добавить товар"** -- links to `/admin/products/new`, a route that does not exist. Product creation now uses a dialog on the `/admin/products` page.
+2. **"Обработать заказы"** and **"Настройки"** -- these routes exist (`/admin/orders`, `/admin/settings`), but likely also have issues with click handling.
 
-## Решение
+### Solution
 
-Добавить обработчик `onError` на все теги `<img>` с изображениями товаров, чтобы при ошибке загрузки показывать `/placeholder.svg`.
+Update the quick action buttons in `src/pages/admin/AdminDashboard.tsx` (lines 394-413):
 
-### Файлы для изменения
+1. **"Добавить товар"** -- change the link from `/admin/products/new` to `/admin/products` (the product list page, where the user can click "Add Product" to open the dialog).
+2. **"Обработать заказы"** -- keep link to `/admin/orders` (already correct).
+3. **"Настройки"** -- keep link to `/admin/settings` (already correct).
 
-1. **`src/components/shop/ProductCard.tsx`** -- добавить `onError` на основное изображение карточки товара.
+All three buttons use `Button asChild` with `Link` inside, which is the correct pattern. The main fix is the broken route for "Добавить товар".
 
-2. **`src/pages/ProductPage.tsx`** -- добавить `onError` на:
-   - Главное изображение товара (строка ~148)
-   - Миниатюры (строка ~198)
+### Technical Details
 
-### Пример изменения
+**File:** `src/pages/admin/AdminDashboard.tsx`, lines 395-400
 
+Change:
 ```tsx
-<img
-  src={productImage}
-  alt={product.name}
-  onError={(e) => { e.currentTarget.src = "/placeholder.svg"; }}
-  className="w-full h-full object-cover"
-/>
+<Link to="/admin/products/new">
+```
+To:
+```tsx
+<Link to="/admin/products">
 ```
 
-Это обеспечит отображение заглушки вместо битых картинок без необходимости перезагружать фотографии.
-
+This is a one-line fix. The other two buttons point to valid routes and should work correctly once the page is deployed/previewed with the latest code.
