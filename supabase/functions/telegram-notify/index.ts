@@ -42,6 +42,7 @@ serve(async (req) => {
   try {
     const TELEGRAM_BOT_TOKEN = Deno.env.get('TELEGRAM_BOT_TOKEN');
     const TELEGRAM_CHAT_ID = Deno.env.get('TELEGRAM_CHAT_ID');
+    const TELEGRAM_OWNER_CHAT_ID = Deno.env.get('TELEGRAM_OWNER_CHAT_ID');
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
@@ -49,8 +50,9 @@ serve(async (req) => {
       throw new Error('TELEGRAM_BOT_TOKEN is not configured');
     }
 
-    if (!TELEGRAM_CHAT_ID) {
-      throw new Error('TELEGRAM_CHAT_ID is not configured');
+    const chatIds = [TELEGRAM_CHAT_ID, TELEGRAM_OWNER_CHAT_ID].filter(Boolean) as string[];
+    if (chatIds.length === 0) {
+      throw new Error('No Telegram chat IDs configured');
     }
 
     const body: OrderNotification = await req.json();
