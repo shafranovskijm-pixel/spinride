@@ -94,11 +94,11 @@ serve(async (req) => {
       .sort((a, b) => b[1] - a[1])
       .slice(0, 5);
 
-    // Build category breakdown lines
-    const categoryLines = [...categoryCounts.entries()]
-      .map(([name, count]) => `• ${escapeMarkdown(name)}: ${count}`)
+    // Build category breakdown lines — show ALL categories, even with 0
+    const categoryLines = (categories ?? [])
+      .map(c => `• ${escapeMarkdown(c.name)}: ${categoryCounts.get(c.name) ?? 0}`)
       .join('\n');
-    const uncategorizedLine = uncategorized > 0 ? `\n  • Прочее: ${uncategorized}` : '';
+    const uncategorizedLine = uncategorized > 0 ? `\n• Прочее: ${uncategorized}` : '';
 
     // Build top 5 lines
     let top5Lines = '  Нет продаж за неделю';
