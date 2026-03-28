@@ -42,6 +42,7 @@ serve(async (req) => {
   try {
     const TELEGRAM_BOT_TOKEN = Deno.env.get('TELEGRAM_BOT_TOKEN');
     const TELEGRAM_CHAT_ID = Deno.env.get('TELEGRAM_CHAT_ID');
+    const TELEGRAM_OWNER_CHAT_ID = Deno.env.get('TELEGRAM_OWNER_CHAT_ID');
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
@@ -49,8 +50,9 @@ serve(async (req) => {
       throw new Error('TELEGRAM_BOT_TOKEN is not configured');
     }
 
-    if (!TELEGRAM_CHAT_ID) {
-      throw new Error('TELEGRAM_CHAT_ID is not configured');
+    const chatIds = [TELEGRAM_CHAT_ID, TELEGRAM_OWNER_CHAT_ID].filter(Boolean) as string[];
+    if (chatIds.length === 0) {
+      throw new Error('No Telegram chat IDs configured');
     }
 
     const body: OrderNotification = await req.json();
@@ -110,7 +112,8 @@ serve(async (req) => {
       }[body.new_status] || '📋';
 
       message = `
-${statusEmoji} *Статус заказа изменён*
+${statusEmoji} *Заявка с сайта SpinRide*
+*Статус заказа изменён*
 
 📦 *Заказ:* \`${order.order_number}\`
 👤 *Клиент:* ${escapeMarkdown(order.customer_name)}
@@ -128,7 +131,8 @@ ${statusEmoji} *Статус заказа изменён*
         .join('\n');
 
       message = `
-🛒 *Новый заказ!*
+🛒 *Заявка с сайта SpinRide*
+*Новый заказ!*
 
 📦 *Заказ:* \`${order.order_number}\`
 
@@ -139,39 +143,41 @@ ${order.customer_email ? `📧 *Email:* ${escapeMarkdown(order.customer_email)}`
 🚚 *Доставка:* ${order.delivery_method === 'pickup' ? 'Самовывоз' : 'Доставка'}
 ${order.delivery_address ? `📍 *Адрес:* ${escapeMarkdown(order.delivery_address)}` : ''}
 
-🛍️ *Товары:*
+🛍 *Товары:*
 ${itemsList}
 
 💰 *Итого:* *${order.total_amount.toLocaleString('ru-RU')} ₽*
       `.trim();
     }
 
-    // Send to Telegram
-    const telegramResponse = await fetch(
-      `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          chat_id: TELEGRAM_CHAT_ID,
-          text: message,
-          parse_mode: 'Markdown',
-          reply_markup: inlineKeyboard,
-        }),
+    // Send to all configured Telegram chats
+    const results = [];
+    for (const chatId of chatIds) {
+      const telegramResponse = await fetch(
+        `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: chatId,
+            text: message,
+            parse_mode: 'Markdown',
+            reply_markup: inlineKeyboard,
+          }),
+        }
+      );
+
+      const telegramResult = await telegramResponse.json();
+      if (!telegramResponse.ok) {
+        console.error(`Telegram API error for chat ${chatId}:`, telegramResult);
+      } else {
+        console.log(`Telegram notification sent to ${chatId} for order ${order.order_number}`);
       }
-    );
-
-    const telegramResult = await telegramResponse.json();
-
-    if (!telegramResponse.ok) {
-      console.error('Telegram API error:', telegramResult);
-      throw new Error(`Telegram API error: ${telegramResult.description || 'Unknown error'}`);
+      results.push({ chatId, ok: telegramResponse.ok, message_id: telegramResult.result?.message_id });
     }
 
-    console.log(`Telegram notification sent for order ${order.order_number}`);
-
     return new Response(
-      JSON.stringify({ success: true, message_id: telegramResult.result?.message_id }),
+      JSON.stringify({ success: true, results }),
       { 
         status: 200, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
