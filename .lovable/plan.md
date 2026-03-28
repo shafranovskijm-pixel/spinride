@@ -1,33 +1,75 @@
 
-## Fix Quick Action Buttons on Admin Dashboard
 
-### Problem
-The "Quick Actions" section on the admin dashboard has three buttons that don't work correctly:
+## Еженедельный отчёт в Telegram для владельца магазина
 
-1. **"Добавить товар"** -- links to `/admin/products/new`, a route that does not exist. Product creation now uses a dialog on the `/admin/products` page.
-2. **"Обработать заказы"** and **"Настройки"** -- these routes exist (`/admin/orders`, `/admin/settings`), but likely also have issues with click handling.
+### Что нужно
 
-### Solution
+1. **Второй Telegram Chat ID** — отчёт отправляется владельцу в отдельный чат (через тот же бот). Нужно добавить секрет `TELEGRAM_OWNER_CHAT_ID`.
 
-Update the quick action buttons in `src/pages/admin/AdminDashboard.tsx` (lines 394-413):
+2. **Содержание отчёта:**
+   - Новых товаров добавлено за неделю
+   - Итого товаров на сайте + разбивка по категориям (велосипеды, самокаты, аксессуары и т.д.)
+   - Заказов за неделю, проданных позиций (штук), выручка
+   - Топ-5 товаров по продажам
+   - Нулевые значения отображаются как 0 (не скрываются)
 
-1. **"Добавить товар"** -- change the link from `/admin/products/new` to `/admin/products` (the product list page, where the user can click "Add Product" to open the dialog).
-2. **"Обработать заказы"** -- keep link to `/admin/orders` (already correct).
-3. **"Настройки"** -- keep link to `/admin/settings` (already correct).
+3. **Расписание:** каждый понедельник в 09:00 UTC через pg_cron
 
-All three buttons use `Button asChild` with `Link` inside, which is the correct pattern. The main fix is the broken route for "Добавить товар".
+### Пример сообщения
 
-### Technical Details
+```text
+📊 Еженедельный отчёт (21.03 — 28.03.2026)
 
-**File:** `src/pages/admin/AdminDashboard.tsx`, lines 395-400
+🛍️ Товары за неделю:
+  Добавлено новых: 3
 
-Change:
-```tsx
-<Link to="/admin/products/new">
+📦 Всего на сайте: 45
+  • Самокаты: 20
+  • Велосипеды: 15
+  • Аксессуары: 10
+
+💰 Продажи за неделю:
+  Заказов: 8
+  Продано позиций: 23
+  Выручка: 156 400 ₽
+
+🏆 Топ-5 товаров:
+  1. Электросамокат Kugoo S3 — 5 шт.
+  2. Xiaomi Pro 2 — 4 шт.
+  ...
+
+(если продаж нет — "Заказов: 0, Позиций: 0, Выручка: 0 ₽")
 ```
-To:
-```tsx
-<Link to="/admin/products">
+
+### Реализация
+
+**Шаг 1. Добавить секрет `TELEGRAM_OWNER_CHAT_ID`**
+Через инструмент `add_secret` запросить у пользователя Chat ID владельца.
+
+**Шаг 2. Создать edge-функцию `supabase/functions/weekly-report/index.ts`**
+- Подключается к БД через service role
+- Считает новые товары за 7 дней (`products WHERE created_at >= now() - interval '7 days'`)
+- Считает общее количество товаров и группирует по категориям через JOIN с `categories`
+- Считает заказы за 7 дней (статус != cancelled): количество, сумму, парсит `items` JSONB для подсчёта позиций и топ-5
+- Все нулевые значения выводятся явно (0)
+- Отправляет Markdown-сообщение через Telegram API на `TELEGRAM_OWNER_CHAT_ID`, используя `TELEGRAM_BOT_TOKEN`
+
+**Шаг 3. Миграция для включения расширений**
+```sql
+CREATE EXTENSION IF NOT EXISTS pg_cron;
+CREATE EXTENSION IF NOT EXISTS pg_net;
 ```
 
-This is a one-line fix. The other two buttons point to valid routes and should work correctly once the page is deployed/previewed with the latest code.
+**Шаг 4. Cron-задача (через insert tool, не миграцию)**
+```sql
+SELECT cron.schedule(
+  'weekly-store-report',
+  '0 9 * * 1',  -- понедельник 09:00 UTC
+  $$ SELECT net.http_post(
+    url:='https://atkgcbunyakdnkfybvvp.supabase.co/functions/v1/weekly-report',
+    headers:='{"Content-Type":"application/json","Authorization":"Bearer <anon_key>"}'::jsonb,
+    body:='{}'::jsonb
+  ) $$
+);
+```
+
