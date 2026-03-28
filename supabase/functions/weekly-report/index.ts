@@ -108,7 +108,8 @@ serve(async (req) => {
         .join('\n');
     }
 
-    const message = `📊 *Еженедельный отчёт* (${escapeMarkdown(periodLabel)})
+    const message = `📊 *Отчёт с сайта SpinRide*
+*Еженедельный отчёт* (${escapeMarkdown(periodLabel)})
 
 🛍 *Товары за неделю:*
 Добавлено новых: ${newProductsCount ?? 0}
