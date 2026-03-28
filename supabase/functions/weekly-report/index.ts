@@ -96,7 +96,7 @@ serve(async (req) => {
 
     // Build category breakdown lines
     const categoryLines = [...categoryCounts.entries()]
-      .map(([name, count]) => `  • ${name}: ${count}`)
+      .map(([name, count]) => `• ${escapeMarkdown(name)}: ${count}`)
       .join('\n');
     const uncategorizedLine = uncategorized > 0 ? `\n  • Прочее: ${uncategorized}` : '';
 
