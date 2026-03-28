@@ -112,7 +112,8 @@ serve(async (req) => {
       }[body.new_status] || '📋';
 
       message = `
-${statusEmoji} *Статус заказа изменён*
+${statusEmoji} *Заявка с сайта SpinRide*
+*Статус заказа изменён*
 
 📦 *Заказ:* \`${order.order_number}\`
 👤 *Клиент:* ${escapeMarkdown(order.customer_name)}
