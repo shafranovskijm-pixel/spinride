@@ -131,7 +131,8 @@ ${statusEmoji} *Заявка с сайта SpinRide*
         .join('\n');
 
       message = `
-🛒 *Новый заказ!*
+🛒 *Заявка с сайта SpinRide*
+*Новый заказ!*
 
 📦 *Заказ:* \`${order.order_number}\`
 
@@ -142,7 +143,7 @@ ${order.customer_email ? `📧 *Email:* ${escapeMarkdown(order.customer_email)}`
 🚚 *Доставка:* ${order.delivery_method === 'pickup' ? 'Самовывоз' : 'Доставка'}
 ${order.delivery_address ? `📍 *Адрес:* ${escapeMarkdown(order.delivery_address)}` : ''}
 
-🛍️ *Товары:*
+🛍 *Товары:*
 ${itemsList}
 
 💰 *Итого:* *${order.total_amount.toLocaleString('ru-RU')} ₽*
