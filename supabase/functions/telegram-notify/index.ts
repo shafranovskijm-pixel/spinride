@@ -150,32 +150,34 @@ ${itemsList}
       `.trim();
     }
 
-    // Send to Telegram
-    const telegramResponse = await fetch(
-      `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          chat_id: TELEGRAM_CHAT_ID,
-          text: message,
-          parse_mode: 'Markdown',
-          reply_markup: inlineKeyboard,
-        }),
+    // Send to all configured Telegram chats
+    const results = [];
+    for (const chatId of chatIds) {
+      const telegramResponse = await fetch(
+        `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: chatId,
+            text: message,
+            parse_mode: 'Markdown',
+            reply_markup: inlineKeyboard,
+          }),
+        }
+      );
+
+      const telegramResult = await telegramResponse.json();
+      if (!telegramResponse.ok) {
+        console.error(`Telegram API error for chat ${chatId}:`, telegramResult);
+      } else {
+        console.log(`Telegram notification sent to ${chatId} for order ${order.order_number}`);
       }
-    );
-
-    const telegramResult = await telegramResponse.json();
-
-    if (!telegramResponse.ok) {
-      console.error('Telegram API error:', telegramResult);
-      throw new Error(`Telegram API error: ${telegramResult.description || 'Unknown error'}`);
+      results.push({ chatId, ok: telegramResponse.ok, message_id: telegramResult.result?.message_id });
     }
 
-    console.log(`Telegram notification sent for order ${order.order_number}`);
-
     return new Response(
-      JSON.stringify({ success: true, message_id: telegramResult.result?.message_id }),
+      JSON.stringify({ success: true, results }),
       { 
         status: 200, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
