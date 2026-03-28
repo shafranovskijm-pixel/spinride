@@ -108,23 +108,21 @@ serve(async (req) => {
         .join('\n');
     }
 
-    const message = `
-📊 *Еженедельный отчёт* (${periodLabel})
+    const message = `📊 *Еженедельный отчёт* (${escapeMarkdown(periodLabel)})
 
-🛍️ *Товары за неделю:*
-  Добавлено новых: ${newProductsCount ?? 0}
+🛍 *Товары за неделю:*
+Добавлено новых: ${newProductsCount ?? 0}
 
 📦 *Всего на сайте:* ${totalProducts}
 ${categoryLines}${uncategorizedLine}
 
 💰 *Продажи за неделю:*
-  Заказов: ${ordersCount}
-  Продано позиций: ${totalItems}
-  Выручка: ${totalRevenue.toLocaleString('ru-RU')} ₽
+Заказов: ${ordersCount}
+Продано позиций: ${totalItems}
+Выручка: ${totalRevenue.toLocaleString('ru-RU')} ₽
 
-🏆 *Топ\\-5 товаров:*
-${top5Lines}
-    `.trim();
+🏆 *Топ-5 товаров:*
+${top5Lines}`.trim();
 
     // Send to all chat IDs
     const results = [];
