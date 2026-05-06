@@ -27,10 +27,32 @@ Deno.serve(async (req) => {
 
     // Parse request body
     const body = await req.json().catch(() => ({}));
-    const { order_id } = body;
+    const { order_id, test } = body as { order_id?: string; test?: boolean };
 
-    // Security: Require order_id and validate against database
-    if (!order_id) {
+    // Test path requires authenticated admin
+    if (test) {
+      const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+      const token = (req.headers.get("Authorization") || "").replace("Bearer ", "");
+      if (!token) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const { data: userData, error: userErr } = await supabase.auth.getUser(token);
+      if (userErr || !userData?.user) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const { data: roleRow } = await supabase
+        .from("user_roles").select("role")
+        .eq("user_id", userData.user.id).eq("role", "admin").maybeSingle();
+      if (!roleRow) {
+        return new Response(JSON.stringify({ error: "Forbidden" }), {
+          status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    } else if (!order_id) {
       return new Response(
         JSON.stringify({ error: "order_id is required" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
