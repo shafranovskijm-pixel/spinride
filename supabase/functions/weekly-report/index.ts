@@ -30,14 +30,8 @@ serve(async (req) => {
 
     // Try cron-secret path first
     let isAuthorized = false;
-    const { data: secretRow } = await adminClient
-      .schema('vault' as unknown as 'public')
-      .from('decrypted_secrets' as unknown as 'orders')
-      .select('decrypted_secret')
-      .eq('name', 'weekly_report_cron_secret')
-      .maybeSingle();
-    const cronSecret = (secretRow as unknown as { decrypted_secret?: string } | null)?.decrypted_secret;
-    if (cronSecret && authHeader === cronSecret) {
+    const { data: ok } = await adminClient.rpc('verify_weekly_report_secret', { _secret: authHeader });
+    if (ok === true) {
       isAuthorized = true;
     }
 
