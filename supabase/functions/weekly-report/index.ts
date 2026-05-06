@@ -18,17 +18,30 @@ serve(async (req) => {
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
-    // Authorization: require service-role bearer (used by pg_cron) or admin user JWT.
+    // Authorization: require admin user JWT or a valid cron shared secret stored in vault.
     const authHeader = (req.headers.get('Authorization') || '').replace('Bearer ', '');
-    const isServiceRole = authHeader && authHeader === SUPABASE_SERVICE_ROLE_KEY;
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
-    if (!isServiceRole) {
-      if (!authHeader) {
-        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-          status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-      const adminClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+    const adminClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+    // Try cron-secret path first
+    let isAuthorized = false;
+    const { data: secretRow } = await adminClient
+      .schema('vault' as unknown as 'public')
+      .from('decrypted_secrets' as unknown as 'orders')
+      .select('decrypted_secret')
+      .eq('name', 'weekly_report_cron_secret')
+      .maybeSingle();
+    const cronSecret = (secretRow as unknown as { decrypted_secret?: string } | null)?.decrypted_secret;
+    if (cronSecret && authHeader === cronSecret) {
+      isAuthorized = true;
+    }
+
+    if (!isAuthorized) {
       const { data: userData, error: userErr } = await adminClient.auth.getUser(authHeader);
       if (userErr || !userData?.user) {
         return new Response(JSON.stringify({ error: 'Unauthorized' }), {
