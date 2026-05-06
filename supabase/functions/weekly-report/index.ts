@@ -18,6 +18,33 @@ serve(async (req) => {
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
+    // Authorization: require service-role bearer (used by pg_cron) or admin user JWT.
+    const authHeader = (req.headers.get('Authorization') || '').replace('Bearer ', '');
+    const isServiceRole = authHeader && authHeader === SUPABASE_SERVICE_ROLE_KEY;
+
+    if (!isServiceRole) {
+      if (!authHeader) {
+        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+          status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      const adminClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+      const { data: userData, error: userErr } = await adminClient.auth.getUser(authHeader);
+      if (userErr || !userData?.user) {
+        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+          status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      const { data: roleRow } = await adminClient
+        .from('user_roles').select('role')
+        .eq('user_id', userData.user.id).eq('role', 'admin').maybeSingle();
+      if (!roleRow) {
+        return new Response(JSON.stringify({ error: 'Forbidden' }), {
+          status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+    }
+
     if (!TELEGRAM_BOT_TOKEN) throw new Error('TELEGRAM_BOT_TOKEN is not configured');
 
     const chatIds = [TELEGRAM_CHAT_ID, TELEGRAM_OWNER_CHAT_ID].filter(Boolean) as string[];
