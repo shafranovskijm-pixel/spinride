@@ -83,6 +83,40 @@ serve(async (req) => {
       );
     }
 
+    // Authorization:
+    // - status_change notifications require an authenticated admin caller
+    // - new-order notifications only allowed within 5 minutes of order creation
+    if (body.type === 'status_change') {
+      const authHeader = req.headers.get('Authorization') || '';
+      const token = authHeader.replace('Bearer ', '');
+      if (!token) {
+        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+          status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      const { data: userData, error: userErr } = await supabase.auth.getUser(token);
+      if (userErr || !userData?.user) {
+        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+          status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      const { data: roleRow } = await supabase
+        .from('user_roles').select('role')
+        .eq('user_id', userData.user.id).eq('role', 'admin').maybeSingle();
+      if (!roleRow) {
+        return new Response(JSON.stringify({ error: 'Forbidden' }), {
+          status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+    } else {
+      const ageMs = Date.now() - new Date(order.created_at).getTime();
+      if (ageMs > 5 * 60 * 1000) {
+        return new Response(JSON.stringify({ error: 'Notification window expired' }), {
+          status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+    }
+
     // Clean phone number for links (remove spaces, dashes, etc.)
     const cleanPhone = order.customer_phone.replace(/[^\d+]/g, '');
     const whatsappPhone = cleanPhone.replace('+', '');

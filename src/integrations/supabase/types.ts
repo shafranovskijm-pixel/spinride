@@ -404,6 +404,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      verify_weekly_report_secret: {
+        Args: { _secret: string }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"

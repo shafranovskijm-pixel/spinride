@@ -27,10 +27,32 @@ Deno.serve(async (req) => {
 
     // Parse request body
     const body = await req.json().catch(() => ({}));
-    const { order_id } = body;
+    const { order_id, test } = body as { order_id?: string; test?: boolean };
 
-    // Security: Require order_id and validate against database
-    if (!order_id) {
+    // Test path requires authenticated admin
+    if (test) {
+      const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+      const token = (req.headers.get("Authorization") || "").replace("Bearer ", "");
+      if (!token) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const { data: userData, error: userErr } = await supabase.auth.getUser(token);
+      if (userErr || !userData?.user) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const { data: roleRow } = await supabase
+        .from("user_roles").select("role")
+        .eq("user_id", userData.user.id).eq("role", "admin").maybeSingle();
+      if (!roleRow) {
+        return new Response(JSON.stringify({ error: "Forbidden" }), {
+          status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    } else if (!order_id) {
       return new Response(
         JSON.stringify({ error: "order_id is required" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -40,19 +62,35 @@ Deno.serve(async (req) => {
     // Create Supabase client with service role
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-    // Fetch order from database to verify it exists and get real data
-    const { data: order, error: orderError } = await supabase
-      .from("orders")
-      .select("order_number, customer_name, total_amount")
-      .eq("id", order_id)
-      .single();
+    let order: { order_number: string; customer_name: string; total_amount: number | null } | null = null;
 
-    if (orderError || !order) {
-      console.error("Order not found:", order_id, orderError);
-      return new Response(
-        JSON.stringify({ error: "Order not found" }),
-        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+    if (test) {
+      order = { order_number: "TEST-001", customer_name: "Тестовый клиент", total_amount: 0 };
+    } else {
+      // Fetch order from database to verify it exists and get real data
+      const { data, error: orderError } = await supabase
+        .from("orders")
+        .select("order_number, customer_name, total_amount, created_at")
+        .eq("id", order_id!)
+        .single();
+
+      if (orderError || !data) {
+        console.error("Order not found:", order_id, orderError);
+        return new Response(
+          JSON.stringify({ error: "Order not found" }),
+          { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      // Only allow notifications for recently-created orders (post-checkout window)
+      const ageMs = Date.now() - new Date(data.created_at).getTime();
+      if (ageMs > 5 * 60 * 1000) {
+        return new Response(
+          JSON.stringify({ error: "Notification window expired" }),
+          { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      order = data;
     }
 
     // Get all push subscriptions (admin users)
