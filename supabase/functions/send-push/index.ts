@@ -43,7 +43,7 @@ Deno.serve(async (req) => {
     // Fetch order from database to verify it exists and get real data
     const { data: order, error: orderError } = await supabase
       .from("orders")
-      .select("order_number, customer_name, total_amount")
+      .select("order_number, customer_name, total_amount, created_at")
       .eq("id", order_id)
       .single();
 
@@ -52,6 +52,15 @@ Deno.serve(async (req) => {
       return new Response(
         JSON.stringify({ error: "Order not found" }),
         { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Only allow notifications for recently-created orders (post-checkout window)
+    const ageMs = Date.now() - new Date(order.created_at).getTime();
+    if (ageMs > 5 * 60 * 1000) {
+      return new Response(
+        JSON.stringify({ error: "Notification window expired" }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
