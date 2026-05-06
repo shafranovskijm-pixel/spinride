@@ -62,28 +62,35 @@ Deno.serve(async (req) => {
     // Create Supabase client with service role
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-    // Fetch order from database to verify it exists and get real data
-    const { data: order, error: orderError } = await supabase
-      .from("orders")
-      .select("order_number, customer_name, total_amount, created_at")
-      .eq("id", order_id)
-      .single();
+    let order: { order_number: string; customer_name: string; total_amount: number | null } | null = null;
 
-    if (orderError || !order) {
-      console.error("Order not found:", order_id, orderError);
-      return new Response(
-        JSON.stringify({ error: "Order not found" }),
-        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
+    if (test) {
+      order = { order_number: "TEST-001", customer_name: "Тестовый клиент", total_amount: 0 };
+    } else {
+      // Fetch order from database to verify it exists and get real data
+      const { data, error: orderError } = await supabase
+        .from("orders")
+        .select("order_number, customer_name, total_amount, created_at")
+        .eq("id", order_id!)
+        .single();
 
-    // Only allow notifications for recently-created orders (post-checkout window)
-    const ageMs = Date.now() - new Date(order.created_at).getTime();
-    if (ageMs > 5 * 60 * 1000) {
-      return new Response(
-        JSON.stringify({ error: "Notification window expired" }),
-        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      if (orderError || !data) {
+        console.error("Order not found:", order_id, orderError);
+        return new Response(
+          JSON.stringify({ error: "Order not found" }),
+          { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      // Only allow notifications for recently-created orders (post-checkout window)
+      const ageMs = Date.now() - new Date(data.created_at).getTime();
+      if (ageMs > 5 * 60 * 1000) {
+        return new Response(
+          JSON.stringify({ error: "Notification window expired" }),
+          { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      order = data;
     }
 
     // Get all push subscriptions (admin users)
