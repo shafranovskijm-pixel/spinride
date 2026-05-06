@@ -201,11 +201,7 @@ export function PushNotificationSettings() {
 
     try {
       const { data, error } = await supabase.functions.invoke("send-push", {
-        body: {
-          order_number: "TEST-001",
-          customer_name: "Тестовый клиент",
-          total_amount: 15000,
-        },
+        body: { test: true },
       });
 
       if (error) throw error;
