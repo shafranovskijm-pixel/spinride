@@ -3,29 +3,30 @@ import { Phone, MapPin, Mail, Clock, Instagram, Send, MessageCircle, Heart } fro
 import { useFooterSettings } from "@/hooks/use-footer-settings";
 import { useStoreInfo } from "@/hooks/use-store-info";
 import { useSeason } from "@/hooks/use-season";
+import { usePageContent, ContactsContent } from "@/hooks/use-page-content";
 
 const summerCatalogLinks = [
   { title: "Велосипеды", url: "/catalog/bicycles" },
   { title: "Электровелосипеды", url: "/catalog/e-bikes" },
-  { title: "Электросамокаты", url: "/catalog/scooters" },
+  { title: "Электросамокаты", url: "/catalog/e-scooters" },
   { title: "BMX", url: "/catalog/bmx" },
   { title: "Детям", url: "/catalog/kids" },
   { title: "Аксессуары", url: "/catalog/accessories" },
 ];
 
 const winterCatalogLinks = [
-  { title: "Тюбинги", url: "/catalog/tubing" },
-  { title: "Ёлки", url: "/catalog/christmas-trees" },
-  { title: "Декор", url: "/catalog/decor" },
-  { title: "Праздничные товары", url: "/catalog/party" },
+  { title: "Зимние товары", url: "/catalog/winter" },
+  { title: "Велосипеды", url: "/catalog/bicycles" },
+  { title: "Самокаты", url: "/catalog/scooters" },
   { title: "Детям", url: "/catalog/kids" },
-  { title: "Аксессуары", url: "/catalog/accessories" },
+  { title: "Запчасти", url: "/catalog/parts" },
 ];
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
   const { data: settings } = useFooterSettings();
   const { data: storeInfo } = useStoreInfo();
+  const { data: contactsPage } = usePageContent("contacts");
   const { season } = useSeason();
 
   const catalogLinks = season === "winter" ? winterCatalogLinks : summerCatalogLinks;
@@ -34,6 +35,9 @@ export function Footer() {
   const phone = storeInfo?.phone || settings?.phone || "";
   const address = storeInfo?.address || settings?.address || "";
   const email = storeInfo?.email || settings?.email || "";
+  // The contacts page is the shared source for customer-facing opening hours.
+  const contacts = contactsPage?.content as ContactsContent | undefined;
+  const workHours = contacts?.work_hours || "Пн-Пт: 10:00-19:00, Сб: 11:00-17:00, Вс: выходной";
 
   if (!settings) {
     return null; // Loading state
@@ -161,7 +165,7 @@ export function Footer() {
               </li>
               <li className="flex items-start gap-3 text-white/70">
                 <Clock className="h-5 w-5 shrink-0 mt-0.5" />
-                <span>{settings.work_hours}</span>
+                <span>{workHours}</span>
               </li>
             </ul>
           </div>

@@ -29,11 +29,11 @@ const summerNavigation = [
 
 const winterNavigation = [
   { name: "Каталог", href: "/catalog" },
-  { name: "Тюбинги", href: "/catalog/tubing" },
-  { name: "Ёлки", href: "/catalog/christmas-trees" },
-  { name: "Декор", href: "/catalog/decor" },
-  { name: "Праздник", href: "/catalog/party" },
+  { name: "Зимние товары", href: "/catalog/winter" },
+  { name: "Велосипеды", href: "/catalog/bicycles" },
+  { name: "Самокаты", href: "/catalog/scooters" },
   { name: "Детям", href: "/catalog/kids" },
+  { name: "Запчасти", href: "/catalog/parts" },
 ];
 
 const getInitials = (name: string | null, email: string) => {

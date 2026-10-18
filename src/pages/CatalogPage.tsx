@@ -40,6 +40,7 @@ import { useProducts, useCategories } from "@/hooks/use-products";
 import { useDocumentSEO } from "@/hooks/use-seo";
 import { useNoIndex } from "@/hooks/use-canonical";
 import { resolvePathCategory, buildCategoryPath } from "@/lib/catalog-utils";
+import { getCategorySEO, getAvailableCategoryLinks } from "@/lib/category-seo";
 import { cn } from "@/lib/utils";
 
 const seasons = [
@@ -77,13 +78,9 @@ export default function CatalogPage() {
   // Unknown category slug must not be indexed and must not show the full catalog
   useNoIndex(invalidPathCategory);
 
-  // Apply SEO — unique title/description per category landing page
-  useDocumentSEO(
-    validPathCategory ? validPathCategory.name : "Каталог",
-    validPathCategory
-      ? `${validPathCategory.name} — купить в интернет-магазине SPINRIDE. Широкий выбор, доступные цены, доставка.`
-      : "Полный каталог товаров SPINRIDE — самокаты, велосипеды и аксессуары"
-  );
+  const categorySEO = getCategorySEO(validPathCategory);
+  const availableCategoryLinks = getAvailableCategoryLinks(categories, validPathCategory?.slug);
+  useDocumentSEO(categorySEO.title, categorySEO.description);
 
   // Get filter values from URL
   const queryCategories = searchParams.get("categories")?.split(",").filter(Boolean) || [];
@@ -321,7 +318,7 @@ export default function CatalogPage() {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold">{validPathCategory ? validPathCategory.name : "Каталог"}</h1>
+            <h1 className="text-2xl md:text-3xl font-bold">{invalidPathCategory ? "Категория не найдена" : categorySEO.heading}</h1>
             <p className="text-muted-foreground mt-1">
               {productsLoading ? "Загрузка..." : `${products.length} товар(ов)`}
             </p>
@@ -386,6 +383,21 @@ export default function CatalogPage() {
             </div>
           </div>
         </div>
+
+        {!invalidPathCategory && (
+          <div className="mb-6 space-y-3 max-w-4xl">
+            <p className="text-muted-foreground">{categorySEO.introduction}</p>
+            {availableCategoryLinks.length > 0 && (
+              <nav aria-label="Разделы каталога" className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
+                {availableCategoryLinks.map((category) => (
+                  <Link key={category.slug} to={`/catalog/${category.slug}`} className="text-primary hover:underline">
+                    {category.name.trim()}
+                  </Link>
+                ))}
+              </nav>
+            )}
+          </div>
+        )}
 
         {/* Active filters badges */}
         {activeFiltersCount > 0 && (
@@ -503,6 +515,14 @@ export default function CatalogPage() {
             )}
           </div>
         </div>
+
+        {!invalidPathCategory && categorySEO.guidance && (
+          <section className="mt-10 max-w-4xl" aria-labelledby="catalog-selection-heading">
+            <h2 id="catalog-selection-heading" className="text-lg font-semibold mb-2">Как выбрать</h2>
+            <p className="text-muted-foreground">{categorySEO.guidance}</p>
+            <Link to="/contacts" className="inline-block mt-3 text-primary hover:underline">Контакты магазина</Link>
+          </section>
+        )}
       </div>
     </ShopLayout>
   );

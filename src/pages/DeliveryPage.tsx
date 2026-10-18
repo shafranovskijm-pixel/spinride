@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/accordion";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePageContent } from "@/hooks/use-page-content";
+import { useDocumentSEO } from "@/hooks/use-seo";
 
 // Fallback data
 const defaultDeliveryMethods = [
@@ -128,6 +129,7 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
 };
 
 export default function DeliveryPage() {
+  useDocumentSEO("Доставка и оплата SPINRIDE", "Способы получения и оплаты заказов в магазине SPINRIDE в Уссурийске. Условия доставки, самовывоза и контакты для уточнения заказа.");
   const { data: pageContent, isLoading } = usePageContent("delivery");
   
   const content = pageContent?.content as any || {};

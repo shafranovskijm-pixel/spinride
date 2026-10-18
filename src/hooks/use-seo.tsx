@@ -9,10 +9,10 @@ interface SEOData {
 }
 
 const DEFAULT_SEO: SEOData = {
-  title: "SPINRIDE — магазин самокатов и велосипедов",
-  description: "Купить самокат или велосипед. Широкий выбор, доступные цены.",
+  title: "SPINRIDE — велосипеды и самокаты в Уссурийске",
+  description: "Велосипеды, самокаты и товары для активного отдыха в магазине SPINRIDE в Уссурийске. Каталог моделей, цены, характеристики и контакты магазина.",
   keywords: [],
-  og_image: "",
+  og_image: "https://storage.googleapis.com/gpt-engineer-file-uploads/PTpM50g6m7PLHlVz6xEAe06wJ5E3/social-images/social-1770129750318-Screenshot_15.jpg",
 };
 
 let cachedSEO: SEOData | null = null;
@@ -46,7 +46,7 @@ export function useSEO() {
             title: parsed.title || DEFAULT_SEO.title,
             description: parsed.description || DEFAULT_SEO.description,
             keywords: Array.isArray(parsed.keywords) ? parsed.keywords : [],
-            og_image: parsed.og_image || "",
+            og_image: parsed.og_image || DEFAULT_SEO.og_image,
           };
           
           cachedSEO = seo;
@@ -66,8 +66,14 @@ export function useSEO() {
 }
 
 // Hook to update document head with SEO data
-export function useDocumentSEO(pageTitle?: string, pageDescription?: string) {
+export function useDocumentSEO(
+  pageTitle?: string,
+  pageDescription?: string,
+  options?: { image?: string; type?: string }
+) {
   const { seoData } = useSEO();
+  const image = options?.image || seoData.og_image;
+  const type = options?.type || "website";
 
   useEffect(() => {
     // Update title
@@ -78,10 +84,18 @@ export function useDocumentSEO(pageTitle?: string, pageDescription?: string) {
 
     // Update meta description
     const description = pageDescription || seoData.description;
-    const metaDescription = document.querySelector('meta[name="description"]');
-    if (metaDescription) {
-      metaDescription.setAttribute("content", description);
-    }
+    const setMeta = (attribute: "name" | "property", key: string, value: string) => {
+      const matches = Array.from(document.head.querySelectorAll<HTMLMetaElement>(`meta[${attribute}="${key}"]`));
+      let meta = matches[0];
+      matches.slice(1).forEach((duplicate) => duplicate.remove());
+      if (!meta) {
+        meta = document.createElement("meta");
+        meta.setAttribute(attribute, key);
+        document.head.appendChild(meta);
+      }
+      meta.setAttribute("content", value);
+    };
+    setMeta("name", "description", description);
 
     // Update keywords
     let metaKeywords = document.querySelector('meta[name="keywords"]');
@@ -95,26 +109,14 @@ export function useDocumentSEO(pageTitle?: string, pageDescription?: string) {
     }
 
     // Update OG tags
-    const ogTitle = document.querySelector('meta[property="og:title"]');
-    if (ogTitle) {
-      ogTitle.setAttribute("content", title);
+    setMeta("property", "og:title", title);
+    setMeta("property", "og:description", description);
+    setMeta("property", "og:type", type);
+    setMeta("name", "twitter:title", title);
+    setMeta("name", "twitter:description", description);
+    if (image) {
+      setMeta("property", "og:image", image);
+      setMeta("name", "twitter:image", image);
     }
-
-    const ogDescription = document.querySelector('meta[property="og:description"]');
-    if (ogDescription) {
-      ogDescription.setAttribute("content", description);
-    }
-
-    if (seoData.og_image) {
-      const ogImage = document.querySelector('meta[property="og:image"]');
-      if (ogImage) {
-        ogImage.setAttribute("content", seoData.og_image);
-      }
-
-      const twitterImage = document.querySelector('meta[name="twitter:image"]');
-      if (twitterImage) {
-        twitterImage.setAttribute("content", seoData.og_image);
-      }
-    }
-  }, [seoData, pageTitle, pageDescription]);
+  }, [seoData, pageTitle, pageDescription, image, type]);
 }

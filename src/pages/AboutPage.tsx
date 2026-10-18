@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ShopLayout } from "@/components/shop/ShopLayout";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePageContent } from "@/hooks/use-page-content";
+import { useDocumentSEO } from "@/hooks/use-seo";
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   Award,
@@ -62,6 +63,7 @@ const defaultStory = [
 
 export default function AboutPage() {
   const { data: pageContent, isLoading } = usePageContent("about");
+  useDocumentSEO("О магазине SPINRIDE в Уссурийске", "Магазин SPINRIDE в Уссурийске: велосипеды, самокаты и товары для активного отдыха. Информация о магазине, адрес и контакты.");
   
   const content = pageContent?.content as any || {};
   const title = pageContent?.title || "О магазине SPINRIDE";

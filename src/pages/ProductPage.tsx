@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { 
@@ -18,7 +18,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ShopLayout } from "@/components/shop/ShopLayout";
 import { ProductCard } from "@/components/shop/ProductCard";
 import { ReviewForm } from "@/components/shop/ReviewForm";
@@ -33,6 +32,9 @@ import { useNoIndex } from "@/hooks/use-canonical";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { getImageUrls } from "@/lib/image-utils";
+import { ProductDetails } from "@/components/shop/ProductDetails";
+import { getProductDescription, getProductSearchImages, getProductStructuredData } from "@/lib/product-seo";
+import { useStructuredData } from "@/hooks/use-structured-data";
 
 export default function ProductPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -44,23 +46,19 @@ export default function ProductPage() {
   const { addToCompare, isInCompare, canAdd } = useCompare();
 
   // Fetch product from database
-  const { data: product, isLoading: productLoading, error } = useProduct(slug || "");
+  const { data: product, isLoading: productLoading, error, refetch } = useProduct(slug || "");
 
   // Missing product must not be indexed — but only when the query
   // succeeded and returned no record; transient API errors keep the
   // page indexable.
   useNoIndex(!productLoading && !error && !product);
 
-  // Dynamic SEO for product page
-  useEffect(() => {
-    if (product) {
-      document.title = `${product.name} | SPINRIDE`;
-      const metaDescription = document.querySelector('meta[name="description"]');
-      if (metaDescription && product.description) {
-        metaDescription.setAttribute("content", product.description.slice(0, 160));
-      }
-    }
-  }, [product]);
+  useDocumentSEO(
+    product ? `${product.name} в Уссурийске` : "Товар",
+    product ? getProductDescription(product) : "Товары магазина SPINRIDE в Уссурийске.",
+    { image: product ? getProductSearchImages(product)[0] : undefined, type: product ? "product" : "website" }
+  );
+  useStructuredData("product-structured-data", product && !error ? getProductStructuredData(product) : null);
 
   // Fetch related products
   const { data: relatedProducts = [] } = useRelatedProducts(
@@ -103,7 +101,8 @@ export default function ProductPage() {
     return (
       <ShopLayout>
         <div className="container-shop py-20 text-center">
-          <h1 className="text-2xl font-bold mb-4">Товар не найден</h1>
+          <h1 className="text-2xl font-bold mb-4">{error ? "Не удалось загрузить товар" : "Товар не найден"}</h1>
+          {error && <Button className="mr-3" variant="outline" onClick={() => refetch()}>Попробовать снова</Button>}
           <Button asChild>
             <Link to="/catalog">Вернуться в каталог</Link>
           </Button>
@@ -333,32 +332,9 @@ export default function ProductPage() {
           </div>
         </div>
 
-        {/* Tabs */}
-        <Tabs defaultValue="specs" className="mt-12">
-          <TabsList className="w-full justify-start">
-            <TabsTrigger value="specs">Характеристики</TabsTrigger>
-            <TabsTrigger value="description">Описание</TabsTrigger>
-            <TabsTrigger value="reviews">Отзывы ({reviewCount})</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="specs" className="mt-6">
-            <div className="max-w-2xl">
-              {Object.entries(product.specifications || {}).map(([key, value]) => (
-                <div key={key} className="flex py-3 border-b last:border-0">
-                  <span className="w-1/2 text-muted-foreground">{key}</span>
-                  <span className="w-1/2 font-medium">{value}</span>
-                </div>
-              ))}
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="description" className="mt-6">
-            <div className="prose max-w-2xl">
-              <p>{product.description || "Описание товара отсутствует."}</p>
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="reviews" className="mt-6">
+        <ProductDetails product={product} />
+        <section className="mt-12" aria-labelledby="product-reviews-title">
+          <h2 id="product-reviews-title" className="text-2xl font-bold mb-6">Отзывы ({reviewCount})</h2>
             <div className="grid lg:grid-cols-3 gap-8">
               {/* Reviews list */}
               <div className="lg:col-span-2">
@@ -370,8 +346,7 @@ export default function ProductPage() {
                 <ReviewForm productId={product.id} onSuccess={refetchReviews} />
               </div>
             </div>
-          </TabsContent>
-        </Tabs>
+        </section>
 
         {/* Related products */}
         {relatedProducts.length > 0 && (

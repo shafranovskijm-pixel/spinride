@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePageContent, ContactsContent } from "@/hooks/use-page-content";
 import { useStoreInfo } from "@/hooks/use-store-info";
+import { useDocumentSEO } from "@/hooks/use-seo";
 
 export default function ContactsPage() {
   const { data: page, isLoading } = usePageContent("contacts");
@@ -15,6 +16,7 @@ export default function ContactsPage() {
   const phoneNumber = storeInfo?.phone || content?.phone || "+7 924-788-11-11";
   const emailAddr = storeInfo?.email || content?.email || "info@spinride.ru";
   const addressText = storeInfo?.address || content?.address || "г. Уссурийск, ул. Пушкина, 13";
+  useDocumentSEO("Контакты SPINRIDE в Уссурийске", `Адрес магазина SPINRIDE: ${addressText}. Телефон ${phoneNumber}. Контакты и время работы магазина велосипедов и самокатов.`);
 
   if (isLoading) {
     return (

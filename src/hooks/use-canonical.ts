@@ -30,6 +30,15 @@ export function useCanonical(pathOverride?: string) {
       document.head.appendChild(link);
     }
     link.setAttribute("href", url);
+    for (const [attribute, name] of [["property", "og:url"], ["name", "twitter:url"]]) {
+      let meta = document.head.querySelector<HTMLMetaElement>(`meta[${attribute}="${name}"]`);
+      if (!meta) {
+        meta = document.createElement("meta");
+        meta.setAttribute(attribute, name);
+        document.head.appendChild(meta);
+      }
+      meta.setAttribute("content", url);
+    }
   }, [pathname, pathOverride]);
 }
 

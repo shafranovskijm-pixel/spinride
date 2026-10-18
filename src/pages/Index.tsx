@@ -18,7 +18,10 @@ export default function Index() {
   const { season } = useSeason();
   
   // Apply SEO settings
-  useDocumentSEO();
+  useDocumentSEO(
+    "Велосипеды и самокаты в Уссурийске",
+    "Велосипеды, трюковые самокаты, детская техника и зимние товары в SPINRIDE. Каталог моделей с ценами и характеристиками. Магазин в Уссурийске, ул. Пушкина, 13."
+  );
   
   // Fetch products from database
   const { data: featuredProducts = [], isLoading: featuredLoading } = useProducts({

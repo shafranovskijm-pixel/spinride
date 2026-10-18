@@ -3,10 +3,15 @@ import { Shield, CheckCircle, Clock, Phone, Mail } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePageContent, WarrantyContent } from "@/hooks/use-page-content";
+import { useStoreInfo } from "@/hooks/use-store-info";
+import { useDocumentSEO } from "@/hooks/use-seo";
 
 export default function WarrantyPage() {
   const { data: page, isLoading } = usePageContent("warranty");
   const content = page?.content as WarrantyContent | undefined;
+  const { data: storeInfo } = useStoreInfo();
+  const contactPhone = storeInfo?.phone || "+7 924-788-11-11";
+  useDocumentSEO("Гарантия и обслуживание SPINRIDE", "Информация о гарантийном обслуживании товаров SPINRIDE и контакты магазина в Уссурийске для обращения по гарантии.");
 
   if (isLoading) {
     return (
@@ -106,13 +111,13 @@ export default function WarrantyPage() {
           </CardHeader>
           <CardContent>
             <div className="flex flex-col sm:flex-row gap-4">
-              {content?.contact_phone && (
+              {contactPhone && (
                 <a 
-                  href={`tel:${content.contact_phone.replace(/\D/g, '')}`}
+                  href={`tel:${contactPhone.replace(/\D/g, '')}`}
                   className="flex items-center gap-2 text-primary hover:underline"
                 >
                   <Phone className="h-5 w-5" />
-                  {content.contact_phone}
+                  {contactPhone}
                 </a>
               )}
               {content?.contact_email && (
