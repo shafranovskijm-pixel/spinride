@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { useSearchParams, Link } from "react-router-dom";
+import { useSearchParams, useParams, Link } from "react-router-dom";
 import { 
   Filter, 
   X, 
@@ -38,6 +38,8 @@ import { ShopLayout } from "@/components/shop/ShopLayout";
 import { ProductCard } from "@/components/shop/ProductCard";
 import { useProducts, useCategories } from "@/hooks/use-products";
 import { useDocumentSEO } from "@/hooks/use-seo";
+import { useNoIndex } from "@/hooks/use-canonical";
+import { resolvePathCategory } from "@/lib/catalog-utils";
 import { cn } from "@/lib/utils";
 
 const seasons = [
