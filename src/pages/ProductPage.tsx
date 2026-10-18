@@ -29,6 +29,7 @@ import { useFavorites } from "@/hooks/use-favorites";
 import { useCompare } from "@/hooks/use-compare";
 import { useProduct, useRelatedProducts } from "@/hooks/use-products";
 import { useDocumentSEO } from "@/hooks/use-seo";
+import { useNoIndex } from "@/hooks/use-canonical";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { getImageUrls } from "@/lib/image-utils";
@@ -44,6 +45,9 @@ export default function ProductPage() {
 
   // Fetch product from database
   const { data: product, isLoading: productLoading, error } = useProduct(slug || "");
+
+  // Missing/invalid product must not be indexed
+  useNoIndex(!productLoading && (!product || !!error));
 
   // Dynamic SEO for product page
   useEffect(() => {

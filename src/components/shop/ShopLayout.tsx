@@ -1,4 +1,5 @@
 import { ReactNode } from "react";
+import { useCanonical } from "@/hooks/use-canonical";
 import { Header } from "@/components/shop/Header";
 import { Footer } from "@/components/shop/Footer";
 import { CompareFloatingBar } from "@/components/shop/CompareFloatingBar";
@@ -9,6 +10,7 @@ interface ShopLayoutProps {
 }
 
 export function ShopLayout({ children }: ShopLayoutProps) {
+  useCanonical();
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
