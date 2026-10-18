@@ -46,8 +46,10 @@ export default function ProductPage() {
   // Fetch product from database
   const { data: product, isLoading: productLoading, error } = useProduct(slug || "");
 
-  // Missing/invalid product must not be indexed
-  useNoIndex(!productLoading && (!product || !!error));
+  // Missing product must not be indexed — but only when the query
+  // succeeded and returned no record; transient API errors keep the
+  // page indexable.
+  useNoIndex(!productLoading && !error && !product);
 
   // Dynamic SEO for product page
   useEffect(() => {
