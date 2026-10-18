@@ -44,13 +44,18 @@ export function validateSitemap(xml) {
   }
 
   // Real XML wellformedness check (rejects malformed/truncated/HTML input)
-  const doc = new DOMParser({
-    onError: (level, msg) => {
-      if (level === "error" || level === "fatalError") {
-        errors.push(`XML parse ${level}: ${msg}`);
-      }
-    },
-  }).parseFromString(xml, "application/xml");
+  let doc = null;
+  try {
+    doc = new DOMParser({
+      onError: (level, msg) => {
+        if (level === "error" || level === "fatalError") {
+          errors.push(`XML parse ${level}: ${msg}`);
+        }
+      },
+    }).parseFromString(xml, "application/xml");
+  } catch (err) {
+    errors.push(`XML parse exception: ${err.message}`);
+  }
 
   if (!doc || doc.documentElement?.tagName !== "urlset") {
     errors.push("root element is not <urlset>");

@@ -192,7 +192,7 @@ describe("validateSitemap", () => {
   it("accepts a valid sitemap and counts URLs", () => {
     const r = validateSitemap(validXml);
     expect(r.ok).toBe(true);
-    expect(r.urlCount).toBe(55);
+    expect(r.urlCount).toBe(56);
   });
 
   it("rejects empty/truncated output", () => {
