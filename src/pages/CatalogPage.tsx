@@ -299,13 +299,21 @@ export default function CatalogPage() {
         <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
           <Link to="/" className="hover:text-primary">Главная</Link>
           <span>/</span>
-          <span className="text-foreground">Каталог</span>
+          {validPathCategory ? (
+            <>
+              <Link to="/catalog" className="hover:text-primary">Каталог</Link>
+              <span>/</span>
+              <span className="text-foreground">{validPathCategory.name}</span>
+            </>
+          ) : (
+            <span className="text-foreground">Каталог</span>
+          )}
         </nav>
 
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold">Каталог</h1>
+            <h1 className="text-2xl md:text-3xl font-bold">{validPathCategory ? validPathCategory.name : "Каталог"}</h1>
             <p className="text-muted-foreground mt-1">
               {productsLoading ? "Загрузка..." : `${products.length} товар(ов)`}
             </p>
