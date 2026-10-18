@@ -10,6 +10,7 @@ import { CompareProvider } from "@/hooks/use-compare";
 import { AuthProvider } from "@/hooks/use-auth";
 import { ProtectedAdminRoute } from "@/components/admin/ProtectedAdminRoute";
 import { OfflineCacheProvider } from "@/components/OfflineCacheProvider";
+import { ServicePageIndexing } from "@/components/ServicePageIndexing";
 import Index from "./pages/Index";
 import CatalogPage from "./pages/CatalogPage";
 import ProductPage from "./pages/ProductPage";
@@ -56,6 +57,7 @@ const App = () => (
                   <Toaster />
                   <Sonner />
                 <BrowserRouter>
+                  <ServicePageIndexing />
                   <Routes>
                     <Route path="/" element={<Index />} />
                     <Route path="/catalog" element={<CatalogPage />} />

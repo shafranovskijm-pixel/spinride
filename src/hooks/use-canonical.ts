@@ -44,30 +44,24 @@ export function useCanonical(pathOverride?: string) {
 
 /**
  * Adds <meta name="robots" content="noindex, nofollow"> while `noindex` is
- * true. The tag is marked as owned by this hook; on unmount or when
- * `noindex` becomes false only the owned tag is removed — unrelated
- * deliberate robots directives are left untouched.
+ * true. Each hook instance owns a separate tag, so overlapping service
+ * and missing-page directives cannot remove each other on navigation.
+ * On unmount or when `noindex` becomes false, only that instance's tag
+ * is removed; other robots directives are left untouched.
  */
 export function useNoIndex(noindex: boolean) {
   useEffect(() => {
     if (!noindex) return;
 
-    let meta = document.head.querySelector<HTMLMetaElement>(
-      `meta[name="robots"][${OWNED_ATTR}]`
-    );
-    if (!meta) {
-      meta = document.createElement("meta");
-      meta.setAttribute("name", "robots");
-      meta.setAttribute(OWNED_ATTR, "true");
-      document.head.appendChild(meta);
-    }
+    const meta = document.createElement("meta");
+    meta.setAttribute("name", "robots");
+    meta.setAttribute(OWNED_ATTR, "true");
     meta.setAttribute("content", "noindex, nofollow");
+    document.head.appendChild(meta);
 
     return () => {
-      // Remove only the tag this hook owns
-      document.head
-        .querySelectorAll(`meta[name="robots"][${OWNED_ATTR}]`)
-        .forEach((el) => el.remove());
+      // Capture and remove only the element created by this effect instance.
+      meta.remove();
     };
   }, [noindex]);
 }

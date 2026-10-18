@@ -59,11 +59,13 @@ describe("storefront navigation", () => {
     }
   });
 
-  it("routes electric scooters to their own category", () => {
+  it("promotes populated scooter and winter sections instead of empty electrical sections in summer", () => {
     state.season = "summer";
     const { container } = renderStorefrontNavigation();
     const footer = within(container.querySelector("footer")!);
-    expect(footer.getByRole("link", { name: "Электросамокаты" })).toHaveAttribute("href", "/catalog/e-scooters");
+    expect(footer.getByRole("link", { name: "Самокаты" })).toHaveAttribute("href", "/catalog/scooters");
+    expect(footer.getByRole("link", { name: "Зимние товары" })).toHaveAttribute("href", "/catalog/winter");
+    expect(container.querySelector('a[href="/catalog/e-bikes"], a[href="/catalog/e-scooters"], a[href="/catalog/bmx"], a[href="/catalog/accessories"]')).toBeNull();
   });
 
   it("uses contact page hours when the saved footer hours disagree", () => {

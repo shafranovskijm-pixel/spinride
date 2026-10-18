@@ -21,10 +21,11 @@ import { SearchAutocomplete } from "./SearchAutocomplete";
 const summerNavigation = [
   { name: "Каталог", href: "/catalog" },
   { name: "Велосипеды", href: "/catalog/bicycles" },
-  { name: "Электро", href: "/catalog/e-bikes" },
   { name: "Самокаты", href: "/catalog/scooters" },
-  { name: "BMX", href: "/catalog/bmx" },
   { name: "Детям", href: "/catalog/kids" },
+  { name: "Запчасти", href: "/catalog/parts" },
+  { name: "Электромобили", href: "/catalog/elektromobil" },
+  { name: "Зимние товары", href: "/catalog/winter" },
 ];
 
 const winterNavigation = [

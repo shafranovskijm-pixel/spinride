@@ -1,107 +1,58 @@
 import { Link } from "react-router-dom";
-import { Bike, Zap, CircleDot, Users, Wrench, Snowflake, TreePine, Gift } from "lucide-react";
+import { Bike, Zap, CircleDot, Users, Wrench, Snowflake } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSeason } from "@/hooks/use-season";
 
-const summerCategories = [
+// Match the populated catalog sections. Season changes their order, not
+// the assortment advertised to visitors, and requires no extra API request.
+const catalogCategories = [
   {
     id: "bicycles",
     name: "Велосипеды",
-    description: "Горные, городские, шоссейные",
+    description: "Для города и прогулок",
     icon: Bike,
     image: "https://274418.selcdn.ru/cv08300-33250f0d-0664-43fc-9dbf-9d89738d114e/uploads/521356/a85a9360-a056-457c-992b-b66f659aa4c2.jpg",
     color: "from-orange-500 to-yellow-500",
   },
   {
-    id: "e-bikes",
-    name: "Электро",
-    description: "Электровелосипеды и питбайки",
-    icon: Zap,
-    image: "https://274418.selcdn.ru/cv08300-33250f0d-0664-43fc-9dbf-9d89738d114e/uploads/521356/2a228bf0-4281-423c-bace-a1623d0491d2.jpg",
+    id: "scooters",
+    name: "Самокаты",
+    description: "Детские и трюковые",
+    icon: CircleDot,
+    image: "https://274418.selcdn.ru/cv08300-33250f0d-0664-43fc-9dbf-9d89738d114e/uploads/521356/4c80292a-0679-4945-b342-efafb7dde38b.jpg",
     color: "from-purple-500 to-indigo-500",
   },
   {
-    id: "e-scooters",
-    name: "Электросамокаты",
-    description: "Городские и мощные",
-    icon: Zap,
-    image: "https://274418.selcdn.ru/cv08300-33250f0d-0664-43fc-9dbf-9d89738d114e/uploads/521356/71a81878-4e51-4aa1-a085-2d1b94cce964.jpg",
-    color: "from-blue-500 to-cyan-500",
-  },
-  {
-    id: "bmx",
-    name: "BMX",
-    description: "Трюковые велосипеды",
-    icon: CircleDot,
-    image: "https://274418.selcdn.ru/cv08300-33250f0d-0664-43fc-9dbf-9d89738d114e/uploads/521356/c2af4791-f230-41bb-ba52-52baf0f9a8f3.jpg",
-    color: "from-red-500 to-orange-500",
-  },
-  {
     id: "kids",
     name: "Детям",
-    description: "Велосипеды и самокаты",
+    description: "Ролики-квады и дрифт-карт",
     icon: Users,
-    image: "https://274418.selcdn.ru/cv08300-33250f0d-0664-43fc-9dbf-9d89738d114e/uploads/521356/51a66775-8baa-41eb-9c29-c68ff12ba6f9.jpg",
+    image: "https://atkgcbunyakdnkfybvvp.supabase.co/storage/v1/object/public/product-images/products/1777249410451-z4mr3u6jzw.webp",
     color: "from-pink-500 to-rose-500",
   },
   {
-    id: "accessories",
-    name: "Аксессуары",
-    description: "Фонари, замки, запчасти",
+    id: "parts",
+    name: "Запчасти",
+    description: "Колёса для трюковых самокатов",
     icon: Wrench,
-    image: "/categories/bike-accessories.jpg",
+    image: "https://atkgcbunyakdnkfybvvp.supabase.co/storage/v1/object/public/product-images/products/1778375529003-3efz8g47hpe.webp",
     color: "from-green-500 to-emerald-500",
   },
-];
-
-const winterCategories = [
+  {
+    id: "elektromobil",
+    name: "Электромобили",
+    description: "Детские модели с пультом",
+    icon: Zap,
+    image: "https://atkgcbunyakdnkfybvvp.supabase.co/storage/v1/object/public/product-images/products/1775969435955-r6542t7mcw.webp",
+    color: "from-blue-500 to-cyan-500",
+  },
   {
     id: "winter",
-    name: "Тюбинги и санки",
-    description: "Для весёлого катания с горок",
+    name: "Зимние товары",
+    description: "Коньки и тюбинги",
     icon: Snowflake,
-    image: "/categories/tubing-sleds.jpg",
+    image: "/products/figure-skates.jpg",
     color: "from-blue-400 to-cyan-400",
-  },
-  {
-    id: "decor",
-    name: "Ёлки",
-    description: "Искусственные ёлки всех размеров",
-    icon: TreePine,
-    image: "/categories/christmas-trees.jpg",
-    color: "from-green-600 to-emerald-500",
-  },
-  {
-    id: "party",
-    name: "Декор для дома",
-    description: "Гирлянды, шары, украшения",
-    icon: Gift,
-    image: "/categories/home-decor.jpg",
-    color: "from-red-500 to-pink-500",
-  },
-  {
-    id: "kids",
-    name: "Детям",
-    description: "Санки, ледянки, снегокаты",
-    icon: Users,
-    image: "/categories/kids.jpg",
-    color: "from-pink-400 to-rose-400",
-  },
-  {
-    id: "accessories",
-    name: "Аксессуары",
-    description: "Всё для зимнего отдыха",
-    icon: Wrench,
-    image: "/categories/accessories.jpg",
-    color: "from-slate-500 to-gray-500",
-  },
-  {
-    id: "bicycles",
-    name: "Велосипеды",
-    description: "Фэтбайки для зимы",
-    icon: Bike,
-    image: "/categories/bicycles.jpg",
-    color: "from-orange-400 to-yellow-400",
   },
 ];
 
@@ -111,7 +62,9 @@ interface CategoryGridProps {
 
 export function CategoryGrid({ className }: CategoryGridProps) {
   const { season } = useSeason();
-  const categories = season === "winter" ? winterCategories : summerCategories;
+  const categories = season === "winter"
+    ? [...catalogCategories.filter((category) => category.id === "winter"), ...catalogCategories.filter((category) => category.id !== "winter")]
+    : catalogCategories;
   
   return (
     <div className={cn("grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 stagger-children", className)}>
@@ -127,6 +80,10 @@ export function CategoryGrid({ className }: CategoryGridProps) {
             <img
               src={category.image}
               alt={category.name}
+              onError={(event) => {
+                event.currentTarget.onerror = null;
+                event.currentTarget.src = "/placeholder.svg";
+              }}
               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
             />
             <div className={cn(

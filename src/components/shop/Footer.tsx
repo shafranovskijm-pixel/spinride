@@ -7,11 +7,11 @@ import { usePageContent, ContactsContent } from "@/hooks/use-page-content";
 
 const summerCatalogLinks = [
   { title: "Велосипеды", url: "/catalog/bicycles" },
-  { title: "Электровелосипеды", url: "/catalog/e-bikes" },
-  { title: "Электросамокаты", url: "/catalog/e-scooters" },
-  { title: "BMX", url: "/catalog/bmx" },
+  { title: "Самокаты", url: "/catalog/scooters" },
   { title: "Детям", url: "/catalog/kids" },
-  { title: "Аксессуары", url: "/catalog/accessories" },
+  { title: "Запчасти", url: "/catalog/parts" },
+  { title: "Электромобили", url: "/catalog/elektromobil" },
+  { title: "Зимние товары", url: "/catalog/winter" },
 ];
 
 const winterCatalogLinks = [
