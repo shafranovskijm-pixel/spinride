@@ -176,10 +176,11 @@ export function useProduct(slug: string) {
           categories!products_category_id_fkey(slug, name)
         `)
         .eq("slug", slug)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
-      return mapDbToProduct(data);
+      // Absent record -> null (distinguishable from network/server errors)
+      return data ? mapDbToProduct(data) : null;
     },
     enabled: !!slug,
   });
