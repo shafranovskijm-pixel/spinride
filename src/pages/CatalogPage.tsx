@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { useSearchParams, Link } from "react-router-dom";
+import { useSearchParams, useParams, Link } from "react-router-dom";
 import { 
   Filter, 
   X, 
@@ -38,6 +38,8 @@ import { ShopLayout } from "@/components/shop/ShopLayout";
 import { ProductCard } from "@/components/shop/ProductCard";
 import { useProducts, useCategories } from "@/hooks/use-products";
 import { useDocumentSEO } from "@/hooks/use-seo";
+import { useNoIndex } from "@/hooks/use-canonical";
+import { resolvePathCategory } from "@/lib/catalog-utils";
 import { cn } from "@/lib/utils";
 
 const seasons = [
@@ -56,17 +58,35 @@ const sortOptions = [
 
 export default function CatalogPage() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const { category: categorySlug } = useParams<{ category: string }>();
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
-
-  // Apply SEO
-  useDocumentSEO("Каталог", "Полный каталог товаров SPINRIDE — самокаты, велосипеды и аксессуары");
 
   // Fetch categories from DB
   const { data: categories = [], isLoading: categoriesLoading } = useCategories();
 
+  // Resolve /catalog/:category path slug against real categories
+  const pathCategory = resolvePathCategory(categorySlug, categories);
+  const validPathCategory = pathCategory.status === "valid" ? pathCategory.category : null;
+  const invalidPathCategory = pathCategory.status === "invalid" && !categoriesLoading;
+
+  // Unknown category slug must not be indexed and must not show the full catalog
+  useNoIndex(invalidPathCategory);
+
+  // Apply SEO — unique title/description per category landing page
+  useDocumentSEO(
+    validPathCategory ? validPathCategory.name : "Каталог",
+    validPathCategory
+      ? `${validPathCategory.name} — купить в интернет-магазине SPINRIDE. Широкий выбор, доступные цены, доставка.`
+      : "Полный каталог товаров SPINRIDE — самокаты, велосипеды и аксессуары"
+  );
+
   // Get filter values from URL
-  const selectedCategories = searchParams.get("categories")?.split(",").filter(Boolean) || [];
+  const queryCategories = searchParams.get("categories")?.split(",").filter(Boolean) || [];
+  // Path slug selects the category; query filters keep working on top
+  const selectedCategories = validPathCategory
+    ? Array.from(new Set([validPathCategory.slug, ...queryCategories]))
+    : queryCategories;
   const selectedSeason = searchParams.get("season") || "all";
   const minPrice = Number(searchParams.get("minPrice")) || 0;
   const maxPrice = Number(searchParams.get("maxPrice")) || 100000;
@@ -279,13 +299,21 @@ export default function CatalogPage() {
         <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
           <Link to="/" className="hover:text-primary">Главная</Link>
           <span>/</span>
-          <span className="text-foreground">Каталог</span>
+          {validPathCategory ? (
+            <>
+              <Link to="/catalog" className="hover:text-primary">Каталог</Link>
+              <span>/</span>
+              <span className="text-foreground">{validPathCategory.name}</span>
+            </>
+          ) : (
+            <span className="text-foreground">Каталог</span>
+          )}
         </nav>
 
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold">Каталог</h1>
+            <h1 className="text-2xl md:text-3xl font-bold">{validPathCategory ? validPathCategory.name : "Каталог"}</h1>
             <p className="text-muted-foreground mt-1">
               {productsLoading ? "Загрузка..." : `${products.length} товар(ов)`}
             </p>
@@ -425,7 +453,18 @@ export default function CatalogPage() {
 
           {/* Products grid */}
           <div className="flex-1">
-            {productsLoading ? (
+            {invalidPathCategory ? (
+              <div className="text-center py-16">
+                <Filter className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <h2 className="text-xl font-semibold mb-2">Категория не найдена</h2>
+                <p className="text-muted-foreground mb-4">
+                  Такой категории не существует. Посмотрите полный каталог.
+                </p>
+                <Button variant="outline" asChild>
+                  <Link to="/catalog">Перейти в каталог</Link>
+                </Button>
+              </div>
+            ) : productsLoading ? (
               <div className="flex items-center justify-center py-16">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
               </div>
