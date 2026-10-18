@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { useSearchParams, useParams, Link } from "react-router-dom";
+import { useSearchParams, useParams, useNavigate, Link } from "react-router-dom";
 import { 
   Filter, 
   X, 
@@ -39,7 +39,7 @@ import { ProductCard } from "@/components/shop/ProductCard";
 import { useProducts, useCategories } from "@/hooks/use-products";
 import { useDocumentSEO } from "@/hooks/use-seo";
 import { useNoIndex } from "@/hooks/use-canonical";
-import { resolvePathCategory } from "@/lib/catalog-utils";
+import { resolvePathCategory, buildCategoryPath } from "@/lib/catalog-utils";
 import { cn } from "@/lib/utils";
 
 const seasons = [
@@ -58,17 +58,21 @@ const sortOptions = [
 
 export default function CatalogPage() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const { category: categorySlug } = useParams<{ category: string }>();
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
 
   // Fetch categories from DB
-  const { data: categories = [], isLoading: categoriesLoading } = useCategories();
+  const { data: categories = [], isLoading: categoriesLoading, error: categoriesError } = useCategories();
 
-  // Resolve /catalog/:category path slug against real categories
+  // Resolve /catalog/:category path slug against real categories.
+  // Only a successful query with no match counts as "invalid" —
+  // transient API failures must not noindex a legitimate page.
   const pathCategory = resolvePathCategory(categorySlug, categories);
   const validPathCategory = pathCategory.status === "valid" ? pathCategory.category : null;
-  const invalidPathCategory = pathCategory.status === "invalid" && !categoriesLoading;
+  const invalidPathCategory =
+    pathCategory.status === "invalid" && !categoriesLoading && !categoriesError;
 
   // Unknown category slug must not be indexed and must not show the full catalog
   useNoIndex(invalidPathCategory);
@@ -129,15 +133,19 @@ export default function CatalogPage() {
 
   // Toggle category
   const toggleCategory = (slug: string) => {
-    const newCategories = selectedCategories.includes(slug)
+    const next = selectedCategories.includes(slug)
       ? selectedCategories.filter((c) => c !== slug)
       : [...selectedCategories, slug];
-    updateFilters("categories", newCategories);
+    // Navigate to the canonical form: /catalog/:slug for one category,
+    // /catalog?categories=a,b for several, /catalog for none.
+    // The path category is never forced back — unchecking it navigates away.
+    navigate(buildCategoryPath(next, searchParams));
   };
 
   // Clear all filters
   const clearFilters = () => {
-    setSearchParams(new URLSearchParams());
+    // Clears everything, including the path category -> plain /catalog
+    navigate("/catalog");
   };
 
   // Active filters count
