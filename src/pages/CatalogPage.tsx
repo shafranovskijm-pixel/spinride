@@ -133,15 +133,19 @@ export default function CatalogPage() {
 
   // Toggle category
   const toggleCategory = (slug: string) => {
-    const newCategories = selectedCategories.includes(slug)
+    const next = selectedCategories.includes(slug)
       ? selectedCategories.filter((c) => c !== slug)
       : [...selectedCategories, slug];
-    updateFilters("categories", newCategories);
+    // Navigate to the canonical form: /catalog/:slug for one category,
+    // /catalog?categories=a,b for several, /catalog for none.
+    // The path category is never forced back — unchecking it navigates away.
+    navigate(buildCategoryPath(next, searchParams));
   };
 
   // Clear all filters
   const clearFilters = () => {
-    setSearchParams(new URLSearchParams());
+    // Clears everything, including the path category -> plain /catalog
+    navigate("/catalog");
   };
 
   // Active filters count
