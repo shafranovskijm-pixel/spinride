@@ -453,7 +453,18 @@ export default function CatalogPage() {
 
           {/* Products grid */}
           <div className="flex-1">
-            {productsLoading ? (
+            {invalidPathCategory ? (
+              <div className="text-center py-16">
+                <Filter className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <h2 className="text-xl font-semibold mb-2">Категория не найдена</h2>
+                <p className="text-muted-foreground mb-4">
+                  Такой категории не существует. Посмотрите полный каталог.
+                </p>
+                <Button variant="outline" asChild>
+                  <Link to="/catalog">Перейти в каталог</Link>
+                </Button>
+              </div>
+            ) : productsLoading ? (
               <div className="flex items-center justify-center py-16">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
               </div>
