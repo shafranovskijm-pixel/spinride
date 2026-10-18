@@ -58,17 +58,35 @@ const sortOptions = [
 
 export default function CatalogPage() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const { category: categorySlug } = useParams<{ category: string }>();
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
-
-  // Apply SEO
-  useDocumentSEO("Каталог", "Полный каталог товаров SPINRIDE — самокаты, велосипеды и аксессуары");
 
   // Fetch categories from DB
   const { data: categories = [], isLoading: categoriesLoading } = useCategories();
 
+  // Resolve /catalog/:category path slug against real categories
+  const pathCategory = resolvePathCategory(categorySlug, categories);
+  const validPathCategory = pathCategory.status === "valid" ? pathCategory.category : null;
+  const invalidPathCategory = pathCategory.status === "invalid" && !categoriesLoading;
+
+  // Unknown category slug must not be indexed and must not show the full catalog
+  useNoIndex(invalidPathCategory);
+
+  // Apply SEO — unique title/description per category landing page
+  useDocumentSEO(
+    validPathCategory ? validPathCategory.name : "Каталог",
+    validPathCategory
+      ? `${validPathCategory.name} — купить в интернет-магазине SPINRIDE. Широкий выбор, доступные цены, доставка.`
+      : "Полный каталог товаров SPINRIDE — самокаты, велосипеды и аксессуары"
+  );
+
   // Get filter values from URL
-  const selectedCategories = searchParams.get("categories")?.split(",").filter(Boolean) || [];
+  const queryCategories = searchParams.get("categories")?.split(",").filter(Boolean) || [];
+  // Path slug selects the category; query filters keep working on top
+  const selectedCategories = validPathCategory
+    ? Array.from(new Set([validPathCategory.slug, ...queryCategories]))
+    : queryCategories;
   const selectedSeason = searchParams.get("season") || "all";
   const minPrice = Number(searchParams.get("minPrice")) || 0;
   const maxPrice = Number(searchParams.get("maxPrice")) || 100000;
